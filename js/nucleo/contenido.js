@@ -7,5 +7,6 @@ export function indexar(C) {
     ITEMS: porId(C.items),
     OBJ: porId(C.objetos),
     CULT: porId(C.cultivos),
+    MON: porId(C.monstruos || []),
   };
 }

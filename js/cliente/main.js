@@ -28,7 +28,7 @@ let jugando = false;
 function conectar(s) {
   sesion?.cerrar();
   sesion = s;
-  sesion.alEvento(ev => { render.eventos(ev); ui.eventos(ev); });
+  sesion.alEvento(ev => { render.eventos(ev, sesion.jugadorId); ui.eventos(ev); });
 }
 conectar(sesion);
 

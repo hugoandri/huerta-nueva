@@ -269,6 +269,65 @@ async function generarPersonaje(p) {
   }
 }
 
+// ---------- ropas: variantes (estados) del mismo personaje + su animación de caminar ----------
+// Cada ropa es un "estado" de PixelLab: misma persona, otra ropa. Se guarda en
+// assets/personaje/<id>/ropa_<ropa>/ con los mismos nombres de archivo que la base.
+async function generarRopa(p, r) {
+  const base = estado[`personaje:${p.id}`];
+  if (!base) throw new Error('primero hay que generar el personaje base');
+  const carpeta = dir(`personaje/${p.id}/ropa_${r.id}`);
+  const clave = `ropa:${p.id}:${r.id}`;
+  let sid = estado[clave];
+  if (!sid || FORZAR) {
+    const { datos } = await api('POST', '/create-character-state', {
+      character_id: base, edit_description: r.edicion, state_name: r.id, no_background: true,
+    });
+    sid = estado[clave] = datos.character_id;
+    delete estado[`${clave}:anim`];
+    await guardarEstado();
+  }
+  await animarYDescargar(p, sid, `${clave}:anim`, carpeta, `?states=${sid}`);
+}
+
+// Espera a que el personaje (o estado) termine, lo anima con la plantilla y baja el ZIP.
+async function animarYDescargar(p, cid, claveAnim, carpeta, consultaZip = '') {
+  let info;
+  for (;;) {
+    info = (await api('GET', `/characters/${cid}`)).datos;
+    if (info.status === 'completed' && info.rotation_urls) break;
+    if (info.status === 'failed') throw new Error(`PixelLab no pudo crear ${cid}`);
+    await esperar(8000);
+  }
+  if (!estado[claveAnim]) {
+    const { datos } = await api('POST', '/animate-character', { character_id: cid, template_animation_id: p.animacion, directions: DIRS });
+    estado[claveAnim] = datos.animation_group_id || true;
+    await guardarEstado();
+  }
+  for (;;) {
+    info = (await api('GET', `/characters/${cid}`)).datos;
+    const anim = (info.animations || []).find(a => a.animation_group_id === estado[claveAnim] || a.animation_type === p.animacion);
+    if (anim && DIRS.every(d => anim.directions.find(x => x.direction === d && x.frames?.length))) {
+      const zip = await apiBinario(`/characters/${cid}/zip${consultaZip}`);
+      if (zip) {
+        const archivos = leerZip(zip), buscar = re => Object.keys(archivos).filter(n => re.test(n)).sort();
+        await fs.mkdir(carpeta, { recursive: true });
+        const cuadros = {};
+        for (const d of DIRS) {
+          const rot = buscar(new RegExp(`(^|/)rotations/${d}\\.png$`))[0];
+          if (!rot) throw new Error(`el ZIP no trae la rotación ${d}`);
+          await fs.writeFile(`${carpeta}/${d}.png`, limpiarBordes(archivos[rot]));
+          const frames = buscar(new RegExp(`(^|/)animations/[^/]+/${d}/[^/]+\\.png$`));
+          cuadros[d] = frames.length;
+          for (let i = 0; i < frames.length; i++) await fs.writeFile(`${carpeta}/caminar_${d}_${i}.png`, limpiarBordes(archivos[frames[i]]));
+        }
+        await fs.writeFile(`${carpeta}/info.json`, JSON.stringify({ tamano: info.size, cuadros }));
+        return;
+      }
+    }
+    await esperar(8000);
+  }
+}
+
 // ---------- manifest: qué gráficos existen (el juego usa provisionales para el resto) ----------
 async function escribirManifest() {
   const m = { sprites: {}, tilesets: {}, personaje: null };
@@ -280,7 +339,11 @@ async function escribirManifest() {
   const infoRuta = dir(`personaje/${p.id}/info.json`);
   if (await existe(infoRuta)) {
     const info = JSON.parse(await fs.readFile(infoRuta, 'utf8'));
-    m.personaje = { carpeta: `assets/personaje/${p.id}`, ...info };
+    m.personaje = { carpeta: `assets/personaje/${p.id}`, ...info, ropas: {} };
+    for (const r of p.ropas || []) {
+      const ri = dir(`personaje/${p.id}/ropa_${r.id}/info.json`);
+      if (await existe(ri)) m.personaje.ropas[r.id] = { carpeta: `assets/personaje/${p.id}/ropa_${r.id}`, ...JSON.parse(await fs.readFile(ri, 'utf8')) };
+    }
   }
   await fs.writeFile(dir('manifest.json'), JSON.stringify(m, null, 2));
   return m;
@@ -308,6 +371,9 @@ for (const t of contenido.tilesets)
 const p = contenido.personaje;
 if (quiere(p.id) && (FORZAR || !(await existe(dir(`personaje/${p.id}/info.json`)))))
   tareas.push({ tipo: 'personaje', id: p.id, costo: 5, run: () => generarPersonaje(p) });
+for (const r of p.ropas || [])
+  if (quiere(`ropa_${r.id}`) && (FORZAR || !(await existe(dir(`personaje/${p.id}/ropa_${r.id}/info.json`)))))
+    tareas.push({ tipo: 'ropa', id: `ropa_${r.id}`, costo: 5, run: () => generarRopa(p, r) });
 
 console.log(`Por generar: ${tareas.length} (≈${tareas.reduce((a, t) => a + t.costo, 0)} generaciones)`);
 for (const t of tareas) console.log(`  · ${t.tipo.padEnd(9)} ${t.id}`);
