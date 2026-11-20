@@ -122,6 +122,20 @@
 
   "tienda": ["semilla_rabano", "semilla_zanahoria", "semilla_calabaza"],
 
+  "_botines": "Tablas de botín para las mazmorras (próxima etapa). Cada jugador sortea su propio botín.",
+  "botines": {
+    "mazmorra_prueba": {
+      "tiradas": 3,
+      "garantizado": [{ "item": "piedra", "n": 5 }],
+      "entradas": [
+        { "item": "madera",           "peso": 30, "min": 3, "max": 8 },
+        { "item": "fibra",            "peso": 25, "min": 2, "max": 5 },
+        { "item": "semilla_calabaza", "peso": 15, "min": 1, "max": 3 },
+        { "item": "conserva_calabaza","peso": 5,  "min": 1, "max": 1 }
+      ]
+    }
+  },
+
   "inicio": {
     "dinero": 300,
     "inventario": [["azada", 1], ["regadera", 1], ["hacha", 1], ["pico", 1], ["semilla_rabano", 15]]

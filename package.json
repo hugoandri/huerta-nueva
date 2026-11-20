@@ -1,0 +1,11 @@
+{
+  "name": "huerta-nueva",
+  "private": true,
+  "type": "module",
+  "description": "Juego de granja y crafteo con gráficos de PixelLab",
+  "scripts": {
+    "test": "node --test pruebas/*.test.js",
+    "assets": "node herramientas/generar-assets.mjs",
+    "servir": "npx serve ."
+  }
+}
