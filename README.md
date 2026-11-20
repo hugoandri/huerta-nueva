@@ -16,10 +16,15 @@ Controles: `WASD`/flechas para caminar, `Espacio` o clic para usar, `1`–`0` pa
 
 | Archivo | Qué contiene |
 | --- | --- |
-| `data/contenido.json` | Sprites (con su prompt), items, cultivos, objetos del mundo, recetas, tienda e inventario inicial |
+| `data/contenido.json` | Sprites (con su prompt), items, cultivos, objetos del mundo, recetas, botines, tienda e inventario inicial |
+| `js/nucleo/` | Reglas del juego, sin navegador: estado, acciones, azar reproducible, botín |
+| `js/servicios/` | Sesión, guardado y perfil (intercambiables por versiones online) |
+| `js/cliente/` | Gráficos, dibujo (autotiling Wang), interfaz y controles |
 | `herramientas/generar-assets.mjs` | Llama a PixelLab y escribe `assets/` y `assets/manifest.json` |
-| `juego.js` | Motor: mundo, autotiling Wang, cultivos, días, energía, crafteo, guardado |
 | `assets/` | Gráficos generados. Lo que falte se dibuja provisional |
+| `pruebas/` | Pruebas del núcleo (`npm test`) |
+
+La arquitectura y el camino a online están en [ARQUITECTURA.md](ARQUITECTURA.md).
 
 Qué endpoint de PixelLab genera cada cosa:
 
