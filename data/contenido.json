@@ -1,0 +1,129 @@
+{
+  "_ayuda": "Fuente única de verdad del juego. Para agregar algo: crea un sprite en 'sprites' (con su prompt para PixelLab) y úsalo desde un item, objeto o cultivo. Luego ejecuta: node herramientas/generar-assets.mjs  (solo genera lo que falta).",
+
+  "estilo": {
+    "outline": "single color black outline",
+    "shading": "basic shading",
+    "detail": "medium detail",
+    "view": "high top-down",
+    "sufijo": "cozy farming game pixel art, vibrant colors"
+  },
+
+  "mundo": { "tile": 32, "ancho": 48, "alto": 36, "semilla": 7 },
+
+  "personaje": {
+    "id": "granjera",
+    "descripcion": "young farmer with a wide straw hat, green overalls, white shirt and brown boots",
+    "tamano": 48,
+    "animacion": "walking"
+  },
+
+  "tilesets": [
+    { "id": "tierra", "inferior": "lush green meadow grass", "superior": "dark brown tilled farm soil with furrows", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
+    { "id": "agua", "inferior": "lush green meadow grass", "superior": "clear blue pond water with small ripples", "transicion": "muddy shore", "superior_caminable": false }
+  ],
+
+  "sprites": {
+    "azada":            { "descripcion": "iron farming hoe tool icon", "ancho": 32, "alto": 32 },
+    "regadera":         { "descripcion": "metal watering can icon", "ancho": 32, "alto": 32 },
+    "hacha":            { "descripcion": "wood chopping axe icon", "ancho": 32, "alto": 32 },
+    "pico":             { "descripcion": "mining pickaxe icon", "ancho": 32, "alto": 32 },
+
+    "semilla_rabano":   { "descripcion": "small paper seed packet with a red radish drawn on it", "ancho": 32, "alto": 32 },
+    "semilla_zanahoria":{ "descripcion": "small paper seed packet with an orange carrot drawn on it", "ancho": 32, "alto": 32 },
+    "semilla_calabaza": { "descripcion": "small paper seed packet with an orange pumpkin drawn on it", "ancho": 32, "alto": 32 },
+
+    "rabano":           { "descripcion": "fresh red radish with green leaves", "ancho": 32, "alto": 32 },
+    "zanahoria":        { "descripcion": "fresh orange carrot with green leafy top", "ancho": 32, "alto": 32 },
+    "calabaza":         { "descripcion": "round orange pumpkin with short stem", "ancho": 32, "alto": 32 },
+    "conserva":         { "descripcion": "glass jar of homemade preserves with cloth lid tied with string", "ancho": 32, "alto": 32 },
+
+    "madera":           { "descripcion": "small pile of chopped wood logs", "ancho": 32, "alto": 32 },
+    "piedra":           { "descripcion": "small pile of grey stones", "ancho": 32, "alto": 32 },
+    "fibra":            { "descripcion": "bundle of green plant fiber tied together", "ancho": 32, "alto": 32 },
+
+    "brote":            { "descripcion": "tiny green seedling sprout with two small leaves, growing from soil", "ancho": 32, "alto": 32 },
+    "rabano_crecido":   { "descripcion": "young radish plant with leafy green tops, small crop", "ancho": 32, "alto": 32 },
+    "rabano_maduro":    { "descripcion": "ripe radish crop in the ground, red radish top visible under big green leaves", "ancho": 32, "alto": 32 },
+    "zanahoria_crecida":{ "descripcion": "young carrot plant with feathery green leaves, small crop", "ancho": 32, "alto": 32 },
+    "zanahoria_madura": { "descripcion": "ripe carrot crop in the ground, orange carrot top visible under tall feathery leaves", "ancho": 32, "alto": 32 },
+    "calabaza_crecida": { "descripcion": "young pumpkin vine with broad green leaves and a yellow flower", "ancho": 32, "alto": 32 },
+    "calabaza_madura":  { "descripcion": "ripe orange pumpkin on a green vine with leaves", "ancho": 32, "alto": 32 },
+
+    "arbol":            { "descripcion": "leafy green oak tree with brown trunk", "ancho": 64, "alto": 96 },
+    "roca":             { "descripcion": "grey boulder rock", "ancho": 32, "alto": 32 },
+    "maleza":           { "descripcion": "messy clump of dry yellow-brown wild grass and thistle weeds", "ancho": 32, "alto": 32 },
+    "casa":             { "descripcion": "small cozy wooden farmhouse with red roof, front door and window", "ancho": 128, "alto": 128 },
+    "caja_envios":      { "descripcion": "wooden shipping crate bin with open lid", "ancho": 32, "alto": 32 },
+    "puesto":           { "descripcion": "small wooden market stall with striped awning and seed bags on the counter", "ancho": 64, "alto": 64 },
+    "cofre":            { "descripcion": "wooden storage chest with metal bands", "ancho": 32, "alto": 32 },
+    "cerca":            { "descripcion": "short wooden fence post section", "ancho": 32, "alto": 32 },
+    "aspersor":         { "descripcion": "small metal garden sprinkler with nozzle on top", "ancho": 32, "alto": 32 },
+    "tarro":            { "descripcion": "wooden preserves keg machine with a glass jar on top", "ancho": 32, "alto": 32 },
+    "espantapajaros":   { "descripcion": "scarecrow with straw hat and patched shirt on a wooden pole", "ancho": 32, "alto": 48 }
+  },
+
+  "items": [
+    { "id": "azada",    "nombre": "Azada",    "tipo": "herramienta", "sprite": "azada",    "descripcion": "Ara el césped para poder sembrar." },
+    { "id": "regadera", "nombre": "Regadera", "tipo": "herramienta", "sprite": "regadera", "descripcion": "Riega la tierra. Se rellena en el agua.", "capacidad": 20 },
+    { "id": "hacha",    "nombre": "Hacha",    "tipo": "herramienta", "sprite": "hacha",    "descripcion": "Tala árboles y quita maleza." },
+    { "id": "pico",     "nombre": "Pico",     "tipo": "herramienta", "sprite": "pico",     "descripcion": "Rompe rocas." },
+
+    { "id": "semilla_rabano",    "nombre": "Semillas de rábano",    "tipo": "semilla", "sprite": "semilla_rabano",    "cultivo": "rabano",    "compra": 20, "venta": 10 },
+    { "id": "semilla_zanahoria", "nombre": "Semillas de zanahoria", "tipo": "semilla", "sprite": "semilla_zanahoria", "cultivo": "zanahoria", "compra": 35, "venta": 17 },
+    { "id": "semilla_calabaza",  "nombre": "Semillas de calabaza",  "tipo": "semilla", "sprite": "semilla_calabaza",  "cultivo": "calabaza",  "compra": 80, "venta": 40 },
+
+    { "id": "rabano",    "nombre": "Rábano",    "tipo": "cultivo", "sprite": "rabano",    "venta": 45,  "conserva": "conserva_rabano" },
+    { "id": "zanahoria", "nombre": "Zanahoria", "tipo": "cultivo", "sprite": "zanahoria", "venta": 80,  "conserva": "conserva_zanahoria" },
+    { "id": "calabaza",  "nombre": "Calabaza",  "tipo": "cultivo", "sprite": "calabaza",  "venta": 220, "conserva": "conserva_calabaza" },
+
+    { "id": "conserva_rabano",    "nombre": "Conserva de rábano",    "tipo": "artesanal", "sprite": "conserva", "venta": 140 },
+    { "id": "conserva_zanahoria", "nombre": "Conserva de zanahoria", "tipo": "artesanal", "sprite": "conserva", "venta": 210 },
+    { "id": "conserva_calabaza",  "nombre": "Conserva de calabaza",  "tipo": "artesanal", "sprite": "conserva", "venta": 490 },
+
+    { "id": "madera", "nombre": "Madera", "tipo": "material", "sprite": "madera", "venta": 2 },
+    { "id": "piedra", "nombre": "Piedra", "tipo": "material", "sprite": "piedra", "venta": 2 },
+    { "id": "fibra",  "nombre": "Fibra",  "tipo": "material", "sprite": "fibra",  "venta": 1 },
+
+    { "id": "cofre",          "nombre": "Cofre",          "tipo": "colocable", "sprite": "cofre",          "objeto": "cofre",          "venta": 0,  "descripcion": "Guarda hasta 12 objetos." },
+    { "id": "cerca",          "nombre": "Cerca",          "tipo": "colocable", "sprite": "cerca",          "objeto": "cerca",          "venta": 1,  "descripcion": "Decoración que bloquea el paso." },
+    { "id": "aspersor",       "nombre": "Aspersor",       "tipo": "colocable", "sprite": "aspersor",       "objeto": "aspersor",       "venta": 30, "descripcion": "Cada mañana riega las 4 casillas vecinas." },
+    { "id": "tarro",          "nombre": "Tarro de conservas", "tipo": "colocable", "sprite": "tarro",      "objeto": "tarro",          "venta": 50, "descripcion": "Convierte un cultivo en conserva en 1 día." },
+    { "id": "espantapajaros", "nombre": "Espantapájaros", "tipo": "colocable", "sprite": "espantapajaros", "objeto": "espantapajaros", "venta": 20, "descripcion": "Protege los cultivos de los cuervos en un radio de 8 casillas." }
+  ],
+
+  "cultivos": [
+    { "id": "rabano",    "dias": 3, "producto": "rabano",    "sprites": ["brote", "rabano_crecido", "rabano_maduro"] },
+    { "id": "zanahoria", "dias": 4, "producto": "zanahoria", "sprites": ["brote", "zanahoria_crecida", "zanahoria_madura"] },
+    { "id": "calabaza",  "dias": 6, "producto": "calabaza",  "sprites": ["brote", "calabaza_crecida", "calabaza_madura"] }
+  ],
+
+  "objetos": [
+    { "id": "arbol",          "sprite": "arbol",          "solido": true, "herramienta": "hacha", "golpes": 3, "suelta": { "madera": [5, 8] } },
+    { "id": "roca",           "sprite": "roca",           "solido": true, "herramienta": "pico",  "golpes": 2, "suelta": { "piedra": [2, 3] } },
+    { "id": "maleza",         "sprite": "maleza",         "solido": true, "herramienta": "cualquiera", "golpes": 1, "suelta": { "fibra": [1, 2] } },
+    { "id": "casa",           "sprite": "casa",           "solido": true, "ancho": 4, "alto": 3, "accion": "dormir" },
+    { "id": "caja_envios",    "sprite": "caja_envios",    "solido": true, "accion": "vender" },
+    { "id": "puesto",         "sprite": "puesto",         "solido": true, "ancho": 2, "alto": 1, "accion": "tienda" },
+    { "id": "cofre",          "sprite": "cofre",          "solido": true, "accion": "cofre", "recoger": true },
+    { "id": "cerca",          "sprite": "cerca",          "solido": true, "recoger": true },
+    { "id": "aspersor",       "sprite": "aspersor",       "solido": true, "recoger": true, "riega": 1 },
+    { "id": "tarro",          "sprite": "tarro",          "solido": true, "accion": "maquina", "recoger": true, "dias": 1 },
+    { "id": "espantapajaros", "sprite": "espantapajaros", "solido": true, "recoger": true, "protege": 8 }
+  ],
+
+  "recetas": [
+    { "resultado": "cerca",          "cantidad": 2, "ingredientes": { "madera": 2 } },
+    { "resultado": "espantapajaros", "cantidad": 1, "ingredientes": { "madera": 8, "fibra": 5 } },
+    { "resultado": "cofre",          "cantidad": 1, "ingredientes": { "madera": 20 } },
+    { "resultado": "aspersor",       "cantidad": 1, "ingredientes": { "piedra": 8, "madera": 4 } },
+    { "resultado": "tarro",          "cantidad": 1, "ingredientes": { "madera": 12, "piedra": 8, "fibra": 4 } }
+  ],
+
+  "tienda": ["semilla_rabano", "semilla_zanahoria", "semilla_calabaza"],
+
+  "inicio": {
+    "dinero": 300,
+    "inventario": [["azada", 1], ["regadera", 1], ["hacha", 1], ["pico", 1], ["semilla_rabano", 15]]
+  }
+}

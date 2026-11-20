@@ -1,0 +1,53 @@
+{
+  "sprites": {
+    "azada": "assets/sprites/azada.png",
+    "regadera": "assets/sprites/regadera.png",
+    "hacha": "assets/sprites/hacha.png",
+    "pico": "assets/sprites/pico.png",
+    "semilla_rabano": "assets/sprites/semilla_rabano.png",
+    "semilla_zanahoria": "assets/sprites/semilla_zanahoria.png",
+    "semilla_calabaza": "assets/sprites/semilla_calabaza.png",
+    "rabano": "assets/sprites/rabano.png",
+    "zanahoria": "assets/sprites/zanahoria.png",
+    "calabaza": "assets/sprites/calabaza.png",
+    "conserva": "assets/sprites/conserva.png",
+    "madera": "assets/sprites/madera.png",
+    "piedra": "assets/sprites/piedra.png",
+    "fibra": "assets/sprites/fibra.png",
+    "brote": "assets/sprites/brote.png",
+    "rabano_crecido": "assets/sprites/rabano_crecido.png",
+    "rabano_maduro": "assets/sprites/rabano_maduro.png",
+    "zanahoria_crecida": "assets/sprites/zanahoria_crecida.png",
+    "zanahoria_madura": "assets/sprites/zanahoria_madura.png",
+    "calabaza_crecida": "assets/sprites/calabaza_crecida.png",
+    "calabaza_madura": "assets/sprites/calabaza_madura.png",
+    "arbol": "assets/sprites/arbol.png",
+    "roca": "assets/sprites/roca.png",
+    "maleza": "assets/sprites/maleza.png",
+    "casa": "assets/sprites/casa.png",
+    "caja_envios": "assets/sprites/caja_envios.png",
+    "puesto": "assets/sprites/puesto.png",
+    "cofre": "assets/sprites/cofre.png",
+    "cerca": "assets/sprites/cerca.png",
+    "aspersor": "assets/sprites/aspersor.png",
+    "tarro": "assets/sprites/tarro.png",
+    "espantapajaros": "assets/sprites/espantapajaros.png"
+  },
+  "tilesets": {
+    "tierra": "assets/tilesets/tierra.json",
+    "agua": "assets/tilesets/agua.json"
+  },
+  "personaje": {
+    "carpeta": "assets/personaje/granjera",
+    "tamano": {
+      "width": 68,
+      "height": 68
+    },
+    "cuadros": {
+      "south": 6,
+      "west": 6,
+      "east": 6,
+      "north": 6
+    }
+  }
+}
