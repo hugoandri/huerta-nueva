@@ -62,7 +62,7 @@ export async function cargarGraficos(def) {
     else { nProv++; const c = provisional(id, s.ancho, s.alto); SPR[id] = c; SPR_URL[id] = c.toDataURL(); }
   }));
 
-  const COLOR = { tierra: ['#5d9e3f', '#6b4a2f'], agua: ['#5d9e3f', '#3d7fc4'] };
+  const COLOR = { tierra: ['#5d9e3f', '#6b4a2f'], agua: ['#5d9e3f', '#3d7fc4'], cueva: ['#2a2420', '#8a7058'] };
   const TS = {};
   for (const t of C.tilesets) {
     let tiles = null;
@@ -77,28 +77,34 @@ export async function cargarGraficos(def) {
     TS[t.id] = tiles;
   }
 
-  let PJ = null;
-  if (M.personaje) {
+  // Personaje: la ropa base y cada variante de ropa son juegos de sprites con la misma forma.
+  async function cargarPersonaje(info) {
     try {
       const p = { quieto: {}, caminar: {}, pie: 0 };
       for (const d of DIRS) {
-        p.quieto[d] = await cargarImg(`${M.personaje.carpeta}/${d}.png`);
-        p.caminar[d] = (await Promise.all(Array.from({ length: M.personaje.cuadros?.[d] || 0 }, (_, i) =>
-          cargarImg(`${M.personaje.carpeta}/caminar_${d}_${i}.png`)))).filter(Boolean);
+        p.quieto[d] = await cargarImg(`${info.carpeta}/${d}.png`);
+        p.caminar[d] = (await Promise.all(Array.from({ length: info.cuadros?.[d] || 0 }, (_, i) =>
+          cargarImg(`${info.carpeta}/caminar_${d}_${i}.png`)))).filter(Boolean);
       }
-      if (DIRS.every(d => p.quieto[d])) PJ = p;
-    } catch (e) { PJ = null; }
+      if (!DIRS.every(d => p.quieto[d])) return null;
+      const im = p.quieto.south; p.alto = im.height;
+      try {   // el pie es la fila opaca más baja: así el personaje se apoya en el suelo
+        const c = lienzo(im.width, im.height), g = c.getContext('2d'); g.drawImage(im, 0, 0);
+        const d = g.getImageData(0, 0, im.width, im.height).data;
+        for (let y = im.height - 1; y >= 0 && !p.pie; y--) for (let x = 0; x < im.width; x++) if (d[(y * im.width + x) * 4 + 3] > 40) { p.pie = y + 1; break; }
+      } catch (e) { /* lienzo bloqueado */ }
+      if (!p.pie) p.pie = Math.round(im.height * 0.85);
+      return p;
+    } catch (e) { return null; }
   }
-  if (PJ) {
-    nReales++;
-    const im = PJ.quieto.south; PJ.alto = im.height;
-    try {   // el pie es la fila opaca más baja: así el personaje se apoya en el suelo
-      const c = lienzo(im.width, im.height), g = c.getContext('2d'); g.drawImage(im, 0, 0);
-      const d = g.getImageData(0, 0, im.width, im.height).data;
-      for (let y = im.height - 1; y >= 0 && !PJ.pie; y--) for (let x = 0; x < im.width; x++) if (d[(y * im.width + x) * 4 + 3] > 40) { PJ.pie = y + 1; break; }
-    } catch (e) { /* lienzo bloqueado */ }
-    if (!PJ.pie) PJ.pie = Math.round(im.height * 0.85);
-  } else { nProv++; PJ = personajeProvisional(); }
+  const PJS = {};
+  PJS.base = M.personaje ? await cargarPersonaje(M.personaje) : null;
+  if (PJS.base) nReales++; else { nProv++; PJS.base = personajeProvisional(); }
+  for (const r of C.personaje.ropas || []) {
+    const info = M.personaje?.ropas?.[r.id];
+    const p = info ? await cargarPersonaje(info) : null;
+    if (p) { nReales++; PJS[r.id] = p; } else nProv++;      // sin gráfico: se usa la ropa base
+  }
 
-  return { SPR, SPR_URL, TS, PJ, nReales, nProv };
+  return { SPR, SPR_URL, TS, PJ: PJS.base, PJS, nReales, nProv };
 }

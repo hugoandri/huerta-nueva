@@ -28,6 +28,16 @@ El juego es offline, pero está armado para pasar a online sin reescribirlo. La 
 
 Los eventos (`aviso`, `flotar`, `abrir`, `resumen`, `sacudir`) llevan `jugador` cuando son solo para uno; la interfaz muestra los suyos.
 
+## Zonas y mazmorra
+
+Cada jugador está en una **zona**: su granja o el piso actual de la mazmorra (`zonaDe(estado, jugador)`). Las dos tienen la misma forma (objetos, celdas bloqueadas), así que mover, usar, colocar y los cofres funcionan igual en ambas.
+
+- **`mazmorra.js`**: `generarPiso(def, semilla, piso)` crea salas unidas por pasillos, antorchas, rocas con minerales según el piso, cofres, monstruos y el jefe. Es reproducible: con la misma semilla, el grupo entero ve el mismo piso.
+- **Combate**: `usar` frente a un monstruo ataca. Los monstruos persiguen al jugador más cercano dentro de su visión; esto ocurre en la acción `tiempo` (online la ejecutará el anfitrión).
+- **Jefes** en los pisos 5 y 10. Vencer al del piso 5 habilita el punto de control del piso 6. Al vencer al del 10, `repartirBotin` le da a cada jugador presente su propio botín.
+- **Ropa**: `vestir` cambia el aspecto (cada ropa es una variante del personaje en PixelLab) y aplica su `efecto`: luz, defensa, vida o ahorro de energía.
+- **Máquinas genéricas**: el tarro y el horno se definen con `procesa` (entrada, cantidad, salida, minutos) en `contenido.json`.
+
 ## Cómo se pasa a online
 
 | Hoy (offline) | Mañana (online) | Qué cambia |
