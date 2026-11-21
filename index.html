@@ -145,6 +145,18 @@ canvas#lienzo { display: block; width: 100%; height: 100%; image-rendering: pixe
 .controles dd { margin: 0; font-family: var(--f-texto); color: var(--tinta-suave); }
 kbd { font-family: var(--f-ui); background: #121512; border: 1px solid var(--borde); border-radius: 3px; padding: 0 4px; }
 
+/* ---------- elegir personaje y mazmorra ---------- */
+.elige { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.elige button { display: grid; justify-items: center; gap: 2px; width: 104px; padding: 6px 4px 8px; font: inherit; font-size: 15px;
+  color: var(--tinta); background: var(--panel-2); border: 2px solid #1a1f19; border-radius: 6px; cursor: pointer; }
+.elige button[aria-checked="true"] { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); background: #3d4636; }
+.elige button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.elige img { width: 68px; height: 68px; image-rendering: pixelated; }
+.sello { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #1c221b;
+  border: 2px solid var(--borde); font-weight: 700; color: var(--acento); }
+.fila.cerrada { opacity: .6; }
+.casilla img, .fila img, .ing img { object-fit: contain; }
+
 /* ---------- avisos ---------- */
 .avisos { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); top: calc(70px + env(safe-area-inset-top, 0px)); display: grid; gap: 4px; justify-items: center; pointer-events: none; }
 .aviso { background: rgba(22,27,23,.92); border: 2px solid var(--borde); border-radius: 5px; padding: 4px 12px; font-size: 14px; animation: aparecer .18s ease-out; }
@@ -219,6 +231,8 @@ kbd { font-family: var(--f-ui); background: #121512; border: 1px solid var(--bor
       <h1 class="marca">Huerta Nueva</h1>
       <p class="lema">Un prototipo de granja: ara, siembra, riega, vende y fabrica. Todo el contenido sale de <code>data/contenido.json</code> y los gráficos se generan con PixelLab.</p>
       <div class="estado-assets" id="estado-assets">Cargando gráficos…</div>
+      <div class="sub">Elige tu personaje</div>
+      <div class="elige" id="elige" role="radiogroup" aria-label="Personaje"></div>
       <dl class="controles">
         <dt><kbd>WASD</kbd> / flechas</dt><dd>Caminar</dd>
         <dt><kbd>Espacio</kbd> / clic</dt><dd>Usar lo que tienes en la mano o interactuar (cosechar, vender, dormir, abrir)</dd>

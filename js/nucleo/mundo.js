@@ -3,7 +3,7 @@
 import { mulberry32, entre } from './azar.js';
 import { agregar, TAM_INVENTARIO } from './inventario.js';
 
-export const VERSION_ESTADO = 3;
+export const VERSION_ESTADO = 4;
 export const VIDA_BASE = 10;   // medios corazones
 export const INICIO_DIA = 6 * 60;
 
@@ -50,18 +50,23 @@ export function colocar(def, g, id, x, y, datos) {
 }
 export function quitar(g, o) { g.objetos = g.objetos.filter(x => x !== o); g.ver++; }
 
-export const posicionInicio = def => ({ x: 7.5 * def.T, y: 7.6 * def.T, dir: 'south' });
-export const ENTRADA_CUEVA = { x: 20, y: 4 };
-export const frenteACueva = def => ({ x: (ENTRADA_CUEVA.x + 1) * def.T, y: (ENTRADA_CUEVA.y + 1.6) * def.T, dir: 'south' });
+export const CASA = { x: 5, y: 4 };
+export const posicionInicio = def => ({ x: 6.5 * def.T, y: 6.6 * def.T, dir: 'south' });
+export const ENTRADA_CUEVA = { x: 42, y: 7 };
+export const frenteACueva = def => ({ x: (ENTRADA_CUEVA.x + 1.5) * def.T, y: (ENTRADA_CUEVA.y + 2.6) * def.T, dir: 'south' });
 
 // La zona donde está un jugador: su granja o el piso actual de la mazmorra.
 export const zonaDe = (e, j) => (j.lugar === 'mazmorra' && e.mazmorra.nivel ? e.mazmorra.nivel : e.granja);
 
-export function nuevoJugador(def, { id, nombre }) {
+// Ropa que lleva puesta ahora: la de batalla en la mazmorra, la de campo en la granja.
+export const ropaActual = j => (j.lugar === 'mazmorra' ? j.ropaBatalla : j.ropa);
+
+export function nuevoJugador(def, { id, nombre, cuerpo }) {
+  const c = def.C.personajes.find(p => p.id === cuerpo) || def.C.personajes[0];
   const j = {
-    id, nombre: nombre || 'Granjera', ...posicionInicio(def), lugar: 'granja',
+    id, nombre: nombre || c.nombre, cuerpo: c.id, ...posicionInicio(def), lugar: 'granja',
     energia: 100, energiaMax: 100, vida: VIDA_BASE, vidaMax: VIDA_BASE, cdAtaque: 0,
-    ropa: 'ropa_granjera', dinero: def.C.inicio.dinero,
+    ropa: 'ropa_granjera', ropaBatalla: 'ropa_aventurera', dinero: def.C.inicio.dinero,
     inv: Array(TAM_INVENTARIO).fill(null), sel: 0,
     aguaRegadera: def.ITEMS.regadera?.capacidad || 20, envios: [],
   };
@@ -80,9 +85,9 @@ export function crearGranja(def, semilla, dueno) {
     const e = ((x - 35) / 6) ** 2 + ((y - 23) / 4.2) ** 2 + Math.sin(x * 1.7 + y) * 0.08;
     if (e < 1) g.agua[idx(def, x, y)] = 1;
   }
-  colocar(def, g, 'casa', 5, 3); colocar(def, g, 'caja_envios', 10, 5); colocar(def, g, 'puesto', 12, 4);
+  colocar(def, g, 'casa', CASA.x, CASA.y); colocar(def, g, 'caja_envios', 10, 5); colocar(def, g, 'puesto', 12, 4);
   colocar(def, g, 'entrada_cueva', ENTRADA_CUEVA.x, ENTRADA_CUEVA.y);
-  const claro = (x, y) => (x >= 3 && x <= 17 && y >= 2 && y <= 10) || (x >= 18 && x <= 23 && y >= 2 && y <= 7);
+  const claro = (x, y) => (x >= 3 && x <= 17 && y >= 2 && y <= 10) || (x >= 38 && x <= 46 && y >= 5 && y <= 12);
   const arbolCerca = (x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (objetoEn(def, g, x + dx, y + dy)?.id === 'arbol') return true;
     return false;
@@ -110,8 +115,8 @@ export function crearEstado(def, { semilla = def.C.mundo.semilla, jugador }) {
     semilla: semilla >>> 0, paso: 0,
     tiempo: { dia: 1, min: INICIO_DIA, lluvia: false },
     granja: crearGranja(def, semilla, jugador.id),
-    // nivel = piso actual (zona generada); record = piso más profundo alcanzado
-    mazmorra: { semilla: null, piso: 0, nivel: null, record: 0, completada: 0 },
+    // expedición en curso (actual, semilla, piso, nivel) y progreso por mazmorra {record, completada}
+    mazmorra: { actual: null, semilla: null, piso: 0, nivel: null, progreso: {} },
     jugadores: { [jugador.id]: nuevoJugador(def, jugador) },
   };
 }

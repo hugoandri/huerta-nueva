@@ -116,6 +116,6 @@ test('guardar y cargar conserva el estado', () => {
   act(e, { tipo: 'usar', x: 9, y: 9 });
   const copia = deJSON(aJSON(e), def);
   assert.equal(aJSON({ ...copia, granja: { ...copia.granja, ver: 0 } }), aJSON({ ...e, granja: { ...e.granja, ver: 0 } }));
-  assert.ok(objetoEn(def, copia.granja, 5, 3), 'la casa sigue ahí');
+  assert.equal(objetoEn(def, copia.granja, 5, 4)?.id, 'casa', 'la casa sigue ahí');
   assert.equal(deJSON('{"version":1}', def), null, 'una versión vieja no se carga');
 });

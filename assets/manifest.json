@@ -25,17 +25,12 @@
     "roca": "assets/sprites/roca.png",
     "maleza": "assets/sprites/maleza.png",
     "casa": "assets/sprites/casa.png",
-    "caja_envios": "assets/sprites/caja_envios.png",
-    "puesto": "assets/sprites/puesto.png",
-    "cofre": "assets/sprites/cofre.png",
     "cerca": "assets/sprites/cerca.png",
     "aspersor": "assets/sprites/aspersor.png",
-    "tarro": "assets/sprites/tarro.png",
     "espantapajaros": "assets/sprites/espantapajaros.png",
     "ropa_granjera": "assets/sprites/ropa_granjera.png",
     "ropa_minera": "assets/sprites/ropa_minera.png",
     "ropa_aventurera": "assets/sprites/ropa_aventurera.png",
-    "entrada_cueva": "assets/sprites/entrada_cueva.png",
     "escalera_bajar": "assets/sprites/escalera_bajar.png",
     "escalera_subir": "assets/sprites/escalera_subir.png",
     "antorcha": "assets/sprites/antorcha.png",
@@ -43,7 +38,6 @@
     "roca_cobre": "assets/sprites/roca_cobre.png",
     "roca_hierro": "assets/sprites/roca_hierro.png",
     "roca_gema": "assets/sprites/roca_gema.png",
-    "horno": "assets/sprites/horno.png",
     "mineral_cobre": "assets/sprites/mineral_cobre.png",
     "mineral_hierro": "assets/sprites/mineral_hierro.png",
     "lingote_cobre": "assets/sprites/lingote_cobre.png",
@@ -67,43 +61,45 @@
     "agua": "assets/tilesets/agua.json",
     "cueva": "assets/tilesets/cueva.json"
   },
-  "personaje": {
-    "carpeta": "assets/personaje/granjera",
-    "tamano": {
-      "width": 68,
-      "height": 68
-    },
-    "cuadros": {
-      "south": 6,
-      "west": 6,
-      "east": 6,
-      "north": 6
-    },
-    "ropas": {
-      "minera": {
-        "carpeta": "assets/personaje/granjera/ropa_minera",
-        "tamano": {
-          "width": 68,
-          "height": 68
-        },
-        "cuadros": {
-          "south": 6,
-          "west": 6,
-          "east": 6,
-          "north": 6
-        }
+  "personajes": {
+    "granjera": {
+      "carpeta": "assets/personaje/granjera",
+      "tamano": {
+        "width": 68,
+        "height": 68
       },
-      "aventurera": {
-        "carpeta": "assets/personaje/granjera/ropa_aventurera",
-        "tamano": {
-          "width": 68,
-          "height": 68
+      "cuadros": {
+        "south": 6,
+        "west": 6,
+        "east": 6,
+        "north": 6
+      },
+      "ropas": {
+        "minera": {
+          "carpeta": "assets/personaje/granjera/ropa_minera",
+          "tamano": {
+            "width": 68,
+            "height": 68
+          },
+          "cuadros": {
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
+          }
         },
-        "cuadros": {
-          "south": 6,
-          "west": 6,
-          "east": 6,
-          "north": 6
+        "aventurera": {
+          "carpeta": "assets/personaje/granjera/ropa_aventurera",
+          "tamano": {
+            "width": 68,
+            "height": 68
+          },
+          "cuadros": {
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
+          }
         }
       }
     }

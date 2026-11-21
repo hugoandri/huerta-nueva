@@ -1,6 +1,6 @@
 // Dibuja el estado. Solo lee: nunca modifica el juego.
 // Dibuja la zona del jugador local (granja o piso de mazmorra) y a todos los jugadores en ella.
-import { idx, dentro, zonaDe } from '../nucleo/mundo.js';
+import { idx, dentro, zonaDe, ropaActual } from '../nucleo/mundo.js';
 import { celdaFrente, efecto, maquinaLista } from '../nucleo/reglas.js';
 import { lienzo } from './graficos.js';
 
@@ -44,7 +44,11 @@ export function crearRender(el, def, G) {
     const off = sac > 0 ? Math.sin(sac * 80) * 2 : 0;
     g.drawImage(img, Math.round(cx - img.width / 2 + off), Math.round(basey - img.height));
   }
-  const aspectoDe = j => G.PJS[def.ITEMS[j.ropa]?.aspecto] || G.PJS.base;
+  // Sprites según el personaje (granjera o granjero) y la ropa que lleva en el lugar donde está.
+  const aspectoDe = j => {
+    const juego = G.PJS[j.cuerpo] || Object.values(G.PJS)[0];
+    return juego[def.ITEMS[ropaActual(j)]?.aspecto] || juego.base;
+  };
 
   function dibujar(estado, yoId, { objetivo = true } = {}) {
     const yo = estado.jugadores[yoId], zona = zonaDe(estado, yo), cueva = zona.tipo === 'mazmorra';
@@ -66,9 +70,9 @@ export function crearRender(el, def, G) {
       }
     };
     if (cueva) {
-      const base = G.TS.cueva[0];
+      const ts = G.TS[def.MAZ[zona.mazmorra]?.tileset] || G.TS.cueva, base = ts[0];
       for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) g.drawImage(base, x * T, y * T, T, T);
-      capa(G.TS.cueva, (x, y) => (dentro(def, x, y) ? 1 - zona.muro[idx(def, x, y)] : 0));
+      capa(ts, (x, y) => (dentro(def, x, y) ? 1 - zona.muro[idx(def, x, y)] : 0));
     } else {
       const cesped = G.TS.tierra[0];
       for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) g.drawImage(cesped, x * T, y * T, T, T);
@@ -106,9 +110,14 @@ export function crearRender(el, def, G) {
       const d = def.OBJ[o.id], w = d.ancho || 1, h = d.alto || 1;
       if (o.x + w < x0 - 2 || o.x > x1 + 2 || o.y > y1 + 1 || o.y + h < y0 - 4) continue;
       ents.push([(o.y + h) * T - (d.solido ? 0 : T), () => {
-        sprite(G.SPR[d.sprite], (o.x + w / 2) * T, (o.y + h) * T, sacudidas.get(o.uid) || 0);
+        const img = G.SPR[d.sprite];
+        if (d.solido && img.width >= T) {   // sombra proyectada hacia abajo a la derecha: da volumen
+          g.fillStyle = 'rgba(0,0,0,.22)';
+          g.beginPath(); g.ellipse((o.x + w / 2) * T + w * 4, (o.y + h) * T - 3, img.width * 0.48, 6 + h * 3, 0, 0, 7); g.fill();
+        }
+        sprite(img, (o.x + w / 2) * T, (o.y + h) * T, sacudidas.get(o.uid) || 0);
         if (d.accion === 'maquina' && maquinaLista(estado, o))
-          g.drawImage(G.SPR[def.ITEMS[o.datos.salida].sprite], (o.x + 0.5) * T - 8, o.y * T - 18 + Math.sin(tGlobal * 4) * 2, 16, 16);
+          g.drawImage(G.SPR[def.ITEMS[o.datos.salida].sprite], (o.x + 0.5) * T - 8, (o.y + h) * T - img.height - 18 + Math.sin(tGlobal * 4) * 2, 16, 16);
       }]);
     }
     for (const m of zona.monstruos || []) {

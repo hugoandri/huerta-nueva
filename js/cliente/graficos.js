@@ -97,14 +97,20 @@ export async function cargarGraficos(def) {
       return p;
     } catch (e) { return null; }
   }
-  const PJS = {};
-  PJS.base = M.personaje ? await cargarPersonaje(M.personaje) : null;
-  if (PJS.base) nReales++; else { nProv++; PJS.base = personajeProvisional(); }
-  for (const r of C.personaje.ropas || []) {
-    const info = M.personaje?.ropas?.[r.id];
-    const p = info ? await cargarPersonaje(info) : null;
-    if (p) { nReales++; PJS[r.id] = p; } else nProv++;      // sin gráfico: se usa la ropa base
+  // PJS[cuerpo][aspecto]: cada personaje (granjera, granjero) con su ropa base y sus variantes.
+  const PJS = {}, RETRATO = {};
+  const manifestPj = M.personajes || (M.personaje ? { [C.personajes[0].id]: M.personaje } : {});
+  for (const c of C.personajes) {
+    const info = manifestPj[c.id], juego = (PJS[c.id] = {});
+    juego.base = info ? await cargarPersonaje(info) : null;
+    if (juego.base) nReales++; else { nProv++; juego.base = personajeProvisional(); }
+    RETRATO[c.id] = info ? `${info.carpeta}/south.png` : juego.base.quieto.south.toDataURL();
+    for (const r of C.ropas || []) {
+      const ri = info?.ropas?.[r.id];
+      const p = ri ? await cargarPersonaje(ri) : null;
+      if (p) { nReales++; juego[r.id] = p; } else nProv++;    // sin gráfico: se usa la ropa base
+    }
   }
 
-  return { SPR, SPR_URL, TS, PJ: PJS.base, PJS, nReales, nProv };
+  return { SPR, SPR_URL, TS, PJS, RETRATO, nReales, nProv };
 }

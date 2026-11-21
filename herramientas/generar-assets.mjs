@@ -159,7 +159,22 @@ async function generarSprite(id, s) {
     ...(s.semilla != null ? { seed: s.semilla } : {}),
   });
   await guardarBase64(datos.image.base64, destino);
+  if (s.recortar) await fs.writeFile(destino, recortar(await fs.readFile(destino)));
   return datos.usage;
+}
+
+// Quita los márgenes transparentes: así el dibujo ocupa solo lo que se ve y se apoya en su base.
+function recortar(buf) {
+  const img = leerPNG(buf); if (!img) return buf;
+  const { w, h, px } = img;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (px[(y * w + x) * 4 + 3] > 20) {
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+  }
+  if (x1 < 0 || (x0 === 0 && y0 === 0 && x1 === w - 1 && y1 === h - 1)) return buf;
+  const nw = x1 - x0 + 1, nh = y1 - y0 + 1, out = Buffer.alloc(nw * nh * 4);
+  for (let y = 0; y < nh; y++) px.copy(out, y * nw * 4, ((y + y0) * w + x0) * 4, ((y + y0) * w + x1 + 1) * 4);
+  return escribirPNG({ w: nw, h: nh, px: out });
 }
 
 // ---------- tilesets Wang (16 tiles por esquinas): create-tileset, asíncrono ----------
@@ -330,19 +345,19 @@ async function animarYDescargar(p, cid, claveAnim, carpeta, consultaZip = '') {
 
 // ---------- manifest: qué gráficos existen (el juego usa provisionales para el resto) ----------
 async function escribirManifest() {
-  const m = { sprites: {}, tilesets: {}, personaje: null };
+  const m = { sprites: {}, tilesets: {}, personajes: {} };
   for (const id of Object.keys(contenido.sprites))
     if (await existe(dir(`sprites/${id}.png`))) m.sprites[id] = `assets/sprites/${id}.png`;
   for (const t of contenido.tilesets)
     if (await existe(dir(`tilesets/${t.id}.json`))) m.tilesets[t.id] = `assets/tilesets/${t.id}.json`;
-  const p = contenido.personaje;
-  const infoRuta = dir(`personaje/${p.id}/info.json`);
-  if (await existe(infoRuta)) {
+  for (const p of contenido.personajes) {
+    const infoRuta = dir(`personaje/${p.id}/info.json`);
+    if (!(await existe(infoRuta))) continue;
     const info = JSON.parse(await fs.readFile(infoRuta, 'utf8'));
-    m.personaje = { carpeta: `assets/personaje/${p.id}`, ...info, ropas: {} };
-    for (const r of p.ropas || []) {
+    const pm = m.personajes[p.id] = { carpeta: `assets/personaje/${p.id}`, ...info, ropas: {} };
+    for (const r of contenido.ropas || []) {
       const ri = dir(`personaje/${p.id}/ropa_${r.id}/info.json`);
-      if (await existe(ri)) m.personaje.ropas[r.id] = { carpeta: `assets/personaje/${p.id}/ropa_${r.id}`, ...JSON.parse(await fs.readFile(ri, 'utf8')) };
+      if (await existe(ri)) pm.ropas[r.id] = { carpeta: `assets/personaje/${p.id}/ropa_${r.id}`, ...JSON.parse(await fs.readFile(ri, 'utf8')) };
     }
   }
   await fs.writeFile(dir('manifest.json'), JSON.stringify(m, null, 2));
@@ -351,11 +366,17 @@ async function escribirManifest() {
 
 // ---------- principal ----------
 if (args.limpiar) {   // limpia los bordes de lo ya generado, sin llamar a la API
-  const carpetas = [dir('sprites'), dir(`personaje/${contenido.personaje.id}`)];
+  const carpetas = [dir('sprites')];
+  for (const p of contenido.personajes) {
+    carpetas.push(dir(`personaje/${p.id}`));
+    for (const r of contenido.ropas || []) carpetas.push(dir(`personaje/${p.id}/ropa_${r.id}`));
+  }
   let n = 0;
   for (const c of carpetas) for (const f of await fs.readdir(c).catch(() => [])) {
     if (!f.endsWith('.png')) continue;
-    const ruta = path.join(c, f), antes = await fs.readFile(ruta), despues = limpiarBordes(antes);
+    const ruta = path.join(c, f), antes = await fs.readFile(ruta);
+    let despues = limpiarBordes(antes);
+    if (c === dir('sprites') && contenido.sprites[f.slice(0, -4)]?.recortar) despues = recortar(despues);
     if (despues !== antes) { await fs.writeFile(ruta, despues); n++; }
   }
   console.log(`Bordes limpiados en ${n} imágenes`);
@@ -368,12 +389,19 @@ for (const [id, s] of Object.entries(contenido.sprites))
 for (const t of contenido.tilesets)
   if (quiere(t.id) && (FORZAR || !(await existe(dir(`tilesets/${t.id}.json`)))))
     tareas.push({ tipo: 'tileset', id: t.id, costo: 1, run: () => generarTileset(t) });
-const p = contenido.personaje;
-if (quiere(p.id) && (FORZAR || !(await existe(dir(`personaje/${p.id}/info.json`)))))
-  tareas.push({ tipo: 'personaje', id: p.id, costo: 5, run: () => generarPersonaje(p) });
-for (const r of p.ropas || [])
-  if (quiere(`ropa_${r.id}`) && (FORZAR || !(await existe(dir(`personaje/${p.id}/ropa_${r.id}/info.json`)))))
-    tareas.push({ tipo: 'ropa', id: `ropa_${r.id}`, costo: 5, run: () => generarRopa(p, r) });
+// Cada personaje va en una sola tarea: primero la base y después sus ropas (que parten de la base).
+for (const p of contenido.personajes) {
+  const faltaBase = quiere(p.id) && (FORZAR || !(await existe(dir(`personaje/${p.id}/info.json`))));
+  const ropas = [];
+  for (const r of contenido.ropas || [])
+    if ((quiere(p.id) || quiere(`ropa_${r.id}`)) && (FORZAR || !(await existe(dir(`personaje/${p.id}/ropa_${r.id}/info.json`))))) ropas.push(r);
+  if (!faltaBase && !ropas.length) continue;
+  tareas.push({
+    tipo: 'personaje', id: `${p.id}${ropas.length ? ` + ropas ${ropas.map(r => r.id).join(', ')}` : ''}`,
+    costo: (faltaBase ? 5 : 0) + 5 * ropas.length,
+    run: async () => { if (faltaBase) await generarPersonaje(p); for (const r of ropas) await generarRopa(p, r); },
+  });
+}
 
 console.log(`Por generar: ${tareas.length} (≈${tareas.reduce((a, t) => a + t.costo, 0)} generaciones)`);
 for (const t of tareas) console.log(`  · ${t.tipo.padEnd(9)} ${t.id}`);
@@ -390,5 +418,5 @@ await Promise.all(Array.from({ length: PARALELO }, async () => {
   }
 }));
 const m = await escribirManifest();
-console.log(`Listo. Sprites: ${Object.keys(m.sprites).length}, tilesets: ${Object.keys(m.tilesets).length}, personaje: ${m.personaje ? 'sí' : 'no'}`);
+console.log(`Listo. Sprites: ${Object.keys(m.sprites).length}, tilesets: ${Object.keys(m.tilesets).length}, personajes: ${Object.keys(m.personajes).join(', ') || 'ninguno'}`);
 if (errores.length) { console.error('Fallaron:', errores.join(', ')); process.exit(1); }

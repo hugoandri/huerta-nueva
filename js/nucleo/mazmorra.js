@@ -20,10 +20,10 @@ export function crearMonstruo(def, zona, id, cx, cy, piso) {
   return mo;
 }
 
-export function generarPiso(def, semilla, piso) {
-  const { W, H } = def, cfg = def.C.mazmorra, r = mulberry32(hashTexto(`${semilla}:${piso}`));
+export function generarPiso(def, mazmorra, semilla, piso) {
+  const { W, H } = def, cfg = def.MAZ[mazmorra], r = mulberry32(hashTexto(`${mazmorra}:${semilla}:${piso}`));
   const z = {
-    tipo: 'mazmorra', piso, ver: 0, sigUid: 1, objetos: [], cultivos: {}, monstruos: [],
+    tipo: 'mazmorra', mazmorra, piso, ver: 0, sigUid: 1, objetos: [], cultivos: {}, monstruos: [],
     agua: Array(W * H).fill(0), suelo: Array(W * H).fill(0), regado: Array(W * H).fill(0),
     muro: Array(W * H).fill(1), enSala: Array(W * H).fill(0),
   };

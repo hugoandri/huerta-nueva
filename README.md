@@ -29,8 +29,9 @@ La arquitectura y el camino a online están en [ARQUITECTURA.md](ARQUITECTURA.md
 Qué endpoint de PixelLab genera cada cosa:
 
 - **Mundo**: `POST /create-tileset` crea tilesets Wang de 16 tiles (césped→tierra arada, césped→agua). El juego los dibuja con una rejilla doble: cada tile une las esquinas de 4 celdas.
-- **Personaje**: `POST /create-character-with-4-directions` + `POST /animate-character` (plantilla `walking`), descargado con `GET /characters/{id}/zip`.
-- **Objetos, cultivos e íconos**: `POST /create-image-pixflux` con fondo transparente.
+- **Personajes** (granjera y granjero): `POST /create-character-with-4-directions` + `POST /animate-character` (plantilla `walking`), descargados con `GET /characters/{id}/zip`.
+- **Ropas**: `POST /create-character-state` crea una variante del mismo personaje con otra ropa, que después se anima igual.
+- **Objetos, cultivos, monstruos e íconos**: `POST /create-image-pixflux` con fondo transparente. Las construcciones usan vista `low top-down` con sombreado detallado y `"recortar": true`, que quita los márgenes vacíos.
 
 ## Agregar contenido nuevo
 

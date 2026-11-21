@@ -7,5 +7,11 @@
   "ropa:granjera:minera": "7951409d-0bda-44f3-810b-f4e5e7d83548",
   "ropa:granjera:aventurera": "3e985a26-5f37-4b32-9416-5b38babe7624",
   "ropa:granjera:minera:anim": "917565d0-43df-4af7-9c3c-c01f75abbf57",
-  "ropa:granjera:aventurera:anim": "06e26a5f-de92-4dda-82f3-91ab897b156e"
+  "ropa:granjera:aventurera:anim": "06e26a5f-de92-4dda-82f3-91ab897b156e",
+  "tileset:cripta": "63c54be5-3d64-46db-851c-e26f218fdbd2",
+  "personaje:granjero": "4523ad88-38f6-458c-bae3-fdc2b5696de4",
+  "personaje:granjero:anim": "60cfe2cd-d998-4a99-8f43-aa8969887de6",
+  "ropa:granjero:minera": "232eedbf-1e56-47cf-b553-f7825b054abb",
+  "ropa:granjero:minera:anim": "5c73f2fc-d891-47c4-8d89-9ae380a4d31b",
+  "ropa:granjero:aventurera": "7b2d2f55-dbda-4b8e-bcf3-f6158d373b74"
 }
