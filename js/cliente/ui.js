@@ -192,7 +192,7 @@ export function crearUI({ def, G, sesion }) {
         panel.innerHTML = cab('¿A qué mazmorra vas?') + `<div class="panel-cuerpo">
           <p class="ayuda">Al entrar te pones la ropa de batalla: <b>${batalla?.nombre}</b>. ${batalla?.descripcion || ''} Para cambiarla, ten otra ropa de batalla en la mano y pulsa Usar.</p>
           <div class="lista">${filas}</div>
-          <p class="ayuda" style="margin-top:10px">Jefes en los pisos 5 y 10. Vencer al del piso 5 permite empezar en el piso 6. Si te quedas sin corazones vuelves a la granja; dormir termina la expedición.</p></div>`;
+          <p class="ayuda" style="margin-top:10px">Se avanza subiendo por la escalera de mano de cada piso. Solo se sale por el arco del piso 1 o por el que aparece al vencer al jefe del último piso. Jefes en los pisos 5 y 10; vencer al del 5 permite empezar en el 6. Si te quedas sin corazones vuelves a la granja.</p></div>`;
       },
     });
   }

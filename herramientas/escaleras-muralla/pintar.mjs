@@ -6,7 +6,7 @@ const img = f => ({ image: { type: 'base64', base64: fs.readFileSync(f).toString
 const VISTA = 'seen from a top-down RPG camera from the south, front facing, built into the wall, no people';
 const PIEZAS = {
   escalera_subir: 'stone archway doorway carved into the dungeon wall with a single flight of worn stone steps going up toward bright daylight, ' + VISTA,
-  escalera_bajar: 'a single narrow stone staircase carved into the dungeon wall going down into darkness through a small dark arched opening, keep the surrounding square stone blocks and the dark shadow line at the base of the wall unchanged, ' + VISTA,
+  escalera_bajar: 'a single wooden ladder leaning against the dungeon wall, its top reaching a glowing square wooden trapdoor hatch opening in the ceiling above, warm light shining down from the hatch onto the ladder, 3D shading, ' + VISTA,
 };
 const tilesets = process.argv.slice(2).length ? process.argv.slice(2) : ['cueva', 'cripta'];
 const esperar = ms => new Promise(r => setTimeout(r, ms));

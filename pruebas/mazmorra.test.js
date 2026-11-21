@@ -52,12 +52,14 @@ test('entrar, bajar con la escalera y volver a la granja', () => {
   act(e, { tipo: 'usar', x: esc.x, y: esc.y });
   assert.equal(e.mazmorra.piso, 2);
   assert.equal(e.mazmorra.progreso.mina.record, 2);
-  const sube = e.mazmorra.nivel.objetos.find(o => o.id === 'escalera_subir');
-  junto(e, sube.x, sube.y + 2); e.jugadores.yo.dir = 'north';
-  e.jugadores.yo.y = (sube.y + 1) * def.T + 20;
-  act(e, { tipo: 'usar', x: sube.x, y: sube.y });
-  assert.equal(e.jugadores.yo.lugar, 'granja');
-  assert.equal(e.mazmorra.nivel, null);
+  assert.ok(!e.mazmorra.nivel.objetos.some(o => o.id === 'escalera_subir'), 'en los pisos intermedios no hay salida');
+  // en el piso 1 sí: se vuelve a la granja por el arco
+  const e2 = nuevo(); entrar(e2);
+  const sube = e2.mazmorra.nivel.objetos.find(o => o.id === 'escalera_subir');
+  Object.assign(e2.jugadores.yo, { x: (sube.x + 0.5) * def.T, y: (sube.y + 1) * def.T + 20, dir: 'north' });
+  act(e2, { tipo: 'usar', x: sube.x, y: sube.y });
+  assert.equal(e2.jugadores.yo.lugar, 'granja');
+  assert.equal(e2.mazmorra.nivel, null);
 });
 
 test('no se puede entrar a un punto de control no alcanzado', () => {
