@@ -266,7 +266,7 @@ export function crearUI({ def, G, sesion }) {
       if (e.tipo === 'resumen') resumen(e);
       if (e.tipo === 'botin') botin(e);
       if (e.tipo === 'derrota') derrota(e);
-      if (e.tipo === 'piso' && yo().lugar === 'mazmorra') aviso(e.jefe ? `Piso ${e.piso}: ¡${e.jefe} te espera!` : `Piso ${e.piso}`, !!e.jefe);
+      if (e.tipo === 'piso' && (e.bajada || e.jefe)) aviso(e.jefe ? `Piso ${e.piso}: ¡${e.jefe} te espera!` : `Piso ${e.piso}`, !!e.jefe);
     }
   }
 

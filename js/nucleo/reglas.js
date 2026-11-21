@@ -212,14 +212,14 @@ export function infoMazmorras(e, def) {
 }
 const entradaDe = (def, nivel) => ({ x: (nivel.entrada.x + 0.5) * def.T, y: (nivel.entrada.y + 0.6) * def.T, dir: 'south' });
 
-function irAPiso(e, def, piso, ev) {
+function irAPiso(e, def, piso, ev, bajada = false) {
   const m = e.mazmorra, cfg = def.MAZ[m.actual], prog = progresoDe(e, m.actual);
   m.piso = piso;
   prog.record = Math.max(prog.record, piso);
   m.nivel = generarPiso(def, m.actual, m.semilla, piso);
   for (const p of Object.values(e.jugadores)) if (p.lugar === 'mazmorra') Object.assign(p, entradaDe(def, m.nivel));
   const jefe = cfg.jefes[String(piso)];
-  ev.push({ tipo: 'piso', piso, jefe: jefe ? def.MON[jefe].nombre : null });
+  ev.push({ tipo: 'piso', piso, bajada, jefe: jefe ? def.MON[jefe].nombre : null });
 }
 
 function terminarExpedicion(e) { Object.assign(e.mazmorra, { actual: null, semilla: null, piso: 0, nivel: null }); }
@@ -349,7 +349,7 @@ function usar(e, def, j, x, y, ev) {
     if (d.accion === 'bajar') {
       const siguiente = e.mazmorra.piso + 1;
       if (siguiente > def.MAZ[e.mazmorra.actual].pisos) return;
-      return irAPiso(e, def, siguiente, ev);
+      return irAPiso(e, def, siguiente, ev, true);
     }
     if (d.accion === 'botin') {
       quitar(g, o);

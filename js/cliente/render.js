@@ -111,9 +111,9 @@ export function crearRender(el, def, G) {
       if (o.x + w < x0 - 2 || o.x > x1 + 2 || o.y > y1 + 1 || o.y + h < y0 - 4) continue;
       ents.push([(o.y + h) * T - (d.solido ? 0 : T), () => {
         const img = G.SPR[d.sprite];
-        if (d.solido && img.width >= T) {   // sombra proyectada hacia abajo a la derecha: da volumen
-          g.fillStyle = 'rgba(0,0,0,.22)';
-          g.beginPath(); g.ellipse((o.x + w / 2) * T + w * 4, (o.y + h) * T - 3, img.width * 0.48, 6 + h * 3, 0, 0, 7); g.fill();
+        if (d.solido && w * h > 1) {   // sombra hacia la derecha, casi toda detrás de la construcción: da volumen
+          g.fillStyle = 'rgba(0,0,0,.2)';
+          g.beginPath(); g.ellipse((o.x + w / 2) * T + 10, (o.y + h * 0.4) * T, img.width * 0.48, h * T * 0.38, 0, 0, 7); g.fill();
         }
         sprite(img, (o.x + w / 2) * T, (o.y + h) * T, sacudidas.get(o.uid) || 0);
         if (d.accion === 'maquina' && maquinaLista(estado, o))

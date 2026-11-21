@@ -17,7 +17,7 @@ perfil.cuerpo = def.C.personajes.some(p => p.id === perfil.cuerpo) ? perfil.cuer
 const almacen = new AlmacenLocal(def);
 
 $('#estado-assets').innerHTML = G.nProv === 0
-  ? `Gráficos: <b>${G.nReales} de PixelLab</b> (personaje, ${Object.keys(G.TS).length} tilesets y ${Object.keys(G.SPR).length} sprites).`
+  ? `Gráficos: <b>${G.nReales} de PixelLab</b> (${Object.keys(G.PJS).length} personajes con sus ropas, ${Object.keys(G.TS).length} tilesets y ${Object.keys(G.SPR).length} sprites).`
   : `Gráficos: <b>${G.nReales} de PixelLab</b> · ${G.nProv} provisionales (genera los que faltan con <code>herramientas/generar-assets.mjs</code>).`;
 
 // Elegir personaje en la portada (se recuerda en el perfil del navegador).
