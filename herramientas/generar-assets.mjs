@@ -433,7 +433,7 @@ if (args.limpiar) {   // limpia los bordes de lo ya generado, sin llamar a la AP
 }
 const tareas = [];
 for (const [id, s] of Object.entries(contenido.sprites))
-  if (quiere(id) && (FORZAR || !(await existe(dir(`sprites/${id}.png`)))))
+  if (quiere(id) && !s.fijo && (FORZAR || !(await existe(dir(`sprites/${id}.png`)))))
     tareas.push({ tipo: 'sprite', id, costo: 1, run: () => generarSprite(id, s) });
 for (const t of contenido.tilesets)
   if (quiere(t.id) && (FORZAR || !(await existe(dir(`tilesets/${t.id}.json`)))))
