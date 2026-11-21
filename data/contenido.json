@@ -13,8 +13,8 @@
 
   "_personajes": "Personajes elegibles. Cada ropa es una variante (estado) del mismo personaje en PixelLab: misma cara y proporciones, otra ropa. Todos comparten las mismas ropas.",
   "personajes": [
-    { "id": "granjera", "nombre": "Granjera", "descripcion": "young woman farmer with a wide straw hat, green overalls, white shirt and brown boots", "tamano": 48, "animacion": "walking" },
-    { "id": "granjero", "nombre": "Granjero", "descripcion": "young man farmer with a wide straw hat, short brown hair, green overalls, white shirt and brown boots", "tamano": 48, "animacion": "walking" }
+    { "id": "granjera", "nombre": "Granjera", "descripcion": "young woman farmer, clearly feminine face with soft features, long flowing auburn hair down to her waist, wide straw hat, green overall dress, white blouse, brown boots", "tamano": 48, "animacion": "walking" },
+    { "id": "granjero", "nombre": "Granjero", "descripcion": "young farmer with a wide straw hat, green overalls, white shirt and brown boots", "tamano": 48, "animacion": "walking" }
   ],
   "ropas": [
     { "id": "minera",     "edicion": "now wearing a yellow mining hard hat with a headlamp, a brown leather work jacket with pockets and sturdy dark boots; no straw hat" },
@@ -110,28 +110,28 @@
     "arbol":            { "descripcion": "leafy green oak tree with brown trunk", "ancho": 64, "alto": 96 },
     "roca":             { "descripcion": "grey boulder rock", "ancho": 32, "alto": 32 },
     "maleza":           { "descripcion": "messy clump of dry yellow-brown wild grass and thistle weeds", "ancho": 32, "alto": 32 },
-    "casa":             { "descripcion": "small cozy wooden farmhouse with red tiled roof, chimney, front door and windows, front wall and side wall visible, strong light from top-left with shaded side for depth, standalone with no ground, no grass, no base platform", "ancho": 128, "alto": 128, "view": "low top-down", "shading": "detailed shading", "detail": "highly detailed", "recortar": true },
-    "caja_envios":      { "descripcion": "wooden shipping crate with open hinged lid and a few vegetables inside, front wall and side wall visible, strong light from top-left with shaded side for depth, standalone with no ground, no grass, no base platform", "ancho": 48, "alto": 48, "view": "low top-down", "shading": "detailed shading", "detail": "highly detailed", "recortar": true },
-    "puesto":           { "descripcion": "small wooden market stall with red and white striped awning and seed bags on the counter, front wall and side wall visible, strong light from top-left with shaded side for depth, standalone with no ground, no grass, no base platform", "ancho": 96, "alto": 96, "view": "low top-down", "shading": "detailed shading", "detail": "highly detailed", "recortar": true },
-    "cofre":            { "descripcion": "wooden storage chest with iron bands and lock, front wall and side wall visible, strong light from top-left with shaded side for depth, standalone with no ground, no grass, no base platform", "ancho": 48, "alto": 48, "view": "low top-down", "shading": "detailed shading", "detail": "highly detailed", "recortar": true },
-    "cerca":            { "descripcion": "short wooden fence post section", "ancho": 32, "alto": 32 },
-    "aspersor":         { "descripcion": "small metal garden sprinkler with nozzle on top", "ancho": 32, "alto": 32 },
-    "tarro":            { "descripcion": "wooden preserves keg barrel machine with a glass jar on top, front wall and side wall visible, strong light from top-left with shaded side for depth, standalone with no ground, no grass, no base platform", "ancho": 48, "alto": 64, "view": "low top-down", "shading": "detailed shading", "detail": "highly detailed", "recortar": true },
-    "espantapajaros":   { "descripcion": "scarecrow with straw hat and patched shirt on a wooden pole", "ancho": 32, "alto": 48 },
+    "casa":             { "descripcion": "cozy wooden farmhouse with large red tiled roof seen from above with visible ridge and eave shadow, front wall with a centered wooden door, two windows with flower boxes, brick chimney, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 128, "alto": 128, "modelo": "pixen", "recortar": true },
+    "caja_envios":      { "descripcion": "wooden shipping crate with open lid and vegetables inside, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 48, "modelo": "pixen", "recortar": true },
+    "puesto":           { "descripcion": "small wooden market stall with red and white striped awning seen from above, counter with seed bags facing the viewer, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 96, "alto": 96, "modelo": "pixen", "recortar": true },
+    "cofre":            { "descripcion": "wooden storage chest with iron bands and a lock on the front, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 48, "modelo": "pixen", "recortar": true },
+    "cerca":            { "descripcion": "short wooden fence section with two posts and horizontal rails, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 32, "modelo": "pixen", "recortar": true },
+    "aspersor":         { "descripcion": "small metal garden sprinkler with a nozzle on top on a little base, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 32, "modelo": "pixen", "recortar": true },
+    "tarro":            { "descripcion": "wooden preserves keg barrel standing upright with a glass jar on top, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 64, "modelo": "pixen", "recortar": true },
+    "espantapajaros":   { "descripcion": "scarecrow with straw hat and patched shirt on a wooden pole, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 48, "modelo": "pixen", "recortar": true },
 
     "ropa_granjera":    { "descripcion": "folded green overalls with a straw hat on top, clothing icon", "ancho": 32, "alto": 32 },
     "ropa_minera":      { "descripcion": "yellow mining hard hat with headlamp and brown leather jacket, clothing icon", "ancho": 32, "alto": 32 },
     "ropa_aventurera":  { "descripcion": "brown leather armor chestpiece with a small red cape, clothing icon", "ancho": 32, "alto": 32 },
 
-    "entrada_cueva":    { "descripcion": "rocky hill with a dark mine cave entrance framed by wooden support beams and a lantern, front wall and side wall visible, strong light from top-left with shaded side for depth, standalone with no ground, no grass, no base platform", "ancho": 112, "alto": 96, "view": "low top-down", "shading": "detailed shading", "detail": "highly detailed", "recortar": true },
+    "entrada_cueva":    { "descripcion": "dark tunnel exit carved into a rocky cliff at the edge of a forest, framed by wooden beams, pine trees on both sides and on top, dirt path leading into the dark opening, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 96, "alto": 96, "modelo": "pixen", "recortar": true },
     "escalera_bajar":   { "descripcion": "dark stone stairway going down into a hole in the cave floor", "ancho": 32, "alto": 32 },
     "escalera_subir":   { "descripcion": "wooden ladder leaning up toward a beam of daylight", "ancho": 32, "alto": 48 },
-    "antorcha":         { "descripcion": "standing wooden torch with bright orange flame", "ancho": 32, "alto": 32 },
+    "antorcha":         { "descripcion": "standing wooden torch post with a bright orange flame, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 48, "modelo": "pixen", "recortar": true },
     "cofre_mazmorra":   { "descripcion": "old dungeon treasure chest with gold trim", "ancho": 32, "alto": 32 },
     "roca_cobre":       { "descripcion": "grey boulder with shiny orange copper ore veins", "ancho": 32, "alto": 32 },
     "roca_hierro":      { "descripcion": "dark grey boulder with silver iron ore veins", "ancho": 32, "alto": 32 },
     "roca_gema":        { "descripcion": "purple rock with glowing blue crystal shards sticking out", "ancho": 32, "alto": 32 },
-    "horno":            { "descripcion": "small stone smelting furnace with chimney and glowing fire in the opening, front wall and side wall visible, strong light from top-left with shaded side for depth, standalone with no ground, no grass, no base platform", "ancho": 48, "alto": 64, "view": "low top-down", "shading": "detailed shading", "detail": "highly detailed", "recortar": true },
+    "horno":            { "descripcion": "small stone smelting furnace with chimney and glowing fire in the front opening, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 64, "modelo": "pixen", "recortar": true },
 
     "mineral_cobre":    { "descripcion": "chunk of raw copper ore, item icon", "ancho": 32, "alto": 32 },
     "mineral_hierro":   { "descripcion": "chunk of raw iron ore, item icon", "ancho": 32, "alto": 32 },
@@ -235,7 +235,7 @@
       ] },
     { "id": "espantapajaros", "sprite": "espantapajaros", "solido": true, "recoger": true, "protege": 8 },
     { "id": "antorcha",       "sprite": "antorcha",       "solido": false, "recoger": true, "luz": 90 },
-    { "id": "entrada_cueva",  "sprite": "entrada_cueva",  "solido": true, "ancho": 3, "alto": 2, "accion": "mazmorra", "luz": 70 },
+    { "id": "entrada_cueva",  "sprite": "entrada_cueva",  "solido": true, "ancho": 3, "alto": 3, "accion": "mazmorra", "luz": 70 },
     { "id": "urna",           "sprite": "urna",           "solido": true, "herramienta": "cualquiera", "golpes": 1, "suelta": { "hueso": [0, 2], "mineral_hierro": [0, 1] } },
 
     { "id": "escalera_bajar", "sprite": "escalera_bajar", "solido": false, "accion": "bajar" },

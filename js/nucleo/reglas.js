@@ -6,7 +6,7 @@
 // Devuelven eventos para la interfaz: avisos, textos flotantes, paneles, golpes.
 // Los eventos llevan "jugador" cuando son solo para un jugador.
 import { azar } from './azar.js';
-import { idx, dentro, objetoEn, objetoPorUid, libre, colocar, quitar, posicionInicio, frenteACueva, zonaDe, ropaActual, INICIO_DIA, VIDA_BASE } from './mundo.js';
+import { idx, dentro, objetoEn, objetoPorUid, libre, colocar, quitar, posicionInicio, frenteACueva, zonaDe, ropaActual, enClaro, INICIO_DIA, VIDA_BASE } from './mundo.js';
 import { agregar, cuenta, sacar, gastarMano, espacioPara, esHerramienta } from './inventario.js';
 import { generarPiso } from './mazmorra.js';
 import { tirarBotin, repartirBotin } from './botin.js';
@@ -488,7 +488,7 @@ function nuevoDia(e, def, ev, desmayo) {
   }
   for (let k = 0, n = 0; k < 200 && n < 4; k++) {
     const x = 2 + Math.floor(azar(e) * (W - 4)), y = 3 + Math.floor(azar(e) * (H - 5));
-    if (!(x >= 3 && x <= 17 && y >= 2 && y <= 10) && !(x >= 38 && x <= 46 && y >= 5 && y <= 12) && colocar(def, g, n === 0 ? 'roca' : 'maleza', x, y)) n++;
+    if (!enClaro(x, y) && colocar(def, g, n === 0 ? 'roca' : 'maleza', x, y)) n++;
   }
 
   for (const j of Object.values(e.jugadores)) {

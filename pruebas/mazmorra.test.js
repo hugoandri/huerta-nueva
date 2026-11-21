@@ -161,27 +161,28 @@ test('morir en la mazmorra te devuelve a la granja con media vida', () => {
   assert.equal(j.vida, Math.ceil(j.vidaMax / 2));
 });
 
-test('una partida v3 se migra a v4: cueva a la derecha y ropa separada', () => {
+test('una partida v3 se migra hasta v5: túnel arriba y ropa separada', () => {
   const e = nuevo();
   const v3 = JSON.parse(aJSON(e));
   v3.version = 3; v3.mazmorra = { semilla: null, piso: 0, nivel: null, record: 7, completada: 1 };
   for (const j of Object.values(v3.jugadores)) { j.ropa = 'ropa_minera'; delete j.ropaBatalla; delete j.cuerpo; }
   const cueva = v3.granja.objetos.find(o => o.id === 'entrada_cueva'); cueva.x = 20; cueva.y = 4;
   const m = deJSON(JSON.stringify(v3), def);
-  assert.equal(m.version, 4);
+  assert.equal(m.version, 5);
   assert.equal(m.jugadores.yo.ropa, 'ropa_granjera');
   assert.equal(m.jugadores.yo.ropaBatalla, 'ropa_minera');
   assert.equal(m.jugadores.yo.cuerpo, 'granjera');
   assert.equal(m.mazmorra.progreso.mina.record, 7);
-  assert.ok(m.granja.objetos.find(o => o.id === 'entrada_cueva').x >= 40, 'la cueva está a la derecha');
+  const t = m.granja.objetos.find(o => o.id === 'entrada_cueva');
+  assert.deepEqual([t.x, t.y], [22, 0], 'el túnel está arriba');
 });
 
-test('una partida v2 también llega a v4', () => {
+test('una partida v2 también llega a v5', () => {
   const e = nuevo();
   const v2 = JSON.parse(aJSON(e));
   v2.version = 2; delete v2.mazmorra;
   for (const j of Object.values(v2.jugadores)) { delete j.vida; delete j.ropa; delete j.lugar; delete j.ropaBatalla; }
-  assert.equal(deJSON(JSON.stringify(v2), def).version, 4);
+  assert.equal(deJSON(JSON.stringify(v2), def).version, 5);
 });
 
 test('se puede jugar con el granjero', () => {

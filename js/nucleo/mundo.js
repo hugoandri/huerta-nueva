@@ -3,7 +3,7 @@
 import { mulberry32, entre } from './azar.js';
 import { agregar, TAM_INVENTARIO } from './inventario.js';
 
-export const VERSION_ESTADO = 4;
+export const VERSION_ESTADO = 5;
 export const VIDA_BASE = 10;   // medios corazones
 export const INICIO_DIA = 6 * 60;
 
@@ -52,8 +52,11 @@ export function quitar(g, o) { g.objetos = g.objetos.filter(x => x !== o); g.ver
 
 export const CASA = { x: 5, y: 4 };
 export const posicionInicio = def => ({ x: 6.5 * def.T, y: 6.6 * def.T, dir: 'south' });
-export const ENTRADA_CUEVA = { x: 42, y: 7 };
-export const frenteACueva = def => ({ x: (ENTRADA_CUEVA.x + 1.5) * def.T, y: (ENTRADA_CUEVA.y + 2.6) * def.T, dir: 'south' });
+// El túnel a las mazmorras: arriba, en el borde del bosque, mirando hacia abajo.
+export const ENTRADA_CUEVA = { x: 22, y: 0 };
+export const frenteACueva = def => ({ x: (ENTRADA_CUEVA.x + 1.5) * def.T, y: (ENTRADA_CUEVA.y + 3.6) * def.T, dir: 'south' });
+// Zonas que se mantienen despejadas (alrededor de la casa y del túnel).
+export const enClaro = (x, y) => (x >= 3 && x <= 17 && y >= 2 && y <= 10) || (x >= 19 && x <= 27 && y >= 0 && y <= 7);
 
 // La zona donde está un jugador: su granja o el piso actual de la mazmorra.
 export const zonaDe = (e, j) => (j.lugar === 'mazmorra' && e.mazmorra.nivel ? e.mazmorra.nivel : e.granja);
@@ -87,7 +90,7 @@ export function crearGranja(def, semilla, dueno) {
   }
   colocar(def, g, 'casa', CASA.x, CASA.y); colocar(def, g, 'caja_envios', 10, 5); colocar(def, g, 'puesto', 12, 4);
   colocar(def, g, 'entrada_cueva', ENTRADA_CUEVA.x, ENTRADA_CUEVA.y);
-  const claro = (x, y) => (x >= 3 && x <= 17 && y >= 2 && y <= 10) || (x >= 38 && x <= 46 && y >= 5 && y <= 12);
+  const claro = enClaro;
   const arbolCerca = (x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (objetoEn(def, g, x + dx, y + dy)?.id === 'arbol') return true;
     return false;

@@ -1,18 +1,13 @@
 {
   "tileset:tierra": "42db1111-9f97-481d-be7d-0ba2f82bc51d",
   "tileset:agua": "899ec266-5070-459b-9bd8-6de4e91b3428",
-  "personaje:granjera": "ffe5db86-68d1-4353-b68c-14a4af3b936e",
-  "personaje:granjera:anim": "d36cd764-747b-4058-9227-92837a702167",
+  "personaje:granjero": "ffe5db86-68d1-4353-b68c-14a4af3b936e",
+  "personaje:granjero:anim": "d36cd764-747b-4058-9227-92837a702167",
   "tileset:cueva": "c0346ab5-79de-49fc-b9dd-61fe90bb5080",
-  "ropa:granjera:minera": "7951409d-0bda-44f3-810b-f4e5e7d83548",
-  "ropa:granjera:aventurera": "3e985a26-5f37-4b32-9416-5b38babe7624",
-  "ropa:granjera:minera:anim": "917565d0-43df-4af7-9c3c-c01f75abbf57",
-  "ropa:granjera:aventurera:anim": "06e26a5f-de92-4dda-82f3-91ab897b156e",
+  "ropa:granjero:minera": "7951409d-0bda-44f3-810b-f4e5e7d83548",
+  "ropa:granjero:aventurera": "3e985a26-5f37-4b32-9416-5b38babe7624",
+  "ropa:granjero:minera:anim": "917565d0-43df-4af7-9c3c-c01f75abbf57",
+  "ropa:granjero:aventurera:anim": "06e26a5f-de92-4dda-82f3-91ab897b156e",
   "tileset:cripta": "63c54be5-3d64-46db-851c-e26f218fdbd2",
-  "personaje:granjero": "4523ad88-38f6-458c-bae3-fdc2b5696de4",
-  "personaje:granjero:anim": "60cfe2cd-d998-4a99-8f43-aa8969887de6",
-  "ropa:granjero:minera": "232eedbf-1e56-47cf-b553-f7825b054abb",
-  "ropa:granjero:minera:anim": "5c73f2fc-d891-47c4-8d89-9ae380a4d31b",
-  "ropa:granjero:aventurera": "7b2d2f55-dbda-4b8e-bcf3-f6158d373b74",
-  "ropa:granjero:aventurera:anim": "d51f77b7-7f12-4490-9c10-4feba388611f"
+  "personaje:granjera": "f4a52f0b-72cf-445b-9c13-fcae03ab8f3c"
 }

@@ -147,7 +147,17 @@ const guardarEstado = () => fs.writeFile(RUTA_ESTADO, JSON.stringify(estado, nul
 // ---------- sprites (objetos, cultivos, íconos): create-image-pixflux, síncrono ----------
 async function generarSprite(id, s) {
   const destino = dir(`sprites/${id}.png`);
-  const { datos } = await api('POST', '/create-image-pixflux', {
+  // "modelo": "pixen" → modelo Pixen: mejor para construcciones de frente, con volumen y mirando hacia abajo.
+  const { datos } = s.modelo === 'pixen' ? await api('POST', '/create-image-pixen', {
+    description: `${s.descripcion}, ${estilo.sufijo}`,
+    image_size: { width: s.ancho, height: s.alto },
+    no_background: true,
+    outline: s.outline || estilo.outline,
+    detail: s.detail || 'highly detailed',
+    view: s.view || 'high top-down',
+    direction: 'south',
+    ...(s.semilla != null ? { seed: s.semilla } : {}),
+  }) : await api('POST', '/create-image-pixflux', {
     description: `${s.descripcion}, ${estilo.sufijo}`,
     image_size: { width: s.ancho, height: s.alto },
     no_background: true,

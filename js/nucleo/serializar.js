@@ -1,5 +1,5 @@
 // Guardado y carga del estado como JSON. "version" permite migrar partidas viejas.
-import { VERSION_ESTADO, VIDA_BASE, colocar, quitar, ENTRADA_CUEVA, CASA } from './mundo.js';
+import { VERSION_ESTADO, VIDA_BASE, colocar, quitar, ENTRADA_CUEVA, CASA, enClaro } from './mundo.js';
 
 export const aJSON = estado => JSON.stringify(estado);
 
@@ -37,11 +37,22 @@ function migrarV3(e, def) {
   return e;
 }
 
+// v4 → v5: el túnel pasa al borde de arriba; se despeja el lugar (árboles, rocas, maleza).
+function migrarV4(e, def) {
+  const g = e.granja;
+  g.objetos = g.objetos.filter(o => !(['arbol', 'roca', 'maleza'].includes(o.id) && enClaro(o.x, o.y) && o.y <= 7 && o.x >= 19));
+  g.ver = (g.ver || 0) + 1;
+  mover(def, g, 'entrada_cueva', ENTRADA_CUEVA.x, ENTRADA_CUEVA.y);
+  e.version = 5;
+  return e;
+}
+
 export function deJSON(texto, def) {
   let e = typeof texto === 'string' ? JSON.parse(texto) : texto;
   if (!e) return null;
   if (e.version === 2) e = migrarV2(e);
   if (e.version === 3) e = migrarV3(e, def);
+  if (e.version === 4) e = migrarV4(e, def);
   if (e.version !== VERSION_ESTADO) return null;     // la v1 (prototipo) no se migra
   // descartar lo que ya no exista en el contenido (por ejemplo, un objeto borrado del JSON)
   e.granja.objetos = e.granja.objetos.filter(o => def.OBJ[o.id]);
