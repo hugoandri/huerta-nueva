@@ -1,5 +1,5 @@
 // Guardado y carga del estado como JSON. "version" permite migrar partidas viejas.
-import { VERSION_ESTADO, VIDA_BASE, colocar, quitar, ENTRADA_CUEVA, CASA, enClaro } from './mundo.js';
+import { VERSION_ESTADO, VIDA_BASE, colocar, quitar, ENTRADA_CUEVA, CASA, CAJA, PUESTO, enClaro, trazarBordes, objetoEn, idx } from './mundo.js';
 
 export const aJSON = estado => JSON.stringify(estado);
 
@@ -47,12 +47,29 @@ function migrarV4(e, def) {
   return e;
 }
 
+// v5 → v6: acantilado arriba con el túnel en su pared, camino de tierra, casa y puesto más grandes.
+function migrarV5(e, def) {
+  const g = e.granja;
+  trazarBordes(def, g);
+  // despejar lo que estorbe en el acantilado, el camino y las nuevas huellas (sin tocar lo que construyó el jugador)
+  const natural = o => ['arbol', 'roca', 'maleza'].includes(o.id);
+  const huellas = [[CASA.x, CASA.y, 6, 3], [CAJA.x, CAJA.y, 1, 1], [PUESTO.x, PUESTO.y, 3, 2], [ENTRADA_CUEVA.x, ENTRADA_CUEVA.y, 2, 1]];
+  const enHuella = (x, y) => huellas.some(([hx, hy, w, h]) => x >= hx && x < hx + w && y >= hy && y < hy + h);
+  g.objetos = g.objetos.filter(o => !(natural(o) && (o.y < 2 ? (o.x >= 19 && o.x <= 26) : (enClaro(o.x, o.y) || g.camino[idx(def, o.x, o.y)] || enHuella(o.x, o.y)))));
+  for (let i = 0; i < g.camino.length; i++) if (g.camino[i] || g.acantilado[i]) { g.suelo[i] = 0; g.regado[i] = 0; delete g.cultivos[i]; }
+  g.ver++;
+  for (const [id, p] of [['casa', CASA], ['caja_envios', CAJA], ['puesto', PUESTO], ['entrada_cueva', ENTRADA_CUEVA]]) mover(def, g, id, p.x, p.y);
+  e.version = 6;
+  return e;
+}
+
 export function deJSON(texto, def) {
   let e = typeof texto === 'string' ? JSON.parse(texto) : texto;
   if (!e) return null;
   if (e.version === 2) e = migrarV2(e);
   if (e.version === 3) e = migrarV3(e, def);
   if (e.version === 4) e = migrarV4(e, def);
+  if (e.version === 5) e = migrarV5(e, def);
   if (e.version !== VERSION_ESTADO) return null;     // la v1 (prototipo) no se migra
   // descartar lo que ya no exista en el contenido (por ejemplo, un objeto borrado del JSON)
   e.granja.objetos = e.granja.objetos.filter(o => def.OBJ[o.id]);

@@ -77,7 +77,10 @@ export function crearRender(el, def, G) {
       const cesped = G.TS.tierra[0];
       for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) g.drawImage(cesped, x * T, y * T, T, T);
       capa(G.TS.agua, (x, y) => esp(x, y, 'agua'));
+      if (G.TS.camino && zona.camino) capa(G.TS.camino, (x, y) => esp(x, y, 'camino'));
       capa(G.TS.tierra, (x, y) => esp(x, y, 'suelo'));
+      // el acantilado de arriba: fuera del mapa por arriba también es meseta, para que la pared sea continua
+      if (G.TS.acantilado && zona.acantilado) capa(G.TS.acantilado, (x, y) => (y < 0 ? 1 : esp(x, y, 'acantilado')));
       g.fillStyle = 'rgba(38,22,10,.38)';
       const mojada = (x, y) => esp(x, y, 'regado') && esp(x, y, 'suelo');
       for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
@@ -111,10 +114,6 @@ export function crearRender(el, def, G) {
       if (o.x + w < x0 - 2 || o.x > x1 + 2 || o.y > y1 + 1 || o.y + h < y0 - 4) continue;
       ents.push([(o.y + h) * T - (d.solido ? 0 : T), () => {
         const img = G.SPR[d.sprite];
-        if (d.solido && w * h > 1 && d.sombra !== false) {   // sombra hacia la derecha, casi toda detrás de la construcción: da volumen
-          g.fillStyle = 'rgba(0,0,0,.2)';
-          g.beginPath(); g.ellipse((o.x + w / 2) * T + 10, (o.y + h * 0.4) * T, img.width * 0.48, h * T * 0.38, 0, 0, 7); g.fill();
-        }
         sprite(img, (o.x + w / 2) * T, (o.y + h) * T, sacudidas.get(o.uid) || 0);
         if (d.accion === 'maquina' && maquinaLista(estado, o))
           g.drawImage(G.SPR[def.ITEMS[o.datos.salida].sprite], (o.x + 0.5) * T - 8, (o.y + h) * T - img.height - 18 + Math.sin(tGlobal * 4) * 2, 16, 16);

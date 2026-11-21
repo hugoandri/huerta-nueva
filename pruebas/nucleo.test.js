@@ -17,7 +17,7 @@ const act = (e, a) => aplicar(e, def, { jugador: 'yo', ...a });
 // Pone al jugador en el centro de una celda libre del claro, mirando a la derecha.
 function enCampo(e) {
   const j = e.jugadores.yo;
-  j.x = 8.5 * def.T; j.y = 9 * def.T + 6; j.dir = 'east';
+  j.x = 8.5 * def.T; j.y = 11 * def.T + 6; j.dir = 'east';
   return celdaJugador(def, j);
 }
 
@@ -113,9 +113,9 @@ test('botín propio: cada jugador recibe el suyo y es reproducible', () => {
 
 test('guardar y cargar conserva el estado', () => {
   const e = nuevo(); enCampo(e);
-  act(e, { tipo: 'usar', x: 9, y: 9 });
+  act(e, { tipo: 'usar', x: 9, y: 11 });
   const copia = deJSON(aJSON(e), def);
   assert.equal(aJSON({ ...copia, granja: { ...copia.granja, ver: 0 } }), aJSON({ ...e, granja: { ...e.granja, ver: 0 } }));
-  assert.equal(objetoEn(def, copia.granja, 5, 4)?.id, 'casa', 'la casa sigue ahí');
+  assert.equal(objetoEn(def, copia.granja, 5, 6)?.id, 'casa', 'la casa sigue ahí');
   assert.equal(deJSON('{"version":1}', def), null, 'una versión vieja no se carga');
 });

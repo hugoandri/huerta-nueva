@@ -14,5 +14,7 @@
   "ropa:granjera:minera": "78257a5e-3030-4c20-af97-fe31680a1c41",
   "ropa:granjera:minera:anim": "4daf521d-2672-4b90-aebb-5882fd28fba6",
   "ropa:granjera:aventurera": "a99c3722-a8db-43b3-b828-48b585834855",
-  "ropa:granjera:aventurera:anim": "6280ccff-621a-4d73-adec-2f0627078ee5"
+  "ropa:granjera:aventurera:anim": "6280ccff-621a-4d73-adec-2f0627078ee5",
+  "tileset:camino": "dd42972a-7e4f-4c39-8951-96480cf4b520",
+  "tileset:acantilado": "d6399822-f1a3-4425-a80c-9ea9d289ca99"
 }

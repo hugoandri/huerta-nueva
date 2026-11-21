@@ -34,7 +34,7 @@ export function solido(def, g, px, py) {
   const x = Math.floor(px / def.T), y = Math.floor(py / def.T);
   if (!dentro(def, x, y)) return true;
   const i = idx(def, x, y);
-  if (g.agua[i] || g.muro?.[i]) return true;
+  if (g.agua[i] || g.muro?.[i] || g.acantilado?.[i]) return true;
   const o = objetoEn(def, g, x, y);
   return !!(o && def.OBJ[o.id].solido);
 }
@@ -413,6 +413,7 @@ function usar(e, def, j, x, y, ev) {
 
   if (s.id === 'azada' && enGranja) {
     if (g.agua[i] || g.suelo[i]) return;
+    if (g.camino?.[i]) return aviso(ev, j, 'No se puede arar el camino', true);
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++)
       if (dentro(def, x + dx, y + dy) && g.agua[idx(def, x + dx, y + dy)]) return aviso(ev, j, 'Muy cerca del agua para arar', true);
     if (!gastarEnergia(ev, j, costeCampo)) return;
@@ -488,7 +489,7 @@ function nuevoDia(e, def, ev, desmayo) {
   }
   for (let k = 0, n = 0; k < 200 && n < 4; k++) {
     const x = 2 + Math.floor(azar(e) * (W - 4)), y = 3 + Math.floor(azar(e) * (H - 5));
-    if (!enClaro(x, y) && colocar(def, g, n === 0 ? 'roca' : 'maleza', x, y)) n++;
+    if (!enClaro(x, y) && !g.camino?.[idx(def, x, y)] && colocar(def, g, n === 0 ? 'roca' : 'maleza', x, y)) n++;
   }
 
   for (const j of Object.values(e.jugadores)) {

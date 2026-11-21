@@ -62,7 +62,7 @@ export async function cargarGraficos(def) {
     else { nProv++; const c = provisional(id, s.ancho, s.alto); SPR[id] = c; SPR_URL[id] = c.toDataURL(); }
   }));
 
-  const COLOR = { tierra: ['#5d9e3f', '#6b4a2f'], agua: ['#5d9e3f', '#3d7fc4'], cueva: ['#2a2420', '#8a7058'] };
+  const COLOR = { tierra: ['#5d9e3f', '#6b4a2f'], agua: ['#5d9e3f', '#3d7fc4'], cueva: ['#2a2420', '#8a7058'], camino: ['#5d9e3f', '#b08a5a'], acantilado: ['#5d9e3f', '#6f6a5c'] };
   const TS = {};
   for (const t of C.tilesets) {
     let tiles = null;

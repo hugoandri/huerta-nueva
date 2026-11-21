@@ -169,8 +169,64 @@ async function generarSprite(id, s) {
     ...(s.semilla != null ? { seed: s.semilla } : {}),
   });
   await guardarBase64(datos.image.base64, destino);
+  if (s.rellenar_huecos) await fs.writeFile(destino, rellenarHuecos(await fs.readFile(destino)));
   if (s.recortar) await fs.writeFile(destino, recortar(await fs.readFile(destino)));
   return datos.usage;
+}
+
+// Al quitar el fondo, PixelLab a veces borra también el interior oscuro de una abertura
+// (la boca de un túnel). Todo hueco transparente que no toca el borde de la imagen se pinta oscuro.
+function rellenarHuecos(buf) {
+  const img = leerPNG(buf); if (!img) return buf;
+  const { w, h, px } = img, fuera = new Uint8Array(w * h), pila = [];
+  const transp = i => px[i * 4 + 3] < 20;
+  for (let x = 0; x < w; x++) { pila.push(x, (h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { pila.push(y * w, y * w + w - 1); }
+  while (pila.length) {
+    const i = pila.pop();
+    if (fuera[i] || !transp(i)) continue;
+    fuera[i] = 1;
+    const x = i % w, y = (i / w) | 0;
+    if (x > 0) pila.push(i - 1); if (x < w - 1) pila.push(i + 1); if (y > 0) pila.push(i - w); if (y < h - 1) pila.push(i + w);
+  }
+  let n = 0;
+  for (let i = 0; i < w * h; i++) if (transp(i) && !fuera[i]) { px.writeUInt32BE(0x0d0a0cff, i * 4); n++; }
+  return n ? escribirPNG(img) : buf;
+}
+
+// Realce de color para los personajes: PixelLab los entrega con colores más apagados que los
+// objetos. Sube la saturación y un poco el contraste (en HSL) sin tocar la transparencia.
+function realzar(buf, sat = 1.45, con = 1.15) {
+  const img = leerPNG(buf); if (!img) return buf;
+  const { px } = img;
+  for (let i = 0; i < px.length; i += 4) {
+    if (!px[i + 3]) continue;
+    let r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h /= 6;
+    }
+    s = Math.min(1, s * sat); l = Math.min(1, Math.max(0, (l - 0.5) * con + 0.5));
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+    const c = t => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+    const [rr, gg, bb] = s ? [c(h + 1 / 3), c(h), c(h - 1 / 3)] : [l, l, l];
+    px[i] = Math.round(rr * 255); px[i + 1] = Math.round(gg * 255); px[i + 2] = Math.round(bb * 255);
+  }
+  return escribirPNG(img);
+}
+async function realzarCarpeta(carpeta) {
+  const infoRuta = path.join(carpeta, 'info.json');
+  const info = JSON.parse(await fs.readFile(infoRuta, 'utf8').catch(() => 'null'));
+  if (!info || info.realzado) return 0;
+  let n = 0;
+  for (const f of await fs.readdir(carpeta)) if (f.endsWith('.png')) { const r = path.join(carpeta, f); await fs.writeFile(r, realzar(await fs.readFile(r))); n++; }
+  info.realzado = true;
+  await fs.writeFile(infoRuta, JSON.stringify(info));
+  return n;
 }
 
 // Quita los márgenes transparentes: así el dibujo ocupa solo lo que se ve y se apoya en su base.
@@ -203,6 +259,7 @@ async function generarTileset(t) {
       lower_description: t.inferior,
       upper_description: t.superior,
       transition_description: t.transicion || '',
+      ...(t.transicion_tamano ? { transition_size: t.transicion_tamano } : {}),
       tile_size: { width: contenido.mundo.tile, height: contenido.mundo.tile },
       shading: estilo.shading,
       detail: estilo.detail,
@@ -318,6 +375,7 @@ async function animarYDescargar(p, cid, claveAnim, carpeta, consultaZip = '') {
           for (let i = 0; i < frames.length; i++) await fs.writeFile(`${carpeta}/caminar_${d}_${i}.png`, limpiarBordes(archivos[frames[i]]));
         }
         await fs.writeFile(`${carpeta}/info.json`, JSON.stringify({ tamano: info.size, cuadros }));
+        await realzarCarpeta(carpeta);
         return;
       }
     }
@@ -347,6 +405,15 @@ async function escribirManifest() {
 }
 
 // ---------- principal ----------
+if (args.realzar) {   // realce de color de los personajes ya generados (una sola vez por carpeta)
+  let n = 0;
+  for (const p of contenido.personajes) {
+    n += await realzarCarpeta(dir(`personaje/${p.id}`));
+    for (const r of contenido.ropas || []) n += await realzarCarpeta(dir(`personaje/${p.id}/ropa_${r.id}`));
+  }
+  console.log(`Realzadas ${n} imágenes de personajes`);
+  process.exit(0);
+}
 if (args.limpiar) {   // limpia los bordes de lo ya generado, sin llamar a la API
   const carpetas = [dir('sprites')];
   for (const p of contenido.personajes) {

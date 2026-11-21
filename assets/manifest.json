@@ -70,6 +70,8 @@
     "tierra": "assets/tilesets/tierra.json",
     "agua": "assets/tilesets/agua.json",
     "cueva": "assets/tilesets/cueva.json",
+    "acantilado": "assets/tilesets/acantilado.json",
+    "camino": "assets/tilesets/camino.json",
     "cripta": "assets/tilesets/cripta.json"
   },
   "personajes": {

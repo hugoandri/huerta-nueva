@@ -138,15 +138,15 @@ test('vencer al último jefe reparte un botín propio a cada jugador presente', 
 
 test('el horno funde 3 minerales en un lingote con el paso del tiempo', () => {
   const e = nuevo(), j = e.jugadores.yo;
-  j.x = 8.5 * def.T; j.y = 9 * def.T + 6; j.dir = 'east';
+  j.x = 8.5 * def.T; j.y = 11 * def.T + 6; j.dir = 'east';
   agregar(def, j, 'horno', 1); agregar(def, j, 'mineral_cobre', 4);
   j.sel = j.inv.findIndex(s => s?.id === 'horno');
-  act(e, { tipo: 'usar', x: 9, y: 9 });
+  act(e, { tipo: 'usar', x: 9, y: 11 });
   j.sel = j.inv.findIndex(s => s?.id === 'mineral_cobre');
-  act(e, { tipo: 'usar', x: 9, y: 9 });
+  act(e, { tipo: 'usar', x: 9, y: 11 });
   assert.equal(cuenta(j, 'mineral_cobre'), 1);
   e.tiempo.min += 130;
-  act(e, { tipo: 'usar', x: 9, y: 9 });
+  act(e, { tipo: 'usar', x: 9, y: 11 });
   assert.equal(cuenta(j, 'lingote_cobre'), 1);
 });
 
@@ -168,13 +168,13 @@ test('una partida v3 se migra hasta v5: túnel arriba y ropa separada', () => {
   for (const j of Object.values(v3.jugadores)) { j.ropa = 'ropa_minera'; delete j.ropaBatalla; delete j.cuerpo; }
   const cueva = v3.granja.objetos.find(o => o.id === 'entrada_cueva'); cueva.x = 20; cueva.y = 4;
   const m = deJSON(JSON.stringify(v3), def);
-  assert.equal(m.version, 5);
+  assert.equal(m.version, 6);
   assert.equal(m.jugadores.yo.ropa, 'ropa_granjera');
   assert.equal(m.jugadores.yo.ropaBatalla, 'ropa_minera');
   assert.equal(m.jugadores.yo.cuerpo, 'granjera');
   assert.equal(m.mazmorra.progreso.mina.record, 7);
   const t = m.granja.objetos.find(o => o.id === 'entrada_cueva');
-  assert.deepEqual([t.x, t.y], [22, 0], 'el túnel está arriba');
+  assert.deepEqual([t.x, t.y], [22, 2], 'el túnel está en la pared del acantilado');
 });
 
 test('una partida v2 también llega a v5', () => {
@@ -182,7 +182,7 @@ test('una partida v2 también llega a v5', () => {
   const v2 = JSON.parse(aJSON(e));
   v2.version = 2; delete v2.mazmorra;
   for (const j of Object.values(v2.jugadores)) { delete j.vida; delete j.ropa; delete j.lugar; delete j.ropaBatalla; }
-  assert.equal(deJSON(JSON.stringify(v2), def).version, 5);
+  assert.equal(deJSON(JSON.stringify(v2), def).version, 6);
 });
 
 test('se puede jugar con el granjero', () => {
