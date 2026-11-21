@@ -73,6 +73,47 @@
     "cripta": "assets/tilesets/cripta.json"
   },
   "personajes": {
+    "granjera": {
+      "carpeta": "assets/personaje/granjera",
+      "tamano": {
+        "width": 68,
+        "height": 68
+      },
+      "cuadros": {
+        "south": 6,
+        "west": 6,
+        "east": 6,
+        "north": 6
+      },
+      "ropas": {
+        "minera": {
+          "carpeta": "assets/personaje/granjera/ropa_minera",
+          "tamano": {
+            "width": 68,
+            "height": 68
+          },
+          "cuadros": {
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
+          }
+        },
+        "aventurera": {
+          "carpeta": "assets/personaje/granjera/ropa_aventurera",
+          "tamano": {
+            "width": 68,
+            "height": 68
+          },
+          "cuadros": {
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
+          }
+        }
+      }
+    },
     "granjero": {
       "carpeta": "assets/personaje/granjero",
       "tamano": {

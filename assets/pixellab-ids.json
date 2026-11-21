@@ -11,5 +11,8 @@
   "tileset:cripta": "63c54be5-3d64-46db-851c-e26f218fdbd2",
   "personaje:granjera": "8ba2dc90-8138-4080-8857-65194e0a1062",
   "personaje:granjera:anim": "5b77ab8e-b91b-49fb-aa48-a669619905f9",
-  "ropa:granjera:minera": "78257a5e-3030-4c20-af97-fe31680a1c41"
+  "ropa:granjera:minera": "78257a5e-3030-4c20-af97-fe31680a1c41",
+  "ropa:granjera:minera:anim": "4daf521d-2672-4b90-aebb-5882fd28fba6",
+  "ropa:granjera:aventurera": "a99c3722-a8db-43b3-b828-48b585834855",
+  "ropa:granjera:aventurera:anim": "6280ccff-621a-4d73-adec-2f0627078ee5"
 }
