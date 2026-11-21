@@ -42,7 +42,7 @@ export function crearUI({ def, G, sesion }) {
 
   function pintarHUD() {
     const e = S(), j = yo(), t = e.tiempo, enCueva = j.lugar === 'mazmorra';
-    const dia = enCueva ? `Mazmorra · piso ${e.mazmorra.piso} de ${def.C.mazmorra.pisos}`
+    const dia = enCueva ? `${def.MAZ[e.mazmorra.actual]?.nombre} · piso ${e.mazmorra.piso} de ${def.MAZ[e.mazmorra.actual]?.pisos}`
       : `Primavera · día ${(t.dia - 1) % 28 + 1}${t.dia > 28 ? ` · año ${Math.floor((t.dia - 1) / 28) + 1}` : ''}`;
     const clave = dia + fmtHora(t.min) + j.dinero + Math.round(j.energia) + j.aguaRegadera + t.lluvia + j.vida + j.vidaMax;
     pintarJefe(e, j);
@@ -100,7 +100,8 @@ export function crearUI({ def, G, sesion }) {
           .map(([t, n]) => `<button class="btn ${pestanaMenu === t ? 'activo' : ''}" data-tab="${t}">${n}</button>`).join('');
         let cuerpo;
         if (pestanaMenu === 'mochila') {
-          cuerpo = `<p class="ayuda">Toca una casilla y luego otra para moverla. Las 12 primeras son tu barra.</p>
+          cuerpo = `<p class="ayuda">Ropa de granja: <b>${def.ITEMS[j.ropa]?.nombre}</b> · Ropa de batalla: <b>${def.ITEMS[j.ropaBatalla]?.nombre}</b> (se pone sola en la mazmorra).</p>
+            <p class="ayuda">Toca una casilla y luego otra para moverla. Las 12 primeras son tu barra.</p>
             <div class="grilla" id="g-inv">${j.inv.map((s, i) => casilla(s, i, false)).join('')}</div>`;
         } else if (pestanaMenu === 'crafteo') {
           cuerpo = `<p class="ayuda">Las recetas salen de <code>data/contenido.json</code>. Lo fabricado se coloca en el mundo con <kbd>Espacio</kbd>.</p><div class="lista">` +
@@ -121,8 +122,8 @@ export function crearUI({ def, G, sesion }) {
               <dt>Tarro</dt><dd>Mete un cultivo y al día siguiente tendrás una conserva que vale mucho más.</dd>
               <dt>Cuervos</dt><dd>Con 8 o más cultivos sin espantapájaros cerca, alguno puede desaparecer de noche.</dd>
               <dt>Casa</dt><dd>Úsala para dormir y pasar al día siguiente. La partida se guarda sola.</dd>
-              <dt>Ropa</dt><dd>Ten una ropa en la mano y pulsa Usar para ponértela. Cada una da una ventaja.</dd>
-              <dt>Mazmorra</dt><dd>Entra por la cueva. 10 pisos con minerales, cofres y monstruos; jefes en los pisos 5 y 10.</dd>
+              <dt>Ropa</dt><dd>Tienes ropa de granja y ropa de batalla. La de batalla se pone sola al entrar a una mazmorra. Para cambiar una, tenla en la mano y pulsa Usar.</dd>
+              <dt>Mazmorras</dt><dd>La cueva está a la derecha de la granja. Elige la Mina de cobre o la Cripta olvidada (se abre al llegar al piso 5 de la mina).</dd>
               <dt>Pelear</dt><dd>Usa una espada frente a un monstruo. Las pociones (F) curan corazones.</dd>
               <dt>Horno</dt><dd>Mete 3 minerales y en unas horas tendrás un lingote para armas y ropa.</dd>
             </dl>
@@ -176,18 +177,22 @@ export function crearUI({ def, G, sesion }) {
     });
   }
 
+  // Panel de la cueva: elegir a qué mazmorra ir y desde qué piso.
   function mazmorra(e) {
     abrir({
       pintar() {
-        const m = S().mazmorra;
-        const botones = e.enCurso
-          ? `<button class="btn primario" data-piso="${m.piso}">Unirte en el piso ${m.piso}</button>`
-          : e.pisos.map(p => `<button class="btn ${p === Math.max(...e.pisos) ? 'primario' : ''}" data-piso="${p}">Piso ${p}</button>`).join('');
-        panel.innerHTML = cab('Mazmorra') + `<div class="panel-cuerpo">
-          <p class="ayuda">${def.C.mazmorra.pisos} pisos. Jefes en los pisos ${Object.keys(def.C.mazmorra.jefes).join(' y ')}: vencer al del piso 5 desbloquea empezar en el piso 6.
-          Al vencer al último, cada jugador recibe su propio botín.</p>
-          <p class="ayuda">Récord: piso ${m.record || 0} · Mazmorras completadas: ${m.completada}. Si te quedas sin corazones vuelves a la granja y pierdes algo de dinero. Dormir termina la expedición.</p>
-          <div class="acciones" style="justify-content:flex-start">${botones}</div></div>`;
+        const j = yo(), batalla = def.ITEMS[j.ropaBatalla];
+        const filas = e.enCurso
+          ? `<div class="fila">${icono(j.ropaBatalla)}<div><div class="titulo">${def.MAZ[e.enCurso.id].nombre}</div><div class="det">Tu grupo está en el piso ${e.enCurso.piso}.</div></div>
+              <div class="acciones"><button class="btn primario" data-maz="${e.enCurso.id}" data-piso="${e.enCurso.piso}">Unirte</button></div></div>`
+          : e.mazmorras.map(m => `<div class="fila ${m.abierta ? '' : 'cerrada'}"><div class="sello">${m.abierta ? m.record : '🔒'}</div>
+              <div><div class="titulo">${m.nombre}</div><div class="det">${m.descripcion}</div>
+              <div class="det">${m.abierta ? `${m.pisos} pisos · récord: piso ${m.record || 0} · completada ${m.completada} ${m.completada === 1 ? 'vez' : 'veces'}` : m.requiere}</div></div>
+              <div class="acciones">${m.abierta ? m.disponibles.map((p, k) => `<button class="btn ${k === m.disponibles.length - 1 ? 'primario' : ''}" data-maz="${m.id}" data-piso="${p}">Piso ${p}</button>`).join('') : ''}</div></div>`).join('');
+        panel.innerHTML = cab('¿A qué mazmorra vas?') + `<div class="panel-cuerpo">
+          <p class="ayuda">Al entrar te pones la ropa de batalla: <b>${batalla?.nombre}</b>. ${batalla?.descripcion || ''} Para cambiarla, ten otra ropa de batalla en la mano y pulsa Usar.</p>
+          <div class="lista">${filas}</div>
+          <p class="ayuda" style="margin-top:10px">Jefes en los pisos 5 y 10. Vencer al del piso 5 permite empezar en el piso 6. Si te quedas sin corazones vuelves a la granja; dormir termina la expedición.</p></div>`;
       },
     });
   }
@@ -243,7 +248,7 @@ export function crearUI({ def, G, sesion }) {
     const c = t.closest('#g-cofre .casilla'); if (c) return enviar({ tipo: 'cofreSacar', uid: actual.uid, i: +c.dataset.i });
     const m = t.closest('#g-moch .casilla'); if (m) return enviar({ tipo: 'cofreGuardar', uid: actual.uid, i: +m.dataset.i });
     if (t.id === 'btn-dormir') { cerrar(); return enviar({ tipo: 'dormir' }); }
-    const piso = t.closest('[data-piso]'); if (piso) { cerrar(); return enviar({ tipo: 'entrarMazmorra', piso: +piso.dataset.piso }); }
+    const piso = t.closest('[data-piso]'); if (piso) { cerrar(); return enviar({ tipo: 'entrarMazmorra', mazmorra: piso.dataset.maz, piso: +piso.dataset.piso }); }
     if (t.id === 'btn-reiniciar') {
       panel.querySelector('.panel-cuerpo').insertAdjacentHTML('beforeend', `<p class="ayuda" style="margin-top:10px">¿Seguro? Se pierde la partida guardada.</p><button class="btn primario" id="btn-reiniciar-si">Sí, empezar de nuevo</button>`);
       t.disabled = true; return;
@@ -261,7 +266,7 @@ export function crearUI({ def, G, sesion }) {
       if (e.tipo === 'resumen') resumen(e);
       if (e.tipo === 'botin') botin(e);
       if (e.tipo === 'derrota') derrota(e);
-      if (e.tipo === 'piso' && yo().lugar === 'mazmorra') aviso(e.jefe ? `Piso ${e.piso}: ¡${e.jefe} te espera!` : `Piso ${e.piso}`, !!e.jefe);
+      if (e.tipo === 'piso' && (e.bajada || e.jefe)) aviso(e.jefe ? `Piso ${e.piso}: ¡${e.jefe} te espera!` : `Piso ${e.piso}`, !!e.jefe);
     }
   }
 

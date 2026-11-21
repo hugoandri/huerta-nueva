@@ -6,9 +6,9 @@
 // Devuelven eventos para la interfaz: avisos, textos flotantes, paneles, golpes.
 // Los eventos llevan "jugador" cuando son solo para un jugador.
 import { azar } from './azar.js';
-import { idx, dentro, objetoEn, objetoPorUid, libre, colocar, quitar, posicionInicio, frenteACueva, zonaDe, INICIO_DIA, VIDA_BASE } from './mundo.js';
+import { idx, dentro, objetoEn, objetoPorUid, libre, colocar, quitar, posicionInicio, frenteACueva, zonaDe, ropaActual, enClaro, INICIO_DIA, VIDA_BASE } from './mundo.js';
 import { agregar, cuenta, sacar, gastarMano, espacioPara, esHerramienta } from './inventario.js';
-import { generarPiso } from './mazmorra.js';
+import { generarPiso, ponerBajada } from './mazmorra.js';
 import { tirarBotin, repartirBotin } from './botin.js';
 
 export const FIN_DIA = 26 * 60;              // 2:00
@@ -20,7 +20,13 @@ const VEC = { south: [0, 1], north: [0, -1], west: [-1, 0], east: [1, 0] };
 export const celdaJugador = (def, j) => [Math.floor(j.x / def.T), Math.floor((j.y - 6) / def.T)];
 export function celdaFrente(def, j) { const [cx, cy] = celdaJugador(def, j), [dx, dy] = VEC[j.dir]; return [cx + dx, cy + dy]; }
 export const tiempoAbs = e => e.tiempo.dia * 1440 + e.tiempo.min;
-export const efecto = (def, j) => def.ITEMS[j.ropa]?.efecto || {};
+// Efecto de la ropa que lleva puesta ahora (la de batalla en la mazmorra, la de campo en la granja).
+export const efecto = (def, j) => def.ITEMS[ropaActual(j)]?.efecto || {};
+function recalcularVida(def, j) {
+  j.vidaMax = VIDA_BASE + (efecto(def, j).vida || 0);
+  j.vida = Math.min(j.vida, j.vidaMax);
+}
+export const progresoDe = (e, id) => (e.mazmorra.progreso[id] ||= { record: 0, completada: 0 });
 export const maquinaLista = (e, o) => !!(o.datos.salida && tiempoAbs(e) >= o.datos.listoEn);
 export const jugadoresEn = (e, zona) => Object.values(e.jugadores).filter(j => zonaDe(e, j) === zona);
 
@@ -28,7 +34,7 @@ export function solido(def, g, px, py) {
   const x = Math.floor(px / def.T), y = Math.floor(py / def.T);
   if (!dentro(def, x, y)) return true;
   const i = idx(def, x, y);
-  if (g.agua[i] || g.muro?.[i]) return true;
+  if (g.agua[i] || g.muro?.[i] || g.acantilado?.[i]) return true;
   const o = objetoEn(def, g, x, y);
   return !!(o && def.OBJ[o.id].solido);
 }
@@ -104,16 +110,17 @@ const ACCIONES = {
     flotar(ev, j.x, j.y - 40, `+${ganancia} energía`, '#79c267');
   },
 
-  // Ponerse la ropa de la casilla i (la que se llevaba vuelve a esa casilla).
+  // Equipar la ropa de la casilla i en su puesto: de campo (granja) o de batalla (mazmorra).
+  // La que estaba en ese puesto vuelve a la misma casilla.
   vestir(e, def, a, j, ev) {
     const i = a.i ?? j.sel, s = j.inv[i], it = s && def.ITEMS[s.id];
     if (!it || it.tipo !== 'ropa') return;
-    const anterior = j.ropa;
-    j.ropa = s.id;
+    const puesto = it.uso === 'batalla' ? 'ropaBatalla' : 'ropa';
+    const anterior = j[puesto];
+    j[puesto] = s.id;
     j.inv[i] = anterior ? { id: anterior, n: 1 } : null;
-    j.vidaMax = VIDA_BASE + (efecto(def, j).vida || 0);
-    j.vida = Math.min(j.vida, j.vidaMax);
-    aviso(ev, j, `Te pusiste: ${it.nombre}`);
+    recalcularVida(def, j);
+    aviso(ev, j, `${it.uso === 'batalla' ? 'Ropa de batalla' : 'Ropa de granja'}: ${it.nombre}`);
     ev.push({ tipo: 'ropa', jugador: j.id });
   },
 
@@ -160,42 +167,67 @@ const ACCIONES = {
     j.inv[a.i] = null;
   },
 
-  // Entrar a la mazmorra desde la cueva, en el piso 1 o en un punto de control alcanzado.
+  // Entrar desde la cueva a una mazmorra, en el piso 1 o en un punto de control alcanzado.
+  // Si el grupo ya está en una expedición, el jugador se une a ella.
   entrarMazmorra(e, def, a, j, ev) {
     const cueva = e.granja.objetos.find(o => o.id === 'entrada_cueva');
     if (j.lugar !== 'granja' || !cueva || !cerca(def, j, cueva)) return;
-    const piso = a.piso | 0;
-    if (!pisosDisponibles(e, def).includes(piso)) return aviso(ev, j, 'Todavía no llegaste a ese piso', true);
-    if (!e.mazmorra.nivel) {           // nueva expedición: semilla nueva (compartida por el grupo)
-      e.mazmorra.semilla = Math.floor(azar(e) * 2 ** 32);
+    const m = e.mazmorra;
+    if (!m.nivel) {
+      const cfg = def.MAZ[a.mazmorra];
+      if (!cfg) return;
+      if (!mazmorraAbierta(e, def, cfg)) return aviso(ev, j, 'Esa mazmorra todavía está cerrada', true);
+      const piso = a.piso | 0;
+      if (!pisosDisponibles(e, def, cfg.id).includes(piso)) return aviso(ev, j, 'Todavía no llegaste a ese piso', true);
+      m.actual = cfg.id;
+      m.semilla = Math.floor(azar(e) * 2 ** 32);     // nueva expedición: semilla compartida por el grupo
       irAPiso(e, def, piso, ev);
     }
     j.lugar = 'mazmorra';
-    Object.assign(j, entradaDe(def, e.mazmorra.nivel));
-    aviso(ev, j, `Mazmorra · piso ${e.mazmorra.piso}`);
+    recalcularVida(def, j);
+    Object.assign(j, entradaDe(def, m.nivel));
+    aviso(ev, j, `${def.MAZ[m.actual].nombre} · piso ${m.piso} · llevas: ${def.ITEMS[j.ropaBatalla]?.nombre}`);
+    ev.push({ tipo: 'ropa', jugador: j.id });
   },
 
   usar(e, def, a, j, ev) { usar(e, def, j, a.x | 0, a.y | 0, ev); },
 };
 
-export function pisosDisponibles(e, def) {
-  return def.C.mazmorra.puntos_de_control.filter(p => p === 1 || e.mazmorra.record >= p - 1);
+export function mazmorraAbierta(e, def, cfg) {
+  const r = cfg.requiere;
+  return !r || progresoDe(e, r.mazmorra).record >= r.piso;
+}
+export function pisosDisponibles(e, def, id) {
+  const cfg = def.MAZ[id], record = progresoDe(e, id).record;
+  return cfg.puntos_de_control.filter(p => p === 1 || record >= p - 1);
+}
+// Lo que muestra el panel de la cueva.
+export function infoMazmorras(e, def) {
+  return def.C.mazmorras.map(cfg => ({
+    id: cfg.id, nombre: cfg.nombre, descripcion: cfg.descripcion, pisos: cfg.pisos,
+    abierta: mazmorraAbierta(e, def, cfg),
+    requiere: cfg.requiere ? `Llega al piso ${cfg.requiere.piso} de ${def.MAZ[cfg.requiere.mazmorra].nombre}` : null,
+    disponibles: pisosDisponibles(e, def, cfg.id), ...progresoDe(e, cfg.id),
+  }));
 }
 const entradaDe = (def, nivel) => ({ x: (nivel.entrada.x + 0.5) * def.T, y: (nivel.entrada.y + 0.6) * def.T, dir: 'south' });
 
-function irAPiso(e, def, piso, ev) {
-  e.mazmorra.piso = piso;
-  e.mazmorra.record = Math.max(e.mazmorra.record, piso);
-  e.mazmorra.nivel = generarPiso(def, e.mazmorra.semilla, piso);
-  for (const p of Object.values(e.jugadores)) if (p.lugar === 'mazmorra') Object.assign(p, entradaDe(def, e.mazmorra.nivel));
-  const jefe = def.C.mazmorra.jefes[String(piso)];
-  ev.push({ tipo: 'piso', piso, jefe: jefe ? def.MON[jefe].nombre : null });
+function irAPiso(e, def, piso, ev, bajada = false) {
+  const m = e.mazmorra, cfg = def.MAZ[m.actual], prog = progresoDe(e, m.actual);
+  m.piso = piso;
+  prog.record = Math.max(prog.record, piso);
+  m.nivel = generarPiso(def, m.actual, m.semilla, piso);
+  for (const p of Object.values(e.jugadores)) if (p.lugar === 'mazmorra') Object.assign(p, entradaDe(def, m.nivel));
+  const jefe = cfg.jefes[String(piso)];
+  ev.push({ tipo: 'piso', piso, bajada, jefe: jefe ? def.MON[jefe].nombre : null });
 }
 
+function terminarExpedicion(e) { Object.assign(e.mazmorra, { actual: null, semilla: null, piso: 0, nivel: null }); }
 function salirDeMazmorra(e, def, j) {
   j.lugar = 'granja';
+  recalcularVida(def, j);
   Object.assign(j, frenteACueva(def));
-  if (!Object.values(e.jugadores).some(p => p.lugar === 'mazmorra')) e.mazmorra.nivel = null;
+  if (!Object.values(e.jugadores).some(p => p.lugar === 'mazmorra')) terminarExpedicion(e);
 }
 
 // El jugador debe estar junto al objeto (anti-trampas: valida aunque la acción venga de la red).
@@ -234,21 +266,21 @@ function morirMonstruo(e, def, j, zona, m, ev) {
   for (const [item, [p, mn, mx]] of Object.entries(M.suelta || {}))
     if (azar(e) < p) darItem(def, ev, j, item, mn + Math.floor(azar(e) * (mx - mn + 1)), m.x, m.y - 20, '#f2c14e');
   if (!M.jefe) return;
-  const sf = zona.salaFinal, piso = zona.piso;
-  if (piso < def.C.mazmorra.pisos) {
-    colocarCerca(def, zona, 'escalera_bajar', sf.x, sf.y);
+  const sf = zona.salaFinal, piso = zona.piso, cfg = def.MAZ[zona.mazmorra];
+  if (piso < cfg.pisos) {
+    ponerBajada(def, zona);
     for (const p of jugadoresEn(e, zona)) aviso(ev, p, `¡Venciste a ${M.nombre}! Se abrió la escalera.`);
     return;
   }
   // último jefe: cada jugador presente recibe su propio botín (el servidor lo hará online)
   const presentes = jugadoresEn(e, zona);
-  const reparto = repartirBotin(def.C.botines.mazmorra_final, presentes.map(p => p.id), e.mazmorra.semilla);
+  const reparto = repartirBotin(def.C.botines[cfg.botin_final], presentes.map(p => p.id), e.mazmorra.semilla);
   for (const p of presentes) {
     const items = reparto[p.id];
     for (const { item, n } of items) agregar(def, p, item, n);
-    ev.push({ tipo: 'botin', jugador: p.id, titulo: '¡Mazmorra completada!', items });
+    ev.push({ tipo: 'botin', jugador: p.id, titulo: `¡${cfg.nombre} completada!`, items });
   }
-  e.mazmorra.completada++;
+  progresoDe(e, cfg.id).completada++;
   colocarCerca(def, zona, 'escalera_subir', sf.x, sf.y);
 }
 
@@ -287,9 +319,9 @@ function actualizarMazmorra(e, def, dt, ev) {
 function derrota(e, def, j, ev) {
   const multa = Math.min(300, Math.floor(j.dinero * 0.1));
   j.dinero -= multa;
+  salirDeMazmorra(e, def, j);
   j.vida = Math.ceil(j.vidaMax / 2);
   j.energia = Math.min(j.energia, Math.round(j.energiaMax / 2));
-  salirDeMazmorra(e, def, j);
   ev.push({ tipo: 'derrota', jugador: j.id, multa });
 }
 
@@ -312,12 +344,12 @@ function usar(e, def, j, x, y, ev) {
     const d = def.OBJ[o.id];
     if (d.accion === 'dormir') return abrir(ev, j, 'dormir');
     if (d.accion === 'tienda') return abrir(ev, j, 'tienda');
-    if (d.accion === 'mazmorra') return abrir(ev, j, 'mazmorra', { pisos: pisosDisponibles(e, def), enCurso: !!e.mazmorra.nivel });
+    if (d.accion === 'mazmorra') return abrir(ev, j, 'mazmorra', { mazmorras: infoMazmorras(e, def), enCurso: e.mazmorra.nivel ? { id: e.mazmorra.actual, piso: e.mazmorra.piso } : null });
     if (d.accion === 'salir') { salirDeMazmorra(e, def, j); return aviso(ev, j, 'Volviste a la granja'); }
     if (d.accion === 'bajar') {
       const siguiente = e.mazmorra.piso + 1;
-      if (siguiente > def.C.mazmorra.pisos) return;
-      return irAPiso(e, def, siguiente, ev);
+      if (siguiente > def.MAZ[e.mazmorra.actual].pisos) return;
+      return irAPiso(e, def, siguiente, ev, true);
     }
     if (d.accion === 'botin') {
       quitar(g, o);
@@ -381,6 +413,7 @@ function usar(e, def, j, x, y, ev) {
 
   if (s.id === 'azada' && enGranja) {
     if (g.agua[i] || g.suelo[i]) return;
+    if (g.camino?.[i]) return aviso(ev, j, 'No se puede arar el camino', true);
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++)
       if (dentro(def, x + dx, y + dy) && g.agua[idx(def, x + dx, y + dy)]) return aviso(ev, j, 'Muy cerca del agua para arar', true);
     if (!gastarEnergia(ev, j, costeCampo)) return;
@@ -428,11 +461,12 @@ function nuevoDia(e, def, ev, desmayo) {
     if (desmayo) { multa = Math.min(500, Math.floor(j.dinero * 0.1)); j.dinero -= multa; }
     cobros[j.id] = { ventas, total, multa };
     j.energia = desmayo ? Math.round(j.energiaMax * 0.6) : j.energiaMax;
-    j.vida = j.vidaMax;
     j.lugar = 'granja';
+    recalcularVida(def, j);
+    j.vida = j.vidaMax;
     Object.assign(j, posicionInicio(def));
   }
-  e.mazmorra.nivel = null;     // dormir (o desmayarse) termina la expedición
+  terminarExpedicion(e);     // dormir (o desmayarse) termina la expedición
 
   for (const k of Object.keys(g.cultivos)) if (g.regado[k] && g.cultivos[k].dias < def.CULT[g.cultivos[k].id].dias) g.cultivos[k].dias++;
   const protegido = k => { const x = k % W, y = Math.floor(k / W); return g.objetos.some(o => def.OBJ[o.id].protege && Math.hypot(o.x - x, o.y - y) <= def.OBJ[o.id].protege); };
@@ -455,7 +489,7 @@ function nuevoDia(e, def, ev, desmayo) {
   }
   for (let k = 0, n = 0; k < 200 && n < 4; k++) {
     const x = 2 + Math.floor(azar(e) * (W - 4)), y = 3 + Math.floor(azar(e) * (H - 5));
-    if (!(x >= 3 && x <= 23 && y >= 2 && y <= 10) && colocar(def, g, n === 0 ? 'roca' : 'maleza', x, y)) n++;
+    if (!enClaro(x, y) && !g.camino?.[idx(def, x, y)] && colocar(def, g, n === 0 ? 'roca' : 'maleza', x, y)) n++;
   }
 
   for (const j of Object.values(e.jugadores)) {

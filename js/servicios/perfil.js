@@ -13,7 +13,7 @@ export function obtenerPerfil() {
     const p = JSON.parse(localStorage.getItem(CLAVE) || 'null');
     if (p?.id) return p;
   } catch (e) { /* sin almacenamiento: perfil temporal */ }
-  const p = { id: idAleatorio(), nombre: 'Granjera' };
+  const p = { id: idAleatorio(), nombre: null };
   try { localStorage.setItem(CLAVE, JSON.stringify(p)); } catch (e) { /* perfil temporal */ }
   return p;
 }

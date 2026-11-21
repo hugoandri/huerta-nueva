@@ -12,6 +12,23 @@ function elegirPonderado(r, lista) {
 
 export const centroSala = s => ({ x: s.x + Math.floor(s.w / 2), y: s.y + Math.floor(s.h / 2) });
 
+// Busca en la pared de arriba de una sala un tramo recto: 5 columnas con 3 filas de muro encima
+// y 2 de suelo debajo. Ahí la muralla se dibuja siempre igual, así que la escalera pintada para
+// ese tramo (con inpaint sobre el mismo fondo) calza sin costuras. Devuelve la celda de muro.
+export function puntoEnPared(def, z, s) {
+  const m = (x, y) => z.muro[idx(def, x, y)];
+  const c = s.x + Math.floor(s.w / 2), orden = [0, 1, -1, 2, -2, 3, -3];
+  for (const d of orden) {
+    const x = c + d;
+    if (x - 2 < s.x || x + 2 > s.x + s.w - 1 || s.y < 3) continue;
+    let ok = true;
+    for (let dx = -2; dx <= 2 && ok; dx++)
+      ok = m(x + dx, s.y - 3) && m(x + dx, s.y - 2) && m(x + dx, s.y - 1) && !m(x + dx, s.y) && !m(x + dx, s.y + 1);
+    if (ok && !z.objetos.some(o => o.x === x && o.y === s.y - 1)) return { x, y: s.y - 1 };
+  }
+  return null;
+}
+
 export function crearMonstruo(def, zona, id, cx, cy, piso) {
   const m = def.MON[id], escala = 1 + (piso - 1) * 0.15;
   const vida = Math.round(m.vida * (m.jefe ? 1 : escala));
@@ -20,10 +37,17 @@ export function crearMonstruo(def, zona, id, cx, cy, piso) {
   return mo;
 }
 
-export function generarPiso(def, semilla, piso) {
-  const { W, H } = def, cfg = def.C.mazmorra, r = mulberry32(hashTexto(`${semilla}:${piso}`));
+export function ponerBajada(def, z) {
+  if (z.bajada && colocar(def, z, 'escalera_bajar', z.bajada.x, z.bajada.y, null, true)) return;
+  const { x, y } = z.salaFinal;                    // sin tramo recto de muralla: en el suelo, cerca del centro
+  for (let r = 0; r < 4; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++)
+    if (colocar(def, z, 'escalera_bajar', x + dx, y + dy)) return;
+}
+
+export function generarPiso(def, mazmorra, semilla, piso) {
+  const { W, H } = def, cfg = def.MAZ[mazmorra], r = mulberry32(hashTexto(`${mazmorra}:${semilla}:${piso}`));
   const z = {
-    tipo: 'mazmorra', piso, ver: 0, sigUid: 1, objetos: [], cultivos: {}, monstruos: [],
+    tipo: 'mazmorra', mazmorra, piso, ver: 0, sigUid: 1, objetos: [], cultivos: {}, monstruos: [],
     agua: Array(W * H).fill(0), suelo: Array(W * H).fill(0), regado: Array(W * H).fill(0),
     muro: Array(W * H).fill(1), enSala: Array(W * H).fill(0),
   };
@@ -32,7 +56,7 @@ export function generarPiso(def, semilla, piso) {
   // salas rectangulares sin superponerse
   const salas = [], objetivo = Math.min(11, 6 + Math.floor(piso / 2));
   for (let k = 0; k < 300 && salas.length < objetivo; k++) {
-    const w = entreR(r, 5, 9), h = entreR(r, 4, 7), x = entreR(r, 2, W - w - 3), y = entreR(r, 2, H - h - 3);
+    const w = entreR(r, 5, 9), h = entreR(r, 4, 7), x = entreR(r, 2, W - w - 3), y = entreR(r, 3, H - h - 3);
     if (salas.some(s => x < s.x + s.w + 2 && x + w + 2 > s.x && y < s.y + s.h + 2 && y + h + 2 > s.y)) continue;
     salas.push({ x, y, w, h });
   }
@@ -45,17 +69,22 @@ export function generarPiso(def, semilla, piso) {
     if (r() < 0.5) { hor(a.y, a.x, b.x); ver(b.x, a.y, b.y); } else { ver(a.x, a.y, b.y); hor(b.y, a.x, b.x); }
   }
 
-  // entrada = primera sala; sala final = la más lejana a la entrada
-  const inicio = salas[0], ci = centroSala(inicio);
-  let final = salas[1];
-  for (const s of salas.slice(1)) { const c = centroSala(s), cf = centroSala(final); if (Math.hypot(c.x - ci.x, c.y - ci.y) > Math.hypot(cf.x - ci.x, cf.y - ci.y)) final = s; }
-  z.entrada = { x: ci.x, y: ci.y + 1 };
+  // entrada = la primera sala con un tramo recto de muralla arriba (la salida va en esa pared);
+  // sala final = la más lejana a la entrada que también tenga ese tramo (ahí va la escalera de bajada)
+  const conPared = salas.filter(s => puntoEnPared(def, z, s));
+  const inicio = conPared[0] || salas[0], ci = centroSala(inicio);
+  const lejos = s => { const c = centroSala(s); return Math.hypot(c.x - ci.x, c.y - ci.y); };
+  const candidatas = (conPared.length > 1 ? conPared : salas).filter(s => s !== inicio);
+  const final = candidatas.reduce((a, s) => (lejos(s) > lejos(a) ? s : a), candidatas[0]);
   z.salaFinal = centroSala(final);
-  colocar(def, z, 'escalera_subir', ci.x, ci.y - 1);
+  const salida = puntoEnPared(def, z, inicio);
+  if (salida) { colocar(def, z, 'escalera_subir', salida.x, salida.y, null, true); z.entrada = { x: salida.x, y: salida.y + 1 }; }
+  else { colocar(def, z, 'escalera_subir', ci.x, ci.y - 1); z.entrada = { x: ci.x, y: ci.y + 1 }; }
+  z.bajada = puntoEnPared(def, z, final);          // dónde aparece la escalera de bajada (también tras vencer al jefe)
 
   const jefe = cfg.jefes[String(piso)];
   if (jefe) crearMonstruo(def, z, jefe, z.salaFinal.x, z.salaFinal.y, piso);
-  else if (piso < cfg.pisos) colocar(def, z, 'escalera_bajar', z.salaFinal.x, z.salaFinal.y);
+  else if (piso < cfg.pisos) ponerBajada(def, z);
 
   const celdaEnSala = (s, margen = 1) => ({ x: entreR(r, s.x + margen, s.x + s.w - 1 - margen), y: entreR(r, s.y + margen, s.y + s.h - 1 - margen) });
   const otras = salas.filter(s => s !== inicio);

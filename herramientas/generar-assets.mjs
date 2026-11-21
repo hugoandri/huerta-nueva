@@ -147,7 +147,17 @@ const guardarEstado = () => fs.writeFile(RUTA_ESTADO, JSON.stringify(estado, nul
 // ---------- sprites (objetos, cultivos, íconos): create-image-pixflux, síncrono ----------
 async function generarSprite(id, s) {
   const destino = dir(`sprites/${id}.png`);
-  const { datos } = await api('POST', '/create-image-pixflux', {
+  // "modelo": "pixen" → modelo Pixen: mejor para construcciones de frente, con volumen y mirando hacia abajo.
+  const { datos } = s.modelo === 'pixen' ? await api('POST', '/create-image-pixen', {
+    description: `${s.descripcion}, ${estilo.sufijo}`,
+    image_size: { width: s.ancho, height: s.alto },
+    no_background: true,
+    outline: s.outline || estilo.outline,
+    detail: s.detail || 'highly detailed',
+    view: s.view || 'high top-down',
+    direction: 'south',
+    ...(s.semilla != null ? { seed: s.semilla } : {}),
+  }) : await api('POST', '/create-image-pixflux', {
     description: `${s.descripcion}, ${estilo.sufijo}`,
     image_size: { width: s.ancho, height: s.alto },
     no_background: true,
@@ -159,7 +169,78 @@ async function generarSprite(id, s) {
     ...(s.semilla != null ? { seed: s.semilla } : {}),
   });
   await guardarBase64(datos.image.base64, destino);
+  if (s.rellenar_huecos) await fs.writeFile(destino, rellenarHuecos(await fs.readFile(destino)));
+  if (s.recortar) await fs.writeFile(destino, recortar(await fs.readFile(destino)));
   return datos.usage;
+}
+
+// Al quitar el fondo, PixelLab a veces borra también el interior oscuro de una abertura
+// (la boca de un túnel). Todo hueco transparente que no toca el borde de la imagen se pinta oscuro.
+function rellenarHuecos(buf) {
+  const img = leerPNG(buf); if (!img) return buf;
+  const { w, h, px } = img, fuera = new Uint8Array(w * h), pila = [];
+  const transp = i => px[i * 4 + 3] < 20;
+  for (let x = 0; x < w; x++) { pila.push(x, (h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { pila.push(y * w, y * w + w - 1); }
+  while (pila.length) {
+    const i = pila.pop();
+    if (fuera[i] || !transp(i)) continue;
+    fuera[i] = 1;
+    const x = i % w, y = (i / w) | 0;
+    if (x > 0) pila.push(i - 1); if (x < w - 1) pila.push(i + 1); if (y > 0) pila.push(i - w); if (y < h - 1) pila.push(i + w);
+  }
+  let n = 0;
+  for (let i = 0; i < w * h; i++) if (transp(i) && !fuera[i]) { px.writeUInt32BE(0x0d0a0cff, i * 4); n++; }
+  return n ? escribirPNG(img) : buf;
+}
+
+// Realce de color para los personajes: PixelLab los entrega con colores más apagados que los
+// objetos. Sube la saturación y un poco el contraste (en HSL) sin tocar la transparencia.
+function realzar(buf, sat = 1.45, con = 1.15) {
+  const img = leerPNG(buf); if (!img) return buf;
+  const { px } = img;
+  for (let i = 0; i < px.length; i += 4) {
+    if (!px[i + 3]) continue;
+    let r = px[i] / 255, g = px[i + 1] / 255, b = px[i + 2] / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h /= 6;
+    }
+    s = Math.min(1, s * sat); l = Math.min(1, Math.max(0, (l - 0.5) * con + 0.5));
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+    const c = t => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+    const [rr, gg, bb] = s ? [c(h + 1 / 3), c(h), c(h - 1 / 3)] : [l, l, l];
+    px[i] = Math.round(rr * 255); px[i + 1] = Math.round(gg * 255); px[i + 2] = Math.round(bb * 255);
+  }
+  return escribirPNG(img);
+}
+async function realzarCarpeta(carpeta) {
+  const infoRuta = path.join(carpeta, 'info.json');
+  const info = JSON.parse(await fs.readFile(infoRuta, 'utf8').catch(() => 'null'));
+  if (!info || info.realzado) return 0;
+  let n = 0;
+  for (const f of await fs.readdir(carpeta)) if (f.endsWith('.png')) { const r = path.join(carpeta, f); await fs.writeFile(r, realzar(await fs.readFile(r))); n++; }
+  info.realzado = true;
+  await fs.writeFile(infoRuta, JSON.stringify(info));
+  return n;
+}
+
+// Quita los márgenes transparentes: así el dibujo ocupa solo lo que se ve y se apoya en su base.
+function recortar(buf) {
+  const img = leerPNG(buf); if (!img) return buf;
+  const { w, h, px } = img;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (px[(y * w + x) * 4 + 3] > 20) {
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+  }
+  if (x1 < 0 || (x0 === 0 && y0 === 0 && x1 === w - 1 && y1 === h - 1)) return buf;
+  const nw = x1 - x0 + 1, nh = y1 - y0 + 1, out = Buffer.alloc(nw * nh * 4);
+  for (let y = 0; y < nh; y++) px.copy(out, y * nw * 4, ((y + y0) * w + x0) * 4, ((y + y0) * w + x1 + 1) * 4);
+  return escribirPNG({ w: nw, h: nh, px: out });
 }
 
 // ---------- tilesets Wang (16 tiles por esquinas): create-tileset, asíncrono ----------
@@ -178,6 +259,7 @@ async function generarTileset(t) {
       lower_description: t.inferior,
       upper_description: t.superior,
       transition_description: t.transicion || '',
+      ...(t.transicion_tamano ? { transition_size: t.transicion_tamano } : {}),
       tile_size: { width: contenido.mundo.tile, height: contenido.mundo.tile },
       shading: estilo.shading,
       detail: estilo.detail,
@@ -209,64 +291,36 @@ async function generarTileset(t) {
 // ---------- personaje: 4 direcciones + animación de caminar ----------
 const DIRS = ['south', 'west', 'east', 'north'];
 async function generarPersonaje(p) {
-  const base = dir(`personaje/${p.id}`);
-  let cid = estado[`personaje:${p.id}`];
+  const clave = `personaje:${p.id}`;
+  let cid = estado[clave];
   if (!cid || FORZAR) {
-    const { datos } = await api('POST', '/create-character-with-4-directions', {
-      description: p.descripcion,
-      image_size: { width: p.tamano, height: p.tamano },
-      view: 'high top-down',
-      outline: estilo.outline,
-      shading: estilo.shading,
-      detail: estilo.detail,
-    });
-    cid = estado[`personaje:${p.id}`] = datos.character_id;
-    delete estado[`personaje:${p.id}:anim`];
-    await guardarEstado();
-  }
-  let info;
-  for (;;) {
-    info = (await api('GET', `/characters/${cid}`)).datos;
-    if (info.status === 'completed' && info.rotation_urls) break;
-    if (info.status === 'failed') throw new Error('PixelLab no pudo crear el personaje');
-    await esperar(8000);
-  }
-  if (!estado[`personaje:${p.id}:anim`]) {
-    const { datos } = await api('POST', '/animate-character', {
-      character_id: cid,
-      template_animation_id: p.animacion,
-      directions: DIRS,
-    });
-    estado[`personaje:${p.id}:anim`] = datos.animation_group_id || true;
-    await guardarEstado();
-  }
-  for (;;) {
-    info = (await api('GET', `/characters/${cid}`)).datos;
-    const anim = (info.animations || []).find(a =>
-      a.animation_group_id === estado[`personaje:${p.id}:anim`] || a.animation_type === p.animacion);
-    const listas = anim && DIRS.every(d => anim.directions.find(x => x.direction === d && x.frames?.length));
-    if (listas) {
-      // Todo sale en un ZIP desde api.pixellab.ai (rotations/ y animations/<tipo>/<dir>/frame_NNN.png).
-      const zip = await apiBinario(`/characters/${cid}/zip`);
-      if (zip) {
-        const archivos = leerZip(zip);
-        const buscar = re => Object.keys(archivos).filter(n => re.test(n)).sort();
-        await fs.mkdir(base, { recursive: true });
-        const cuadros = {};
-        for (const d of DIRS) {
-          const rot = buscar(new RegExp(`(^|/)rotations/${d}\\.png$`))[0];
-          if (!rot) throw new Error(`el ZIP no trae la rotación ${d}`);
-          await fs.writeFile(`${base}/${d}.png`, limpiarBordes(archivos[rot]));
-          const frames = buscar(new RegExp(`(^|/)animations/[^/]+/${d}/[^/]+\\.png$`));
-          cuadros[d] = frames.length;
-          for (let i = 0; i < frames.length; i++) await fs.writeFile(`${base}/caminar_${d}_${i}.png`, limpiarBordes(archivos[frames[i]]));
-        }
-        await fs.writeFile(`${base}/info.json`, JSON.stringify({ tamano: info.size, cuadros }));
-        return;
-      }
+    if (p.basadoEn) {
+      // Variante de otro personaje: mismo estilo de dibujo, proporciones y paleta.
+      // si el personaje de origen se está generando en paralelo, se espera a que exista
+      for (let k = 0; k < 120 && !(await existe(dir(`personaje/${p.basadoEn}/info.json`))); k++) await esperar(5000);
+      const origen = estado[`personaje:${p.basadoEn}`];
+      if (!origen) throw new Error(`primero hay que generar ${p.basadoEn}`);
+      const { datos } = await api('POST', '/create-character-state', {
+        character_id: origen, edit_description: p.edicion, state_name: p.id, no_background: true, use_color_palette_from_reference: true,
+      });
+      cid = datos.character_id;
+    } else {
+      const { datos } = await api('POST', '/create-character-with-4-directions', {
+        description: p.descripcion,
+        image_size: { width: p.tamano, height: p.tamano },
+        view: 'high top-down',
+        outline: estilo.outline,
+        shading: estilo.shading,
+        detail: estilo.detail,
+      });
+      cid = datos.character_id;
     }
-    await esperar(8000);
+    estado[clave] = cid;
+    delete estado[`${clave}:anim`];
+    await guardarEstado();
   }
+  // ?states= limita el ZIP a este personaje (si no, trae todo su grupo de variantes)
+  await animarYDescargar(p, cid, `${clave}:anim`, dir(`personaje/${p.id}`), `?states=${cid}`);
 }
 
 // ---------- ropas: variantes (estados) del mismo personaje + su animación de caminar ----------
@@ -321,6 +375,7 @@ async function animarYDescargar(p, cid, claveAnim, carpeta, consultaZip = '') {
           for (let i = 0; i < frames.length; i++) await fs.writeFile(`${carpeta}/caminar_${d}_${i}.png`, limpiarBordes(archivos[frames[i]]));
         }
         await fs.writeFile(`${carpeta}/info.json`, JSON.stringify({ tamano: info.size, cuadros }));
+        await realzarCarpeta(carpeta);
         return;
       }
     }
@@ -330,19 +385,19 @@ async function animarYDescargar(p, cid, claveAnim, carpeta, consultaZip = '') {
 
 // ---------- manifest: qué gráficos existen (el juego usa provisionales para el resto) ----------
 async function escribirManifest() {
-  const m = { sprites: {}, tilesets: {}, personaje: null };
+  const m = { sprites: {}, tilesets: {}, personajes: {} };
   for (const id of Object.keys(contenido.sprites))
     if (await existe(dir(`sprites/${id}.png`))) m.sprites[id] = `assets/sprites/${id}.png`;
   for (const t of contenido.tilesets)
     if (await existe(dir(`tilesets/${t.id}.json`))) m.tilesets[t.id] = `assets/tilesets/${t.id}.json`;
-  const p = contenido.personaje;
-  const infoRuta = dir(`personaje/${p.id}/info.json`);
-  if (await existe(infoRuta)) {
+  for (const p of contenido.personajes) {
+    const infoRuta = dir(`personaje/${p.id}/info.json`);
+    if (!(await existe(infoRuta))) continue;
     const info = JSON.parse(await fs.readFile(infoRuta, 'utf8'));
-    m.personaje = { carpeta: `assets/personaje/${p.id}`, ...info, ropas: {} };
-    for (const r of p.ropas || []) {
+    const pm = m.personajes[p.id] = { carpeta: `assets/personaje/${p.id}`, ...info, ropas: {} };
+    for (const r of contenido.ropas || []) {
       const ri = dir(`personaje/${p.id}/ropa_${r.id}/info.json`);
-      if (await existe(ri)) m.personaje.ropas[r.id] = { carpeta: `assets/personaje/${p.id}/ropa_${r.id}`, ...JSON.parse(await fs.readFile(ri, 'utf8')) };
+      if (await existe(ri)) pm.ropas[r.id] = { carpeta: `assets/personaje/${p.id}/ropa_${r.id}`, ...JSON.parse(await fs.readFile(ri, 'utf8')) };
     }
   }
   await fs.writeFile(dir('manifest.json'), JSON.stringify(m, null, 2));
@@ -350,12 +405,27 @@ async function escribirManifest() {
 }
 
 // ---------- principal ----------
+if (args.realzar) {   // realce de color de los personajes ya generados (una sola vez por carpeta)
+  let n = 0;
+  for (const p of contenido.personajes) {
+    n += await realzarCarpeta(dir(`personaje/${p.id}`));
+    for (const r of contenido.ropas || []) n += await realzarCarpeta(dir(`personaje/${p.id}/ropa_${r.id}`));
+  }
+  console.log(`Realzadas ${n} imágenes de personajes`);
+  process.exit(0);
+}
 if (args.limpiar) {   // limpia los bordes de lo ya generado, sin llamar a la API
-  const carpetas = [dir('sprites'), dir(`personaje/${contenido.personaje.id}`)];
+  const carpetas = [dir('sprites')];
+  for (const p of contenido.personajes) {
+    carpetas.push(dir(`personaje/${p.id}`));
+    for (const r of contenido.ropas || []) carpetas.push(dir(`personaje/${p.id}/ropa_${r.id}`));
+  }
   let n = 0;
   for (const c of carpetas) for (const f of await fs.readdir(c).catch(() => [])) {
     if (!f.endsWith('.png')) continue;
-    const ruta = path.join(c, f), antes = await fs.readFile(ruta), despues = limpiarBordes(antes);
+    const ruta = path.join(c, f), antes = await fs.readFile(ruta);
+    let despues = limpiarBordes(antes);
+    if (c === dir('sprites') && contenido.sprites[f.slice(0, -4)]?.recortar) despues = recortar(despues);
     if (despues !== antes) { await fs.writeFile(ruta, despues); n++; }
   }
   console.log(`Bordes limpiados en ${n} imágenes`);
@@ -363,17 +433,24 @@ if (args.limpiar) {   // limpia los bordes de lo ya generado, sin llamar a la AP
 }
 const tareas = [];
 for (const [id, s] of Object.entries(contenido.sprites))
-  if (quiere(id) && (FORZAR || !(await existe(dir(`sprites/${id}.png`)))))
+  if (quiere(id) && !s.fijo && (FORZAR || !(await existe(dir(`sprites/${id}.png`)))))
     tareas.push({ tipo: 'sprite', id, costo: 1, run: () => generarSprite(id, s) });
 for (const t of contenido.tilesets)
   if (quiere(t.id) && (FORZAR || !(await existe(dir(`tilesets/${t.id}.json`)))))
     tareas.push({ tipo: 'tileset', id: t.id, costo: 1, run: () => generarTileset(t) });
-const p = contenido.personaje;
-if (quiere(p.id) && (FORZAR || !(await existe(dir(`personaje/${p.id}/info.json`)))))
-  tareas.push({ tipo: 'personaje', id: p.id, costo: 5, run: () => generarPersonaje(p) });
-for (const r of p.ropas || [])
-  if (quiere(`ropa_${r.id}`) && (FORZAR || !(await existe(dir(`personaje/${p.id}/ropa_${r.id}/info.json`)))))
-    tareas.push({ tipo: 'ropa', id: `ropa_${r.id}`, costo: 5, run: () => generarRopa(p, r) });
+// Cada personaje va en una sola tarea: primero la base y después sus ropas (que parten de la base).
+for (const p of contenido.personajes) {
+  const faltaBase = quiere(p.id) && (FORZAR || !(await existe(dir(`personaje/${p.id}/info.json`))));
+  const ropas = [];
+  for (const r of contenido.ropas || [])
+    if ((quiere(p.id) || quiere(`ropa_${r.id}`)) && (FORZAR || !(await existe(dir(`personaje/${p.id}/ropa_${r.id}/info.json`))))) ropas.push(r);
+  if (!faltaBase && !ropas.length) continue;
+  tareas.push({
+    tipo: 'personaje', id: `${p.id}${ropas.length ? ` + ropas ${ropas.map(r => r.id).join(', ')}` : ''}`,
+    costo: (faltaBase ? 5 : 0) + 5 * ropas.length,
+    run: async () => { if (faltaBase) await generarPersonaje(p); for (const r of ropas) await generarRopa(p, r); },
+  });
+}
 
 console.log(`Por generar: ${tareas.length} (≈${tareas.reduce((a, t) => a + t.costo, 0)} generaciones)`);
 for (const t of tareas) console.log(`  · ${t.tipo.padEnd(9)} ${t.id}`);
@@ -390,5 +467,5 @@ await Promise.all(Array.from({ length: PARALELO }, async () => {
   }
 }));
 const m = await escribirManifest();
-console.log(`Listo. Sprites: ${Object.keys(m.sprites).length}, tilesets: ${Object.keys(m.tilesets).length}, personaje: ${m.personaje ? 'sí' : 'no'}`);
+console.log(`Listo. Sprites: ${Object.keys(m.sprites).length}, tilesets: ${Object.keys(m.tilesets).length}, personajes: ${Object.keys(m.personajes).join(', ') || 'ninguno'}`);
 if (errores.length) { console.error('Fallaron:', errores.join(', ')); process.exit(1); }

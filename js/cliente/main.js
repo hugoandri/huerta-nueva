@@ -13,11 +13,26 @@ const $ = s => document.querySelector(s);
 const def = indexar(await fetch('data/contenido.json').then(r => r.json()));
 const G = await cargarGraficos(def);
 const perfil = obtenerPerfil();
+perfil.cuerpo = def.C.personajes.some(p => p.id === perfil.cuerpo) ? perfil.cuerpo : def.C.personajes[0].id;
 const almacen = new AlmacenLocal(def);
 
 $('#estado-assets').innerHTML = G.nProv === 0
-  ? `Gráficos: <b>${G.nReales} de PixelLab</b> (personaje, ${Object.keys(G.TS).length} tilesets y ${Object.keys(G.SPR).length} sprites).`
+  ? `Gráficos: <b>${G.nReales} de PixelLab</b> (${Object.keys(G.PJS).length} personajes con sus ropas, ${Object.keys(G.TS).length} tilesets y ${Object.keys(G.SPR).length} sprites).`
   : `Gráficos: <b>${G.nReales} de PixelLab</b> · ${G.nProv} provisionales (genera los que faltan con <code>herramientas/generar-assets.mjs</code>).`;
+
+// Elegir personaje en la portada (se recuerda en el perfil del navegador).
+function pintarElige() {
+  $('#elige').innerHTML = def.C.personajes.map(p => `<button type="button" role="radio" aria-checked="${p.id === perfil.cuerpo}" data-cuerpo="${p.id}">
+    <img src="${G.RETRATO[p.id]}" alt="">${p.nombre}</button>`).join('');
+}
+pintarElige();
+$('#elige').addEventListener('click', e => {
+  const b = e.target.closest('[data-cuerpo]'); if (!b) return;
+  perfil.cuerpo = b.dataset.cuerpo;
+  try { localStorage.setItem('huerta-nueva-perfil', JSON.stringify(perfil)); } catch (er) { /* sin almacenamiento */ }
+  pintarElige();
+});
+const nuevaPartida = () => crearEstado(def, { semilla: (Math.random() * 2 ** 32) >>> 0, jugador: { id: perfil.id, cuerpo: perfil.cuerpo } });
 
 // Granja de fondo detrás de la portada (no se guarda).
 let sesion = new SesionLocal({ estado: crearEstado(def, { jugador: perfil }), def, jugadorId: perfil.id });
@@ -38,12 +53,12 @@ async function empezar(estado) {
   $('#portada').hidden = true; jugando = true;
   ui.aviso('Ara con la azada, siembra y riega. El puesto vende semillas.');
 }
-ui.alReiniciar(async () => { await almacen.borrar(); empezar(crearEstado(def, { semilla: (Math.random() * 2 ** 32) >>> 0, jugador: perfil })); ui.aviso('Partida nueva'); });
-$('#btn-nueva').addEventListener('click', () => empezar(crearEstado(def, { semilla: (Math.random() * 2 ** 32) >>> 0, jugador: perfil })));
+ui.alReiniciar(async () => { await almacen.borrar(); empezar(nuevaPartida()); ui.aviso('Partida nueva'); });
+$('#btn-nueva').addEventListener('click', () => empezar(nuevaPartida()));
 $('#btn-continuar').addEventListener('click', async () => {
   const e = await almacen.cargar();
   if (e && e.jugadores[perfil.id]) empezar(e);
-  else { ui.aviso('No se pudo leer la partida guardada', true); empezar(crearEstado(def, { jugador: perfil })); }
+  else { ui.aviso('No se pudo leer la partida guardada', true); empezar(nuevaPartida()); }
 });
 if (await almacen.existe()) $('#btn-continuar').hidden = false;
 

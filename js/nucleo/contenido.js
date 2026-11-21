@@ -8,5 +8,6 @@ export function indexar(C) {
     OBJ: porId(C.objetos),
     CULT: porId(C.cultivos),
     MON: porId(C.monstruos || []),
+    MAZ: porId(C.mazmorras || []),
   };
 }

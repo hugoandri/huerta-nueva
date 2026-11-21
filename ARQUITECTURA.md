@@ -28,15 +28,16 @@ El juego es offline, pero está armado para pasar a online sin reescribirlo. La 
 
 Los eventos (`aviso`, `flotar`, `abrir`, `resumen`, `sacudir`) llevan `jugador` cuando son solo para uno; la interfaz muestra los suyos.
 
-## Zonas y mazmorra
+## Zonas y mazmorras
 
-Cada jugador está en una **zona**: su granja o el piso actual de la mazmorra (`zonaDe(estado, jugador)`). Las dos tienen la misma forma (objetos, celdas bloqueadas), así que mover, usar, colocar y los cofres funcionan igual en ambas.
+Cada jugador está en una **zona**: su granja o el piso actual de una mazmorra (`zonaDe(estado, jugador)`). Las dos tienen la misma forma (objetos, celdas bloqueadas), así que mover, usar, colocar y los cofres funcionan igual en ambas.
 
-- **`mazmorra.js`**: `generarPiso(def, semilla, piso)` crea salas unidas por pasillos, antorchas, rocas con minerales según el piso, cofres, monstruos y el jefe. Es reproducible: con la misma semilla, el grupo entero ve el mismo piso.
+- **Varias mazmorras** (`contenido.json → mazmorras`): cada una tiene su tileset, monstruos, rocas, jefes, puntos de control, botín final y, si corresponde, un requisito (la Cripta se abre al llegar al piso 5 de la Mina). El progreso se guarda por mazmorra en `estado.mazmorra.progreso`.
+- **`mazmorra.js`**: `generarPiso(def, mazmorra, semilla, piso)` crea salas unidas por pasillos, antorchas, rocas, cofres, monstruos y el jefe. Es reproducible: con la misma semilla, el grupo entero ve el mismo piso.
 - **Combate**: `usar` frente a un monstruo ataca. Los monstruos persiguen al jugador más cercano dentro de su visión; esto ocurre en la acción `tiempo` (online la ejecutará el anfitrión).
-- **Jefes** en los pisos 5 y 10. Vencer al del piso 5 habilita el punto de control del piso 6. Al vencer al del 10, `repartirBotin` le da a cada jugador presente su propio botín.
-- **Ropa**: `vestir` cambia el aspecto (cada ropa es una variante del personaje en PixelLab) y aplica su `efecto`: luz, defensa, vida o ahorro de energía.
-- **Máquinas genéricas**: el tarro y el horno se definen con `procesa` (entrada, cantidad, salida, minutos) en `contenido.json`.
+- **Jefes** en los pisos 5 y 10. Al vencer al del 10, `repartirBotin` le da a cada jugador presente su propio botín.
+- **Personajes y ropa**: cada jugador elige personaje (`cuerpo`: granjera o granjero). Tiene ropa de granja (`ropa`) y ropa de batalla (`ropaBatalla`); `ropaActual(jugador)` devuelve la de batalla dentro de la mazmorra, así que se cambia sola al entrar. Cada ropa es una variante del personaje creada en PixelLab, y su `efecto` (luz, defensa, vida, ahorro de energía) solo cuenta donde se usa.
+- **Máquinas genéricas**: el tarro y el horno se definen con `procesa` (entrada, cantidad, salida, minutos).
 
 ## Cómo se pasa a online
 
