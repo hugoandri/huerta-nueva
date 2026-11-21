@@ -8,7 +8,7 @@
 import { azar } from './azar.js';
 import { idx, dentro, objetoEn, objetoPorUid, libre, colocar, quitar, posicionInicio, frenteACueva, zonaDe, ropaActual, enClaro, INICIO_DIA, VIDA_BASE } from './mundo.js';
 import { agregar, cuenta, sacar, gastarMano, espacioPara, esHerramienta } from './inventario.js';
-import { generarPiso, ponerBajada } from './mazmorra.js';
+import { generarPiso, ponerBajada, ponerSalidaFinal } from './mazmorra.js';
 import { tirarBotin, repartirBotin } from './botin.js';
 
 export const FIN_DIA = 26 * 60;              // 2:00
@@ -269,7 +269,7 @@ function morirMonstruo(e, def, j, zona, m, ev) {
   const sf = zona.salaFinal, piso = zona.piso, cfg = def.MAZ[zona.mazmorra];
   if (piso < cfg.pisos) {
     ponerBajada(def, zona);
-    for (const p of jugadoresEn(e, zona)) aviso(ev, p, `¡Venciste a ${M.nombre}! Se abrió la escalera.`);
+    for (const p of jugadoresEn(e, zona)) aviso(ev, p, `¡Venciste a ${M.nombre}! Bajó una escalera hacia el piso ${piso + 1}.`);
     return;
   }
   // último jefe: cada jugador presente recibe su propio botín (el servidor lo hará online)
@@ -281,7 +281,7 @@ function morirMonstruo(e, def, j, zona, m, ev) {
     ev.push({ tipo: 'botin', jugador: p.id, titulo: `¡${cfg.nombre} completada!`, items });
   }
   progresoDe(e, cfg.id).completada++;
-  colocarCerca(def, zona, 'escalera_subir', sf.x, sf.y);
+  ponerSalidaFinal(def, zona);
 }
 
 function colocarCerca(def, zona, id, x, y) {

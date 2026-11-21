@@ -37,12 +37,16 @@ export function crearMonstruo(def, zona, id, cx, cy, piso) {
   return mo;
 }
 
-export function ponerBajada(def, z) {
-  if (z.bajada && colocar(def, z, 'escalera_bajar', z.bajada.x, z.bajada.y, null, true)) return;
-  const { x, y } = z.salaFinal;                    // sin tramo recto de muralla: en el suelo, cerca del centro
+// La escalera de mano al piso siguiente (objeto "escalera_bajar": avanza un piso) o, en el último
+// piso, el arco de salida a la granja. Van en la muralla de la sala final; si no hay tramo recto, en el suelo.
+function ponerEnSalaFinal(def, z, id) {
+  if (z.bajada && colocar(def, z, id, z.bajada.x, z.bajada.y, null, true)) return;
+  const { x, y } = z.salaFinal;
   for (let r = 0; r < 4; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++)
-    if (colocar(def, z, 'escalera_bajar', x + dx, y + dy)) return;
+    if (colocar(def, z, id, x + dx, y + dy)) return;
 }
+export const ponerBajada = (def, z) => ponerEnSalaFinal(def, z, 'escalera_bajar');
+export const ponerSalidaFinal = (def, z) => ponerEnSalaFinal(def, z, 'escalera_subir');
 
 export function generarPiso(def, mazmorra, semilla, piso) {
   const { W, H } = def, cfg = def.MAZ[mazmorra], r = mulberry32(hashTexto(`${mazmorra}:${semilla}:${piso}`));
@@ -77,9 +81,14 @@ export function generarPiso(def, mazmorra, semilla, piso) {
   const candidatas = (conPared.length > 1 ? conPared : salas).filter(s => s !== inicio);
   const final = candidatas.reduce((a, s) => (lejos(s) > lejos(a) ? s : a), candidatas[0]);
   z.salaFinal = centroSala(final);
+  // El arco de salida a la granja solo está en el piso 1 (y aparece en el último al vencer al jefe).
+  // En los demás pisos se llega subiendo por la escalera de mano, y se aparece al pie de la pared.
   const salida = puntoEnPared(def, z, inicio);
-  if (salida) { colocar(def, z, 'escalera_subir', salida.x, salida.y, null, true); z.entrada = { x: salida.x, y: salida.y + 1 }; }
-  else { colocar(def, z, 'escalera_subir', ci.x, ci.y - 1); z.entrada = { x: ci.x, y: ci.y + 1 }; }
+  z.entrada = salida ? { x: salida.x, y: salida.y + 1 } : { x: ci.x, y: ci.y + 1 };
+  if (piso === 1) {
+    if (salida) colocar(def, z, 'escalera_subir', salida.x, salida.y, null, true);
+    else colocar(def, z, 'escalera_subir', ci.x, ci.y - 1);
+  }
   z.bajada = puntoEnPared(def, z, final);          // dónde aparece la escalera de bajada (también tras vencer al jefe)
 
   const jefe = cfg.jefes[String(piso)];
