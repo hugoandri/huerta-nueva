@@ -8,7 +8,7 @@
 import { azar } from './azar.js';
 import { idx, dentro, objetoEn, objetoPorUid, libre, colocar, quitar, posicionInicio, frenteACueva, zonaDe, ropaActual, enClaro, INICIO_DIA, VIDA_BASE } from './mundo.js';
 import { agregar, cuenta, sacar, gastarMano, espacioPara, esHerramienta } from './inventario.js';
-import { generarPiso } from './mazmorra.js';
+import { generarPiso, ponerBajada } from './mazmorra.js';
 import { tirarBotin, repartirBotin } from './botin.js';
 
 export const FIN_DIA = 26 * 60;              // 2:00
@@ -268,7 +268,7 @@ function morirMonstruo(e, def, j, zona, m, ev) {
   if (!M.jefe) return;
   const sf = zona.salaFinal, piso = zona.piso, cfg = def.MAZ[zona.mazmorra];
   if (piso < cfg.pisos) {
-    colocarCerca(def, zona, 'escalera_bajar', sf.x, sf.y);
+    ponerBajada(def, zona);
     for (const p of jugadoresEn(e, zona)) aviso(ev, p, `¡Venciste a ${M.nombre}! Se abrió la escalera.`);
     return;
   }

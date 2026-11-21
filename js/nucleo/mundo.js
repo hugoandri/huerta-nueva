@@ -41,9 +41,10 @@ export function libre(def, g, x, y, w = 1, h = 1) {
   }
   return true;
 }
-export function colocar(def, g, id, x, y, datos) {
+// enPared: para escaleras y puertas que van dentro de una muralla (la celda es muro, no suelo libre).
+export function colocar(def, g, id, x, y, datos, enPared = false) {
   const d = def.OBJ[id];
-  if (!libre(def, g, x, y, d.ancho || 1, d.alto || 1)) return null;
+  if (enPared ? objetoEn(def, g, x, y) : !libre(def, g, x, y, d.ancho || 1, d.alto || 1)) return null;
   const o = { uid: g.sigUid++, id, x, y, golpes: d.golpes || 0, datos: datos || {} };
   g.objetos.push(o); g.ver++;
   return o;

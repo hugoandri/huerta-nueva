@@ -112,9 +112,10 @@ export function crearRender(el, def, G) {
     for (const o of zona.objetos) {
       const d = def.OBJ[o.id], w = d.ancho || 1, h = d.alto || 1;
       if (o.x + w < x0 - 2 || o.x > x1 + 2 || o.y > y1 + 1 || o.y + h < y0 - 4) continue;
+      // porTileset: la pieza se pintó sobre la muralla de cada mazmorra (escaleras); desfase: px bajo la huella
+      const img = (d.porTileset && cueva && G.SPR[`${d.sprite}_${def.MAZ[zona.mazmorra]?.tileset}`]) || G.SPR[d.sprite];
       ents.push([(o.y + h) * T - (d.solido ? 0 : T), () => {
-        const img = G.SPR[d.sprite];
-        sprite(img, (o.x + w / 2) * T, (o.y + h) * T, sacudidas.get(o.uid) || 0);
+        sprite(img, (o.x + w / 2) * T, (o.y + h) * T + (d.desfase && img !== G.SPR[d.sprite] ? d.desfase : 0), sacudidas.get(o.uid) || 0);
         if (d.accion === 'maquina' && maquinaLista(estado, o))
           g.drawImage(G.SPR[def.ITEMS[o.datos.salida].sprite], (o.x + 0.5) * T - 8, (o.y + h) * T - img.height - 18 + Math.sin(tGlobal * 4) * 2, 16, 16);
       }]);

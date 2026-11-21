@@ -61,6 +61,10 @@
     "esqueleto": "assets/sprites/esqueleto.png",
     "rey_limo": "assets/sprites/rey_limo.png",
     "guardian": "assets/sprites/guardian.png",
+    "escalera_subir_cueva": "assets/sprites/escalera_subir_cueva.png",
+    "escalera_bajar_cueva": "assets/sprites/escalera_bajar_cueva.png",
+    "escalera_subir_cripta": "assets/sprites/escalera_subir_cripta.png",
+    "escalera_bajar_cripta": "assets/sprites/escalera_bajar_cripta.png",
     "fantasma": "assets/sprites/fantasma.png",
     "nigromante": "assets/sprites/nigromante.png",
     "caballero_espectral": "assets/sprites/caballero_espectral.png",
@@ -87,6 +91,7 @@
         "east": 6,
         "north": 6
       },
+      "realzado": true,
       "ropas": {
         "minera": {
           "carpeta": "assets/personaje/granjera/ropa_minera",
@@ -99,7 +104,8 @@
             "west": 6,
             "east": 6,
             "north": 6
-          }
+          },
+          "realzado": true
         },
         "aventurera": {
           "carpeta": "assets/personaje/granjera/ropa_aventurera",
@@ -112,7 +118,8 @@
             "west": 6,
             "east": 6,
             "north": 6
-          }
+          },
+          "realzado": true
         }
       }
     },
@@ -128,6 +135,7 @@
         "east": 6,
         "north": 6
       },
+      "realzado": true,
       "ropas": {
         "minera": {
           "carpeta": "assets/personaje/granjero/ropa_minera",
@@ -140,7 +148,8 @@
             "west": 6,
             "east": 6,
             "north": 6
-          }
+          },
+          "realzado": true
         },
         "aventurera": {
           "carpeta": "assets/personaje/granjero/ropa_aventurera",
@@ -153,7 +162,8 @@
             "west": 6,
             "east": 6,
             "north": 6
-          }
+          },
+          "realzado": true
         }
       }
     }
