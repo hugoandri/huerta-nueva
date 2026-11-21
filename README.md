@@ -12,6 +12,10 @@ npx serve .
 
 Controles: `WASD`/flechas para caminar, `Espacio` o clic para usar, `1`–`0` para elegir objeto, `I` mochila, `C` crafteo, `F` comer.
 
+### Versión Unity 6
+
+El mismo juego traducido a C# está en [`unity/`](unity/LEEME.md): se crea un proyecto **Universal 2D** en Unity Hub, se copia `unity/Assets/HuertaNueva` y se pulsa Play.
+
 ## Cómo está armado
 
 | Archivo | Qué contiene |
@@ -23,6 +27,8 @@ Controles: `WASD`/flechas para caminar, `Espacio` o clic para usar, `1`–`0` pa
 | `herramientas/generar-assets.mjs` | Llama a PixelLab y escribe `assets/` y `assets/manifest.json` |
 | `assets/` | Gráficos generados. Lo que falte se dibuja provisional |
 | `pruebas/` | Pruebas del núcleo (`npm test`) |
+| `unity/` | Versión Unity 6 (C#): núcleo, sesión, Tilemaps, luz 2D y uGUI por código |
+| `herramientas/unity/sincronizar.py` | Copia `contenido.json` y los gráficos al proyecto de Unity |
 
 La arquitectura y el camino a online están en [ARQUITECTURA.md](ARQUITECTURA.md).
 

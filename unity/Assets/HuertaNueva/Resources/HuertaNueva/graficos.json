@@ -1,0 +1,141 @@
+{
+ "sprites": [
+  "azada",
+  "regadera",
+  "hacha",
+  "pico",
+  "semilla_rabano",
+  "semilla_zanahoria",
+  "semilla_calabaza",
+  "rabano",
+  "zanahoria",
+  "calabaza",
+  "conserva",
+  "madera",
+  "piedra",
+  "fibra",
+  "brote",
+  "rabano_crecido",
+  "rabano_maduro",
+  "zanahoria_crecida",
+  "zanahoria_madura",
+  "calabaza_crecida",
+  "calabaza_madura",
+  "arbol",
+  "roca",
+  "maleza",
+  "casa",
+  "caja_envios",
+  "puesto",
+  "cofre",
+  "cerca",
+  "aspersor",
+  "tarro",
+  "espantapajaros",
+  "ropa_granjera",
+  "ropa_minera",
+  "ropa_aventurera",
+  "entrada_cueva",
+  "escalera_bajar",
+  "escalera_subir",
+  "antorcha",
+  "cofre_mazmorra",
+  "roca_cobre",
+  "roca_hierro",
+  "roca_gema",
+  "horno",
+  "mineral_cobre",
+  "mineral_hierro",
+  "lingote_cobre",
+  "lingote_hierro",
+  "gema",
+  "baba",
+  "ala",
+  "hueso",
+  "pocion",
+  "espada_madera",
+  "espada_cobre",
+  "espada_hierro",
+  "limo",
+  "murcielago",
+  "esqueleto",
+  "rey_limo",
+  "guardian",
+  "escalera_subir_cueva",
+  "escalera_bajar_cueva",
+  "escalera_subir_cripta",
+  "escalera_bajar_cripta",
+  "fantasma",
+  "nigromante",
+  "caballero_espectral",
+  "urna"
+ ],
+ "tilesets": [
+  "tierra",
+  "agua",
+  "cueva",
+  "acantilado",
+  "camino",
+  "cripta"
+ ],
+ "personajes": {
+  "granjera": {
+   "base": {
+    "pie": 56,
+    "cuadros": {
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
+    }
+   },
+   "minera": {
+    "pie": 56,
+    "cuadros": {
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
+    }
+   },
+   "aventurera": {
+    "pie": 56,
+    "cuadros": {
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
+    }
+   }
+  },
+  "granjero": {
+   "base": {
+    "pie": 57,
+    "cuadros": {
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
+    }
+   },
+   "minera": {
+    "pie": 56,
+    "cuadros": {
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
+    }
+   },
+   "aventurera": {
+    "pie": 56,
+    "cuadros": {
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
+    }
+   }
+  }
+ }
+}

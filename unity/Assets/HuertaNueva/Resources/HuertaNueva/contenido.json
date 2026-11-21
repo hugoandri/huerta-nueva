@@ -1,0 +1,323 @@
+{
+  "_ayuda": "Fuente única de verdad del juego. Para agregar algo: crea un sprite en 'sprites' (con su prompt para PixelLab) y úsalo desde un item, objeto o cultivo. Luego ejecuta: node herramientas/generar-assets.mjs  (solo genera lo que falta).",
+
+  "estilo": {
+    "outline": "single color black outline",
+    "shading": "basic shading",
+    "detail": "medium detail",
+    "view": "high top-down",
+    "sufijo": "cozy farming game pixel art, vibrant colors"
+  },
+
+  "mundo": { "tile": 32, "ancho": 48, "alto": 36, "semilla": 7 },
+
+  "_personajes": "Personajes elegibles. Cada ropa es una variante (estado) del mismo personaje en PixelLab: misma cara y proporciones, otra ropa. Todos comparten las mismas ropas.",
+  "personajes": [
+    { "id": "granjera", "nombre": "Granjera", "basadoEn": "granjero", "edicion": "turn this character into a beautiful young woman: long braided auburn hair falling over one shoulder, delicate feminine face with long eyelashes and a gentle smile, small flower tucked in the straw hat band, feminine figure; keep the same green overalls, white shirt, brown boots and the same art style", "tamano": 48, "animacion": "walking" },
+    { "id": "granjero", "nombre": "Granjero", "descripcion": "young farmer with a wide straw hat, green overalls, white shirt and brown boots", "tamano": 48, "animacion": "walking" }
+  ],
+  "ropas": [
+    { "id": "minera",     "edicion": "now wearing a yellow mining hard hat with a headlamp, a brown leather work jacket with pockets and sturdy dark boots; no straw hat" },
+    { "id": "aventurera", "edicion": "now wearing light brown leather armor with shoulder pads, a short red cape, leather gloves and boots; no hat" }
+  ],
+
+  "_mazmorras": "Mazmorras a las que se entra desde la cueva. Cada una tiene su tileset, monstruos, rocas y jefes. 'requiere': otra mazmorra y el piso que hay que haber alcanzado en ella.",
+  "mazmorras": [
+    {
+      "id": "mina", "nombre": "Mina de cobre", "tileset": "cueva", "pisos": 10,
+      "descripcion": "Limos, murciélagos y esqueletos. Cobre, hierro y gemas.",
+      "jefes": { "5": "rey_limo", "10": "guardian" },
+      "puntos_de_control": [1, 6],
+      "monstruos_por_piso": [
+        { "desde": 1, "hasta": 4,  "id": "limo" },
+        { "desde": 2, "hasta": 8,  "id": "murcielago" },
+        { "desde": 5, "hasta": 10, "id": "esqueleto" }
+      ],
+      "rocas_por_piso": [
+        { "desde": 1, "hasta": 10, "id": "roca",       "peso": 4 },
+        { "desde": 1, "hasta": 7,  "id": "roca_cobre", "peso": 3 },
+        { "desde": 4, "hasta": 10, "id": "roca_hierro","peso": 3 },
+        { "desde": 7, "hasta": 10, "id": "roca_gema",  "peso": 1 }
+      ],
+      "botin_final": "mazmorra_final"
+    },
+    {
+      "id": "cripta", "nombre": "Cripta olvidada", "tileset": "cripta", "pisos": 10,
+      "descripcion": "Esqueletos y fantasmas. Más hierro, gemas y huesos.",
+      "requiere": { "mazmorra": "mina", "piso": 5 },
+      "jefes": { "5": "nigromante", "10": "caballero_espectral" },
+      "puntos_de_control": [1, 6],
+      "monstruos_por_piso": [
+        { "desde": 1, "hasta": 10, "id": "esqueleto" },
+        { "desde": 1, "hasta": 10, "id": "fantasma" },
+        { "desde": 4, "hasta": 10, "id": "murcielago" }
+      ],
+      "rocas_por_piso": [
+        { "desde": 1, "hasta": 10, "id": "urna",        "peso": 4 },
+        { "desde": 1, "hasta": 10, "id": "roca_hierro", "peso": 3 },
+        { "desde": 4, "hasta": 10, "id": "roca_gema",   "peso": 2 }
+      ],
+      "botin_final": "cripta_final"
+    }
+  ],
+
+  "_monstruos": "vida, daño (medio corazón = 1), velocidad en px/s, visión en casillas. 'suelta': item → [probabilidad, min, max].",
+  "monstruos": [
+    { "id": "limo",       "nombre": "Limo",       "sprite": "limo",       "vida": 3,  "dano": 1, "velocidad": 38, "vision": 5, "suelta": { "baba": [0.8, 1, 2] } },
+    { "id": "murcielago", "nombre": "Murciélago", "sprite": "murcielago", "vida": 2,  "dano": 1, "velocidad": 70, "vision": 7, "vuela": true, "suelta": { "ala": [0.6, 1, 1] } },
+    { "id": "esqueleto", "nombre": "Esqueleto",  "sprite": "esqueleto",  "vida": 6,  "dano": 2, "velocidad": 46, "vision": 6, "suelta": { "hueso": [0.8, 1, 2], "lingote_hierro": [0.1, 1, 1] } },
+    { "id": "rey_limo", "nombre": "Rey Limo",   "sprite": "rey_limo",   "vida": 30, "dano": 2, "velocidad": 34, "vision": 9, "jefe": true, "suelta": { "baba": [1, 5, 8], "gema": [1, 1, 2] } },
+    { "id": "guardian", "nombre": "Guardián de piedra",   "sprite": "guardian",   "vida": 60, "dano": 3, "velocidad": 30, "vision": 10, "jefe": true, "suelta": { "gema": [1, 2, 3] } },
+    { "id": "fantasma",   "nombre": "Fantasma",   "sprite": "fantasma",   "vida": 4,  "dano": 2, "velocidad": 55, "vision": 8, "vuela": true, "suelta": { "gema": [0.08, 1, 1], "hueso": [0.4, 1, 1] } },
+    { "id": "nigromante", "nombre": "Nigromante", "sprite": "nigromante", "vida": 45, "dano": 3, "velocidad": 36, "vision": 9, "jefe": true, "suelta": { "hueso": [1, 4, 8], "gema": [1, 2, 3] } },
+    { "id": "caballero_espectral", "nombre": "Caballero espectral", "sprite": "caballero_espectral", "vida": 90, "dano": 4, "velocidad": 34, "vision": 10, "jefe": true, "suelta": { "gema": [1, 3, 5], "lingote_hierro": [1, 3, 5] } }
+  ],
+
+  "tilesets": [
+    { "id": "tierra", "inferior": "lush green meadow grass", "superior": "dark brown tilled farm soil with furrows", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
+    { "id": "agua", "inferior": "lush green meadow grass", "superior": "clear blue pond water with small ripples", "transicion": "muddy shore", "superior_caminable": false },
+    { "id": "cueva", "inferior": "dark jagged cave rock wall seen from above", "superior": "dusty brown cobblestone cave floor", "transicion": "rocky edge", "superior_caminable": true },
+    { "id": "acantilado", "inferior": "lush green meadow grass", "superior": "raised rocky plateau top covered with moss, grass and small bushes", "transicion": "steep grey rock cliff face", "transicion_tamano": 0.5, "superior_caminable": false, "referencia_inferior": "agua" },
+    { "id": "camino", "inferior": "lush green meadow grass", "superior": "packed light brown dirt footpath with small pebbles", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
+    { "id": "cripta", "inferior": "black void abyss with faint purple mist", "superior": "cracked grey stone brick crypt floor tiles with moss", "transicion": "broken stone edge", "superior_caminable": true }
+  ],
+
+  "sprites": {
+    "azada":            { "descripcion": "iron farming hoe tool icon", "ancho": 32, "alto": 32 },
+    "regadera":         { "descripcion": "metal watering can icon", "ancho": 32, "alto": 32 },
+    "hacha":            { "descripcion": "wood chopping axe icon", "ancho": 32, "alto": 32 },
+    "pico":             { "descripcion": "mining pickaxe icon", "ancho": 32, "alto": 32 },
+
+    "semilla_rabano":   { "descripcion": "small paper seed packet with a red radish drawn on it", "ancho": 32, "alto": 32 },
+    "semilla_zanahoria":{ "descripcion": "small paper seed packet with an orange carrot drawn on it", "ancho": 32, "alto": 32 },
+    "semilla_calabaza": { "descripcion": "small paper seed packet with an orange pumpkin drawn on it", "ancho": 32, "alto": 32 },
+
+    "rabano":           { "descripcion": "fresh red radish with green leaves", "ancho": 32, "alto": 32 },
+    "zanahoria":        { "descripcion": "fresh orange carrot with green leafy top", "ancho": 32, "alto": 32 },
+    "calabaza":         { "descripcion": "round orange pumpkin with short stem", "ancho": 32, "alto": 32 },
+    "conserva":         { "descripcion": "glass jar of homemade preserves with cloth lid tied with string", "ancho": 32, "alto": 32 },
+
+    "madera":           { "descripcion": "small pile of chopped wood logs", "ancho": 32, "alto": 32 },
+    "piedra":           { "descripcion": "small pile of grey stones", "ancho": 32, "alto": 32 },
+    "fibra":            { "descripcion": "bundle of green plant fiber tied together", "ancho": 32, "alto": 32 },
+
+    "brote":            { "descripcion": "tiny green seedling sprout with two small leaves, growing from soil", "ancho": 32, "alto": 32 },
+    "rabano_crecido":   { "descripcion": "young radish plant with leafy green tops, small crop", "ancho": 32, "alto": 32 },
+    "rabano_maduro":    { "descripcion": "ripe radish crop in the ground, red radish top visible under big green leaves", "ancho": 32, "alto": 32 },
+    "zanahoria_crecida":{ "descripcion": "young carrot plant with feathery green leaves, small crop", "ancho": 32, "alto": 32 },
+    "zanahoria_madura": { "descripcion": "ripe carrot crop in the ground, orange carrot top visible under tall feathery leaves", "ancho": 32, "alto": 32 },
+    "calabaza_crecida": { "descripcion": "young pumpkin vine with broad green leaves and a yellow flower", "ancho": 32, "alto": 32 },
+    "calabaza_madura":  { "descripcion": "ripe orange pumpkin on a green vine with leaves", "ancho": 32, "alto": 32 },
+
+    "arbol":            { "descripcion": "leafy green oak tree with brown trunk", "ancho": 64, "alto": 96 },
+    "roca":             { "descripcion": "grey boulder rock", "ancho": 32, "alto": 32 },
+    "maleza":           { "descripcion": "messy clump of dry yellow-brown wild grass and thistle weeds", "ancho": 32, "alto": 32 },
+    "casa":             { "descripcion": "large cozy two-story wooden farmhouse with big red tiled roof seen from above with visible ridge and eave shadow, timber frame front wall with a tall centered wooden double door, four windows with flower boxes, stone foundation, brick chimney, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 256, "alto": 240, "modelo": "pixen", "recortar": true },
+    "caja_envios":      { "descripcion": "wooden shipping crate with open lid and vegetables inside, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 48, "modelo": "pixen", "recortar": true },
+    "puesto":           { "descripcion": "wooden market stall seen straight from the front: red and white striped awning roof on top seen from above, long counter facing the viewer with seed bags and baskets, two wooden posts, perfectly frontal and symmetrical, no diagonal angle, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric, no people", "ancho": 128, "alto": 128, "modelo": "pixen", "recortar": true },
+    "cofre":            { "descripcion": "wooden storage chest with iron bands and a lock on the front, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 48, "modelo": "pixen", "recortar": true },
+    "cerca":            { "descripcion": "short wooden fence section with two posts and horizontal rails, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 32, "modelo": "pixen", "recortar": true },
+    "aspersor":         { "descripcion": "small metal garden sprinkler with a nozzle on top on a little base, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 32, "modelo": "pixen", "recortar": true },
+    "tarro":            { "descripcion": "wooden preserves keg barrel standing upright with a glass jar on top, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 64, "modelo": "pixen", "recortar": true },
+    "espantapajaros":   { "descripcion": "scarecrow with straw hat and patched shirt on a wooden pole, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 48, "modelo": "pixen", "recortar": true },
+
+    "ropa_granjera":    { "descripcion": "folded green overalls with a straw hat on top, clothing icon", "ancho": 32, "alto": 32 },
+    "ropa_minera":      { "descripcion": "yellow mining hard hat with headlamp and brown leather jacket, clothing icon", "ancho": 32, "alto": 32 },
+    "ropa_aventurera":  { "descripcion": "brown leather armor chestpiece with a small red cape, clothing icon", "ancho": 32, "alto": 32 },
+
+    "entrada_cueva":    { "descripcion": "mine tunnel entrance dug into the grey stone cliff wall (pintado con inpaint-v3 sobre el acantilado del juego: ver herramientas/entrada-cueva)", "ancho": 128, "alto": 128, "fijo": true },
+    "escalera_bajar":   { "descripcion": "square hole in a stone dungeon floor with worn stone stairs descending into darkness, seen from above, flush with the floor, isolated, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 48, "modelo": "pixen", "recortar": true },
+    "escalera_subir":   { "descripcion": "short flight of worn stone stairs going up into a bright arched exit in a rock wall, empty stairs without any person, seen from above, isolated, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric, no people", "ancho": 48, "alto": 64, "modelo": "pixen", "recortar": true },
+    "antorcha":         { "descripcion": "standing wooden torch post with a bright orange flame, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 48, "modelo": "pixen", "recortar": true },
+    "cofre_mazmorra":   { "descripcion": "old dungeon treasure chest with gold trim", "ancho": 32, "alto": 32 },
+    "roca_cobre":       { "descripcion": "grey boulder with shiny orange copper ore veins", "ancho": 32, "alto": 32 },
+    "roca_hierro":      { "descripcion": "dark grey boulder with silver iron ore veins", "ancho": 32, "alto": 32 },
+    "roca_gema":        { "descripcion": "purple rock with glowing blue crystal shards sticking out", "ancho": 32, "alto": 32 },
+    "horno":            { "descripcion": "small stone smelting furnace with chimney and glowing fire in the front opening, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 64, "modelo": "pixen", "recortar": true },
+
+    "mineral_cobre":    { "descripcion": "chunk of raw copper ore, item icon", "ancho": 32, "alto": 32 },
+    "mineral_hierro":   { "descripcion": "chunk of raw iron ore, item icon", "ancho": 32, "alto": 32 },
+    "lingote_cobre":    { "descripcion": "shiny copper ingot bar, item icon", "ancho": 32, "alto": 32 },
+    "lingote_hierro":   { "descripcion": "shiny iron ingot bar, item icon", "ancho": 32, "alto": 32 },
+    "gema":             { "descripcion": "sparkling blue crystal gem, item icon", "ancho": 32, "alto": 32 },
+    "baba":             { "descripcion": "blob of green slime goo, item icon", "ancho": 32, "alto": 32 },
+    "ala":              { "descripcion": "leathery bat wing, item icon", "ancho": 32, "alto": 32 },
+    "hueso":            { "descripcion": "old white bone, item icon", "ancho": 32, "alto": 32 },
+    "pocion":           { "descripcion": "small round red health potion bottle with cork, item icon", "ancho": 32, "alto": 32 },
+    "espada_madera":    { "descripcion": "simple wooden training sword, item icon", "ancho": 32, "alto": 32 },
+    "espada_cobre":     { "descripcion": "copper short sword with leather grip, item icon", "ancho": 32, "alto": 32 },
+    "espada_hierro":    { "descripcion": "iron sword with crossguard, item icon", "ancho": 32, "alto": 32 },
+
+    "limo":             { "descripcion": "small cute green slime monster blob with big eyes", "ancho": 32, "alto": 32 },
+    "murcielago":       { "descripcion": "purple cave bat monster with spread wings", "ancho": 32, "alto": 32 },
+    "esqueleto":        { "descripcion": "small skeleton warrior monster holding a rusty sword", "ancho": 32, "alto": 48 },
+    "rey_limo":         { "descripcion": "huge green slime king monster wearing a small golden crown", "ancho": 64, "alto": 64 },
+    "guardian":         { "descripcion": "ancient stone golem guardian monster with glowing blue eyes and mossy shoulders", "ancho": 64, "alto": 80 },
+    "escalera_subir_cueva": { "descripcion": "stone archway with steps going up to daylight in the dungeon wall (pintada con inpaint-v3 sobre la muralla de cueva: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
+    "escalera_bajar_cueva": { "descripcion": "wooden ladder leaning on the dungeon wall up to a glowing trapdoor in the ceiling (pintada con inpaint-v3 sobre la muralla de cueva: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
+    "escalera_subir_cripta": { "descripcion": "stone archway with steps going up to daylight in the dungeon wall (pintada con inpaint-v3 sobre la muralla de cripta: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
+    "escalera_bajar_cripta": { "descripcion": "wooden ladder leaning on the dungeon wall up to a glowing trapdoor in the ceiling (pintada con inpaint-v3 sobre la muralla de cripta: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
+    "fantasma":         { "descripcion": "floating translucent pale blue ghost monster with hollow eyes", "ancho": 32, "alto": 40 },
+    "nigromante":       { "descripcion": "hooded necromancer boss in dark purple robes holding a glowing skull staff", "ancho": 64, "alto": 72 },
+    "caballero_espectral": { "descripcion": "huge spectral knight boss in ghostly glowing blue armor with a big sword", "ancho": 72, "alto": 88 },
+    "urna":             { "descripcion": "old cracked clay funeral urn with purple markings", "ancho": 32, "alto": 32 }
+  },
+
+  "items": [
+    { "id": "azada",    "nombre": "Azada",    "tipo": "herramienta", "sprite": "azada",    "descripcion": "Ara el césped para poder sembrar." },
+    { "id": "regadera", "nombre": "Regadera", "tipo": "herramienta", "sprite": "regadera", "descripcion": "Riega la tierra. Se rellena en el agua.", "capacidad": 20 },
+    { "id": "hacha",    "nombre": "Hacha",    "tipo": "herramienta", "sprite": "hacha",    "descripcion": "Tala árboles y quita maleza." },
+    { "id": "pico",     "nombre": "Pico",     "tipo": "herramienta", "sprite": "pico",     "descripcion": "Rompe rocas." },
+
+    { "id": "semilla_rabano",    "nombre": "Semillas de rábano",    "tipo": "semilla", "sprite": "semilla_rabano",    "cultivo": "rabano",    "compra": 20, "venta": 10 },
+    { "id": "semilla_zanahoria", "nombre": "Semillas de zanahoria", "tipo": "semilla", "sprite": "semilla_zanahoria", "cultivo": "zanahoria", "compra": 35, "venta": 17 },
+    { "id": "semilla_calabaza",  "nombre": "Semillas de calabaza",  "tipo": "semilla", "sprite": "semilla_calabaza",  "cultivo": "calabaza",  "compra": 80, "venta": 40 },
+
+    { "id": "rabano",    "nombre": "Rábano",    "tipo": "cultivo", "sprite": "rabano",    "venta": 45,  "conserva": "conserva_rabano" },
+    { "id": "zanahoria", "nombre": "Zanahoria", "tipo": "cultivo", "sprite": "zanahoria", "venta": 80,  "conserva": "conserva_zanahoria" },
+    { "id": "calabaza",  "nombre": "Calabaza",  "tipo": "cultivo", "sprite": "calabaza",  "venta": 220, "conserva": "conserva_calabaza" },
+
+    { "id": "conserva_rabano",    "nombre": "Conserva de rábano",    "tipo": "artesanal", "sprite": "conserva", "venta": 140 },
+    { "id": "conserva_zanahoria", "nombre": "Conserva de zanahoria", "tipo": "artesanal", "sprite": "conserva", "venta": 210 },
+    { "id": "conserva_calabaza",  "nombre": "Conserva de calabaza",  "tipo": "artesanal", "sprite": "conserva", "venta": 490 },
+
+    { "id": "madera", "nombre": "Madera", "tipo": "material", "sprite": "madera", "venta": 2 },
+    { "id": "piedra", "nombre": "Piedra", "tipo": "material", "sprite": "piedra", "venta": 2 },
+    { "id": "fibra",  "nombre": "Fibra",  "tipo": "material", "sprite": "fibra",  "venta": 1 },
+
+    { "id": "cofre",          "nombre": "Cofre",          "tipo": "colocable", "sprite": "cofre",          "objeto": "cofre",          "venta": 0,  "descripcion": "Guarda hasta 12 objetos." },
+    { "id": "cerca",          "nombre": "Cerca",          "tipo": "colocable", "sprite": "cerca",          "objeto": "cerca",          "venta": 1,  "descripcion": "Decoración que bloquea el paso." },
+    { "id": "aspersor",       "nombre": "Aspersor",       "tipo": "colocable", "sprite": "aspersor",       "objeto": "aspersor",       "venta": 30, "descripcion": "Cada mañana riega las 4 casillas vecinas." },
+    { "id": "tarro",          "nombre": "Tarro de conservas", "tipo": "colocable", "sprite": "tarro",      "objeto": "tarro",          "venta": 50, "descripcion": "Convierte un cultivo en conserva en 1 día." },
+    { "id": "espantapajaros", "nombre": "Espantapájaros", "tipo": "colocable", "sprite": "espantapajaros", "objeto": "espantapajaros", "venta": 20, "descripcion": "Protege los cultivos de los cuervos en un radio de 8 casillas." },
+    { "id": "horno",          "nombre": "Horno de fundición", "tipo": "colocable", "sprite": "horno",    "objeto": "horno",          "venta": 40, "descripcion": "Funde 3 minerales en un lingote en unas horas." },
+    { "id": "antorcha",       "nombre": "Antorcha",       "tipo": "colocable", "sprite": "antorcha",       "objeto": "antorcha",       "venta": 2,  "descripcion": "Ilumina la granja de noche y la mazmorra." },
+
+    { "id": "ropa_granjera",   "nombre": "Ropa de granja",   "tipo": "ropa", "uso": "campo",   "sprite": "ropa_granjera",   "aspecto": "base",       "venta": 0,  "efecto": { "energia_campo": 0.5 }, "descripcion": "Arar y regar gastan la mitad de energía." },
+    { "id": "ropa_minera",     "nombre": "Traje de minería",    "tipo": "ropa", "uso": "batalla", "sprite": "ropa_minera",     "aspecto": "minera",     "venta": 60, "efecto": { "luz": 1.7, "energia_pico": 0.5 }, "descripcion": "Casco con lámpara: más luz en la mazmorra y el pico gasta la mitad." },
+    { "id": "ropa_aventurera", "nombre": "Armadura de aventura", "tipo": "ropa", "uso": "batalla", "sprite": "ropa_aventurera", "aspecto": "aventurera", "venta": 90, "efecto": { "defensa": 0.3, "vida": 2 }, "descripcion": "Ropa de batalla: recibes menos daño y tienes 1 corazón más." },
+
+    { "id": "espada_madera", "nombre": "Espada de madera", "tipo": "arma", "sprite": "espada_madera", "dano": 1, "venta": 5,   "descripcion": "Daño 1. Mejor que pelear con la azada." },
+    { "id": "espada_cobre",  "nombre": "Espada de cobre",  "tipo": "arma", "sprite": "espada_cobre",  "dano": 2, "venta": 60,  "descripcion": "Daño 2." },
+    { "id": "espada_hierro", "nombre": "Espada de hierro", "tipo": "arma", "sprite": "espada_hierro", "dano": 4, "venta": 150, "descripcion": "Daño 4." },
+    { "id": "pocion",        "nombre": "Poción de vida",   "tipo": "pocion", "sprite": "pocion", "cura": 6, "venta": 30, "descripcion": "Recupera 3 corazones (tecla F)." },
+
+    { "id": "mineral_cobre",  "nombre": "Mineral de cobre",  "tipo": "material", "sprite": "mineral_cobre",  "venta": 5 },
+    { "id": "mineral_hierro", "nombre": "Mineral de hierro", "tipo": "material", "sprite": "mineral_hierro", "venta": 10 },
+    { "id": "lingote_cobre",  "nombre": "Lingote de cobre",  "tipo": "material", "sprite": "lingote_cobre",  "venta": 25 },
+    { "id": "lingote_hierro", "nombre": "Lingote de hierro", "tipo": "material", "sprite": "lingote_hierro", "venta": 50 },
+    { "id": "gema",           "nombre": "Gema azul",         "tipo": "material", "sprite": "gema",           "venta": 120 },
+    { "id": "baba",           "nombre": "Baba de limo",      "tipo": "material", "sprite": "baba",           "venta": 3 },
+    { "id": "ala",            "nombre": "Ala de murciélago", "tipo": "material", "sprite": "ala",            "venta": 6 },
+    { "id": "hueso",          "nombre": "Hueso",             "tipo": "material", "sprite": "hueso",          "venta": 8 }
+  ],
+
+  "cultivos": [
+    { "id": "rabano",    "dias": 3, "producto": "rabano",    "sprites": ["brote", "rabano_crecido", "rabano_maduro"] },
+    { "id": "zanahoria", "dias": 4, "producto": "zanahoria", "sprites": ["brote", "zanahoria_crecida", "zanahoria_madura"] },
+    { "id": "calabaza",  "dias": 6, "producto": "calabaza",  "sprites": ["brote", "calabaza_crecida", "calabaza_madura"] }
+  ],
+
+  "objetos": [
+    { "id": "arbol",          "sprite": "arbol",          "solido": true, "herramienta": "hacha", "golpes": 3, "suelta": { "madera": [5, 8] } },
+    { "id": "roca",           "sprite": "roca",           "solido": true, "herramienta": "pico",  "golpes": 2, "suelta": { "piedra": [2, 3] } },
+    { "id": "maleza",         "sprite": "maleza",         "solido": true, "herramienta": "cualquiera", "golpes": 1, "suelta": { "fibra": [1, 2] } },
+    { "id": "casa",           "sprite": "casa",           "solido": true, "ancho": 6, "alto": 3, "accion": "dormir" },
+    { "id": "caja_envios",    "sprite": "caja_envios",    "solido": true, "accion": "vender" },
+    { "id": "puesto",         "sprite": "puesto",         "solido": true, "ancho": 3, "alto": 2, "accion": "tienda" },
+    { "id": "cofre",          "sprite": "cofre",          "solido": true, "accion": "cofre", "recoger": true },
+    { "id": "cerca",          "sprite": "cerca",          "solido": true, "recoger": true },
+    { "id": "aspersor",       "sprite": "aspersor",       "solido": true, "recoger": true, "riega": 1 },
+    { "id": "tarro",          "sprite": "tarro",          "solido": true, "accion": "maquina", "recoger": true,
+      "procesa": [
+        { "entrada": "rabano",    "n": 1, "salida": "conserva_rabano",    "minutos": 1440 },
+        { "entrada": "zanahoria", "n": 1, "salida": "conserva_zanahoria", "minutos": 1440 },
+        { "entrada": "calabaza",  "n": 1, "salida": "conserva_calabaza",  "minutos": 1440 }
+      ] },
+    { "id": "horno",          "sprite": "horno",          "solido": true, "accion": "maquina", "recoger": true,
+      "procesa": [
+        { "entrada": "mineral_cobre",  "n": 3, "salida": "lingote_cobre",  "minutos": 120 },
+        { "entrada": "mineral_hierro", "n": 3, "salida": "lingote_hierro", "minutos": 180 }
+      ] },
+    { "id": "espantapajaros", "sprite": "espantapajaros", "solido": true, "recoger": true, "protege": 8 },
+    { "id": "antorcha",       "sprite": "antorcha",       "solido": false, "recoger": true, "luz": 90 },
+    { "id": "entrada_cueva",  "sprite": "entrada_cueva",  "solido": true, "ancho": 2, "alto": 1, "accion": "mazmorra", "luz": 70, "sombra": false },
+    { "id": "urna",           "sprite": "urna",           "solido": true, "herramienta": "cualquiera", "golpes": 1, "suelta": { "hueso": [0, 2], "mineral_hierro": [0, 1] } },
+
+    { "id": "escalera_bajar", "sprite": "escalera_bajar", "solido": true, "accion": "bajar", "desfase": 16, "porTileset": true, "luz": 85 },
+    { "id": "escalera_subir", "sprite": "escalera_subir", "solido": true,  "accion": "salir", "luz": 110, "desfase": 16, "porTileset": true },
+    { "id": "cofre_mazmorra", "sprite": "cofre_mazmorra", "solido": true,  "accion": "botin", "botin": "cofre_mazmorra" },
+    { "id": "roca_cobre",     "sprite": "roca_cobre",     "solido": true, "herramienta": "pico", "golpes": 3, "suelta": { "mineral_cobre": [1, 3], "piedra": [0, 1] } },
+    { "id": "roca_hierro",    "sprite": "roca_hierro",    "solido": true, "herramienta": "pico", "golpes": 4, "suelta": { "mineral_hierro": [1, 3], "piedra": [0, 1] } },
+    { "id": "roca_gema",      "sprite": "roca_gema",      "solido": true, "herramienta": "pico", "golpes": 5, "suelta": { "gema": [1, 1] }, "luz": 50 }
+  ],
+
+  "recetas": [
+    { "resultado": "cerca",          "cantidad": 2, "ingredientes": { "madera": 2 } },
+    { "resultado": "espantapajaros", "cantidad": 1, "ingredientes": { "madera": 8, "fibra": 5 } },
+    { "resultado": "cofre",          "cantidad": 1, "ingredientes": { "madera": 20 } },
+    { "resultado": "aspersor",       "cantidad": 1, "ingredientes": { "piedra": 8, "madera": 4 } },
+    { "resultado": "tarro",          "cantidad": 1, "ingredientes": { "madera": 12, "piedra": 8, "fibra": 4 } },
+    { "resultado": "antorcha",       "cantidad": 3, "ingredientes": { "madera": 2, "fibra": 1 } },
+    { "resultado": "horno",          "cantidad": 1, "ingredientes": { "piedra": 20, "madera": 6 } },
+    { "resultado": "espada_madera",  "cantidad": 1, "ingredientes": { "madera": 10 } },
+    { "resultado": "espada_cobre",   "cantidad": 1, "ingredientes": { "lingote_cobre": 3, "madera": 2 } },
+    { "resultado": "espada_hierro",  "cantidad": 1, "ingredientes": { "lingote_hierro": 3, "hueso": 2 } },
+    { "resultado": "pocion",         "cantidad": 2, "ingredientes": { "baba": 3, "rabano": 1 } },
+    { "resultado": "ropa_minera",    "cantidad": 1, "ingredientes": { "lingote_cobre": 2, "fibra": 10 } },
+    { "resultado": "ropa_aventurera","cantidad": 1, "ingredientes": { "hueso": 5, "ala": 4, "fibra": 10 } },
+    { "resultado": "ropa_granjera",  "cantidad": 1, "ingredientes": { "fibra": 5 } }
+  ],
+
+  "tienda": ["semilla_rabano", "semilla_zanahoria", "semilla_calabaza"],
+
+  "_botines": "Tablas de botín para las mazmorras (próxima etapa). Cada jugador sortea su propio botín.",
+  "botines": {
+    "cripta_final": {
+      "tiradas": 5,
+      "garantizado": [{ "item": "gema", "n": 5 }],
+      "entradas": [
+        { "item": "lingote_hierro", "peso": 30, "min": 3, "max": 6 },
+        { "item": "gema",           "peso": 25, "min": 2, "max": 4 },
+        { "item": "pocion",         "peso": 25, "min": 3, "max": 5 },
+        { "item": "espada_hierro",  "peso": 20, "min": 1, "max": 1 }
+      ]
+    },
+    "cofre_mazmorra": {
+      "tiradas": 2,
+      "entradas": [
+        { "item": "mineral_cobre",  "peso": 30, "min": 2, "max": 5 },
+        { "item": "mineral_hierro", "peso": 20, "min": 1, "max": 4 },
+        { "item": "pocion",         "peso": 20, "min": 1, "max": 2 },
+        { "item": "semilla_calabaza","peso": 15, "min": 2, "max": 4 },
+        { "item": "gema",           "peso": 5,  "min": 1, "max": 1 }
+      ]
+    },
+    "mazmorra_final": {
+      "tiradas": 4,
+      "garantizado": [{ "item": "gema", "n": 3 }, { "item": "lingote_hierro", "n": 3 }],
+      "entradas": [
+        { "item": "lingote_hierro", "peso": 30, "min": 2, "max": 5 },
+        { "item": "gema",           "peso": 25, "min": 1, "max": 3 },
+        { "item": "pocion",         "peso": 25, "min": 2, "max": 4 },
+        { "item": "espada_hierro",  "peso": 10, "min": 1, "max": 1 },
+        { "item": "ropa_aventurera","peso": 10, "min": 1, "max": 1 }
+      ]
+    },
+    "mazmorra_prueba": {
+      "tiradas": 3,
+      "garantizado": [{ "item": "piedra", "n": 5 }],
+      "entradas": [
+        { "item": "madera",           "peso": 30, "min": 3, "max": 8 },
+        { "item": "fibra",            "peso": 25, "min": 2, "max": 5 },
+        { "item": "semilla_calabaza", "peso": 15, "min": 1, "max": 3 },
+        { "item": "conserva_calabaza","peso": 5,  "min": 1, "max": 1 }
+      ]
+    }
+  },
+
+  "inicio": {
+    "dinero": 300,
+    "inventario": [["azada", 1], ["regadera", 1], ["hacha", 1], ["pico", 1], ["semilla_rabano", 15]]
+  }
+}
