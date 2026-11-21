@@ -234,64 +234,36 @@ async function generarTileset(t) {
 // ---------- personaje: 4 direcciones + animación de caminar ----------
 const DIRS = ['south', 'west', 'east', 'north'];
 async function generarPersonaje(p) {
-  const base = dir(`personaje/${p.id}`);
-  let cid = estado[`personaje:${p.id}`];
+  const clave = `personaje:${p.id}`;
+  let cid = estado[clave];
   if (!cid || FORZAR) {
-    const { datos } = await api('POST', '/create-character-with-4-directions', {
-      description: p.descripcion,
-      image_size: { width: p.tamano, height: p.tamano },
-      view: 'high top-down',
-      outline: estilo.outline,
-      shading: estilo.shading,
-      detail: estilo.detail,
-    });
-    cid = estado[`personaje:${p.id}`] = datos.character_id;
-    delete estado[`personaje:${p.id}:anim`];
-    await guardarEstado();
-  }
-  let info;
-  for (;;) {
-    info = (await api('GET', `/characters/${cid}`)).datos;
-    if (info.status === 'completed' && info.rotation_urls) break;
-    if (info.status === 'failed') throw new Error('PixelLab no pudo crear el personaje');
-    await esperar(8000);
-  }
-  if (!estado[`personaje:${p.id}:anim`]) {
-    const { datos } = await api('POST', '/animate-character', {
-      character_id: cid,
-      template_animation_id: p.animacion,
-      directions: DIRS,
-    });
-    estado[`personaje:${p.id}:anim`] = datos.animation_group_id || true;
-    await guardarEstado();
-  }
-  for (;;) {
-    info = (await api('GET', `/characters/${cid}`)).datos;
-    const anim = (info.animations || []).find(a =>
-      a.animation_group_id === estado[`personaje:${p.id}:anim`] || a.animation_type === p.animacion);
-    const listas = anim && DIRS.every(d => anim.directions.find(x => x.direction === d && x.frames?.length));
-    if (listas) {
-      // Todo sale en un ZIP desde api.pixellab.ai (rotations/ y animations/<tipo>/<dir>/frame_NNN.png).
-      const zip = await apiBinario(`/characters/${cid}/zip`);
-      if (zip) {
-        const archivos = leerZip(zip);
-        const buscar = re => Object.keys(archivos).filter(n => re.test(n)).sort();
-        await fs.mkdir(base, { recursive: true });
-        const cuadros = {};
-        for (const d of DIRS) {
-          const rot = buscar(new RegExp(`(^|/)rotations/${d}\\.png$`))[0];
-          if (!rot) throw new Error(`el ZIP no trae la rotación ${d}`);
-          await fs.writeFile(`${base}/${d}.png`, limpiarBordes(archivos[rot]));
-          const frames = buscar(new RegExp(`(^|/)animations/[^/]+/${d}/[^/]+\\.png$`));
-          cuadros[d] = frames.length;
-          for (let i = 0; i < frames.length; i++) await fs.writeFile(`${base}/caminar_${d}_${i}.png`, limpiarBordes(archivos[frames[i]]));
-        }
-        await fs.writeFile(`${base}/info.json`, JSON.stringify({ tamano: info.size, cuadros }));
-        return;
-      }
+    if (p.basadoEn) {
+      // Variante de otro personaje: mismo estilo de dibujo, proporciones y paleta.
+      // si el personaje de origen se está generando en paralelo, se espera a que exista
+      for (let k = 0; k < 120 && !(await existe(dir(`personaje/${p.basadoEn}/info.json`))); k++) await esperar(5000);
+      const origen = estado[`personaje:${p.basadoEn}`];
+      if (!origen) throw new Error(`primero hay que generar ${p.basadoEn}`);
+      const { datos } = await api('POST', '/create-character-state', {
+        character_id: origen, edit_description: p.edicion, state_name: p.id, no_background: true, use_color_palette_from_reference: true,
+      });
+      cid = datos.character_id;
+    } else {
+      const { datos } = await api('POST', '/create-character-with-4-directions', {
+        description: p.descripcion,
+        image_size: { width: p.tamano, height: p.tamano },
+        view: 'high top-down',
+        outline: estilo.outline,
+        shading: estilo.shading,
+        detail: estilo.detail,
+      });
+      cid = datos.character_id;
     }
-    await esperar(8000);
+    estado[clave] = cid;
+    delete estado[`${clave}:anim`];
+    await guardarEstado();
   }
+  // ?states= limita el ZIP a este personaje (si no, trae todo su grupo de variantes)
+  await animarYDescargar(p, cid, `${clave}:anim`, dir(`personaje/${p.id}`), `?states=${cid}`);
 }
 
 // ---------- ropas: variantes (estados) del mismo personaje + su animación de caminar ----------

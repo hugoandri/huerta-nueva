@@ -111,7 +111,7 @@ export function crearRender(el, def, G) {
       if (o.x + w < x0 - 2 || o.x > x1 + 2 || o.y > y1 + 1 || o.y + h < y0 - 4) continue;
       ents.push([(o.y + h) * T - (d.solido ? 0 : T), () => {
         const img = G.SPR[d.sprite];
-        if (d.solido && w * h > 1) {   // sombra hacia la derecha, casi toda detrás de la construcción: da volumen
+        if (d.solido && w * h > 1 && d.sombra !== false) {   // sombra hacia la derecha, casi toda detrás de la construcción: da volumen
           g.fillStyle = 'rgba(0,0,0,.2)';
           g.beginPath(); g.ellipse((o.x + w / 2) * T + 10, (o.y + h * 0.4) * T, img.width * 0.48, h * T * 0.38, 0, 0, 7); g.fill();
         }

@@ -13,7 +13,7 @@
 
   "_personajes": "Personajes elegibles. Cada ropa es una variante (estado) del mismo personaje en PixelLab: misma cara y proporciones, otra ropa. Todos comparten las mismas ropas.",
   "personajes": [
-    { "id": "granjera", "nombre": "Granjera", "descripcion": "young woman farmer, clearly feminine face with soft features, long flowing auburn hair down to her waist, wide straw hat, green overall dress, white blouse, brown boots", "tamano": 48, "animacion": "walking" },
+    { "id": "granjera", "nombre": "Granjera", "basadoEn": "granjero", "edicion": "turn this character into a beautiful young woman: long braided auburn hair falling over one shoulder, delicate feminine face with long eyelashes and a gentle smile, small flower tucked in the straw hat band, feminine figure; keep the same green overalls, white shirt, brown boots and the same art style", "tamano": 48, "animacion": "walking" },
     { "id": "granjero", "nombre": "Granjero", "descripcion": "young farmer with a wide straw hat, green overalls, white shirt and brown boots", "tamano": 48, "animacion": "walking" }
   ],
   "ropas": [
@@ -123,7 +123,7 @@
     "ropa_minera":      { "descripcion": "yellow mining hard hat with headlamp and brown leather jacket, clothing icon", "ancho": 32, "alto": 32 },
     "ropa_aventurera":  { "descripcion": "brown leather armor chestpiece with a small red cape, clothing icon", "ancho": 32, "alto": 32 },
 
-    "entrada_cueva":    { "descripcion": "dark tunnel exit carved into a rocky cliff at the edge of a forest, framed by wooden beams, pine trees on both sides and on top, dirt path leading into the dark opening, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 96, "alto": 96, "modelo": "pixen", "recortar": true },
+    "entrada_cueva":    { "descripcion": "mine tunnel entrance in a rocky hillside covered with bushes and small pine trees, thick wooden frame around a deep black opening, minecart rails coming out of the black tunnel, isolated object, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 96, "alto": 96, "modelo": "pixen", "recortar": true },
     "escalera_bajar":   { "descripcion": "dark stone stairway going down into a hole in the cave floor", "ancho": 32, "alto": 32 },
     "escalera_subir":   { "descripcion": "wooden ladder leaning up toward a beam of daylight", "ancho": 32, "alto": 48 },
     "antorcha":         { "descripcion": "standing wooden torch post with a bright orange flame, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 48, "modelo": "pixen", "recortar": true },
@@ -235,7 +235,7 @@
       ] },
     { "id": "espantapajaros", "sprite": "espantapajaros", "solido": true, "recoger": true, "protege": 8 },
     { "id": "antorcha",       "sprite": "antorcha",       "solido": false, "recoger": true, "luz": 90 },
-    { "id": "entrada_cueva",  "sprite": "entrada_cueva",  "solido": true, "ancho": 3, "alto": 3, "accion": "mazmorra", "luz": 70 },
+    { "id": "entrada_cueva",  "sprite": "entrada_cueva",  "solido": true, "ancho": 3, "alto": 3, "accion": "mazmorra", "luz": 70, "sombra": false },
     { "id": "urna",           "sprite": "urna",           "solido": true, "herramienta": "cualquiera", "golpes": 1, "suelta": { "hueso": [0, 2], "mineral_hierro": [0, 1] } },
 
     { "id": "escalera_bajar", "sprite": "escalera_bajar", "solido": false, "accion": "bajar" },
