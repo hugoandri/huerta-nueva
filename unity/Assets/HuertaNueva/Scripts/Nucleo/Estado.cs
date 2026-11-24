@@ -86,6 +86,15 @@ namespace HuertaNueva
 
     [Serializable] public class Tiempo { public int dia = 1; public float min; public bool lluvia; }
 
+    /// <summary>Mossling rescatado. casa = uid de su Moss Hut en la granja (0 = sin hogar todavía).</summary>
+    [Serializable]
+    public class Residente
+    {
+        public string id, trabajo;
+        public int casa;
+        public bool siesta;                   // ayer no comió: hoy no trabaja
+    }
+
     [Serializable]
     public class Estado
     {
@@ -96,6 +105,8 @@ namespace HuertaNueva
         public Zona granja;
         public EstadoMazmorra mazmorra = new EstadoMazmorra();
         public List<string> hitos = new List<string> { "intro" };
+        // Campo nuevo de la v0.2: las partidas anteriores lo cargan vacío, así que no hace falta subir VERSION_ESTADO.
+        public List<Residente> residentes = new List<Residente>();
         public List<Jugador> jugadores = new List<Jugador>();
 
         public Jugador BuscarJugador(string id) => jugadores.Find(j => j.id == id);
@@ -104,6 +115,8 @@ namespace HuertaNueva
         public void Normalizar(Def def = null)
         {
             if (hitos == null || hitos.Count == 0) hitos = new List<string> { "intro" };
+            if (residentes == null) residentes = new List<Residente>();
+            if (def != null) residentes.RemoveAll(r => r == null || !def.RES.ContainsKey(r.id ?? ""));
             foreach (var j in jugadores)
                 for (int i = 0; i < j.inv.Count; i++)
                     if (j.inv[i] != null && (string.IsNullOrEmpty(j.inv[i].id) || (def != null && !def.ITEMS.ContainsKey(j.inv[i].id)))) j.inv[i] = null;

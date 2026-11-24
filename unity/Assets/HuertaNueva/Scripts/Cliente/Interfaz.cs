@@ -360,7 +360,7 @@ namespace HuertaNueva
         {
             if (pestana != null) pestanaMenu = pestana;
             marcada = -1;
-            Abrir(new Panel { firma = FirmaInv, pintar = PintarMenu });
+            Abrir(new Panel { firma = () => FirmaInv() + "|" + string.Join(",", S.residentes.Select(r => r.trabajo + r.casa + r.siesta)), pintar = PintarMenu });
         }
 
         void PintarMenu()
@@ -368,8 +368,8 @@ namespace HuertaNueva
             var j = Yo;
             Cabecera("Adventurer's Pack", () =>
             {
-                foreach (var (t, n) in new[] { ("mochila", "Backpack"), ("crafteo", "Crafting"), ("diario", "Journal"), ("ayuda", "How to Play") })
-                    UIKit.BotonEstilo(cab, n, () => { pestanaMenu = t; marcada = -1; Repintar(); }, pestanaMenu == t ? "oro" : "madera", true, 108, 34, 14);
+                foreach (var (t, n) in new[] { ("mochila", "Backpack"), ("crafteo", "Crafting"), ("aldea", "Village"), ("diario", "Journal"), ("ayuda", "How to Play") })
+                    UIKit.BotonEstilo(cab, n, () => { pestanaMenu = t; marcada = -1; Repintar(); }, pestanaMenu == t ? "oro" : "madera", true, 100, 34, 14);
             });
             if (pestanaMenu == "mochila")
             {
@@ -434,6 +434,7 @@ namespace HuertaNueva
                     UIKit.BotonEstilo(der, "Craft", () => Enviar(new Accion { tipo = "fabricar", receta = k }), "verde", puede, 84, 34);
                 }
             }
+            else if (pestanaMenu == "aldea") PintarAldea(j);
             else if (pestanaMenu == "diario")
             {
                 var hitos = S.hitos ?? new List<string> { "intro" };
@@ -504,6 +505,61 @@ namespace HuertaNueva
                     }
                 },
             });
+        }
+
+        // ---------------------------------------------------------------- aldea: construir y Mosslings
+        /// <summary>Edificio elegido en la pestaña Village; se coloca delante del jugador al pulsar Usar.</summary>
+        public string Construyendo { get; private set; }
+        public void CancelarConstruccion() { if (Construyendo == null) return; Construyendo = null; Aviso("Building cancelled"); }
+
+        void PintarAldea(Jugador j)
+        {
+            var e = S;
+            Ayuda("Pick a building, then face an empty spot on the farm and press <b>Use</b> (Space) to place it. <b>Esc</b> cancels. Take a building down with the axe or pickaxe to get its materials back.");
+            Sub("Buildings");
+            foreach (var ed in def.edificios)
+            {
+                bool abierto = Reglas.EdificioDisponible(e, def, ed);
+                bool puede = abierto && ed.coste.All(c => Inventario.Cuenta(j, c.id) >= c.n) && j.lugar == "granja";
+                string req = abierto ? ed.descripcion
+                    : ed.requiereEdificio != null && !e.granja.objetos.Any(o => o.id == ed.requiereEdificio)
+                        ? $"Requires the {def.EDIF[ed.requiereEdificio].nombre}."
+                        : $"Requires {ed.requiereResidentes} Mossling{(ed.requiereResidentes > 1 ? "s" : "")} living in the glen.";
+                int hechos = e.granja.objetos.Count(o => o.id == ed.id);
+                var col = FilaLista(ed.id, ed.nombre + (hechos > 0 ? $"  ·  built: {hechos}" : ""), req, out var der, null, !abierto);
+                var ing = UIKit.Fila(col, 10);
+                foreach (var c in ed.coste)
+                {
+                    var f = UIKit.Fila(ing.transform, 2);
+                    UIKit.Icono(f.transform, G.Icono(def, c.id), 18);
+                    int tiene = Inventario.Cuenta(j, c.id);
+                    UIKit.Texto(f.transform, $"{tiene}/{c.n}", 13, tiene < c.n ? UIKit.Rojo : UIKit.Crema).horizontalOverflow = HorizontalWrapMode.Overflow;
+                }
+                string id = ed.id;
+                UIKit.BotonEstilo(der, "Build", () =>
+                {
+                    Construyendo = id; Cerrar();
+                    Aviso($"Placing: {def.EDIF[id].nombre}. Face an empty spot and press Use. Esc cancels.");
+                }, "verde", puede, 84, 34);
+            }
+            Sub("Mosslings");
+            if (e.residentes.Count == 0)
+            {
+                Ayuda("No Mosslings yet. Something glows faintly in the Copper Mine… bring a torch.");
+                return;
+            }
+            bool hayLenera = e.granja.objetos.Any(o => o.id == "lenera");
+            for (int i = 0; i < e.residentes.Count; i++)
+            {
+                int k = i; var r = e.residentes[i]; var rd = def.RES[r.id];
+                string estado = r.casa == 0 ? "Waiting for a Moss Hut"
+                    : r.siesta ? "Napping: nothing to eat on the Shared Table"
+                    : r.trabajo == "lena" ? "Stacks 6 wood in the Woodshed every morning"
+                    : $"Waters {Reglas.RIEGO_MOSSLING} tilled tiles near its hut every morning";
+                FilaLista(rd.sprite, rd.nombre, $"{rd.descripcion}\n<b>{estado}</b>", out var der);
+                UIKit.BotonEstilo(der, "Water", () => Enviar(new Accion { tipo = "asignar", i = k, item = "regar" }), r.trabajo == "regar" ? "oro" : "madera", true, 76, 34);
+                UIKit.BotonEstilo(der, "Wood", () => Enviar(new Accion { tipo = "asignar", i = k, item = "lena" }), r.trabajo == "lena" ? "oro" : "madera", hayLenera, 76, 34);
+            }
         }
 
         void Cofre(int uid)
@@ -637,6 +693,7 @@ namespace HuertaNueva
                     else if (e.panel == "mazmorra") PanelMazmorra(e);
                     break;
                 case "resumen": Resumen(e); break;
+                case "construido": if (e.item == Construyendo) Construyendo = null; break;
                 case "botin": PanelBotin(e); break;
                 case "derrota": Derrota(e); break;
                 case "piso": if (e.bajada || e.jefe != null) Aviso(e.jefe != null ? $"Floor {e.piso}: {e.jefe} awaits!" : $"Floor {e.piso}", e.jefe != null); break;

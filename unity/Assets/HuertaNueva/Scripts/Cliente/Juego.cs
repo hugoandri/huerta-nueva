@@ -84,7 +84,9 @@ namespace HuertaNueva
             ui.Aviso("Till with the hoe, plant seeds, and water them. The stall sells seeds.");
         }
 
-        void UsarFrente() { var (x, y) = Reglas.CeldaFrente(def, sesion.Yo); sesion.Despachar(new Accion { tipo = "usar", x = x, y = y }); }
+        // Con un edificio elegido en la pestaña Village, Usar lo construye delante en vez de usar la casilla.
+        void UsarFrente() { var (x, y) = Reglas.CeldaFrente(def, sesion.Yo); UsarCelda(x, y); }
+        void UsarCelda(int x, int y) => sesion.Despachar(new Accion { tipo = ui.Construyendo != null ? "construir" : "usar", item = ui.Construyendo, x = x, y = y });
         void Seleccionar(int i) => sesion.Despachar(new Accion { tipo = "seleccionar", i = i });
 
         // En el celular la app se cierra sin avisar: guardamos al pasar a segundo plano.
@@ -111,6 +113,8 @@ namespace HuertaNueva
                 if ((Input_.Bajada(Tecla.Escape) || Input_.Bajada(Tecla.Menu) || Input_.Bajada(Tecla.MenuTab) || Input_.Bajada(Tecla.Crafteo)) && ui.Cerrable) ui.Cerrar();
                 return;
             }
+            if (Input_.Bajada(Tecla.Escape) && ui.Construyendo != null) { ui.CancelarConstruccion(); return; }
+            if (sesion.Yo.lugar != "granja" && ui.Construyendo != null) ui.CancelarConstruccion();
             if (Input_.Bajada(Tecla.Menu) || Input_.Bajada(Tecla.MenuTab)) { ui.Menu("mochila"); return; }
             if (Input_.Bajada(Tecla.Crafteo)) { ui.Menu("crafteo"); return; }
             if (Input_.Bajada(Tecla.Comer)) sesion.Despachar(new Accion { tipo = "comer" });
@@ -131,7 +135,7 @@ namespace HuertaNueva
                 if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) <= 1)
                 {
                     if (dx != 0 || dy != 0) sesion.Despachar(new Accion { tipo = "mirar", dir = Mathf.Abs(dx) > Mathf.Abs(dy) ? (dx > 0 ? "east" : "west") : (dy > 0 ? "south" : "north") });
-                    sesion.Despachar(new Accion { tipo = "usar", x = x, y = y });
+                    UsarCelda(x, y);
                 }
             }
             if (ui.Abierto) return;

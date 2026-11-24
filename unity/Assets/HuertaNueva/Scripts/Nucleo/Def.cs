@@ -22,7 +22,7 @@ namespace HuertaNueva
     {
         public string id, sprite, accion, herramienta, botin;
         public bool solido, recoger, porTileset;
-        public int ancho = 1, alto = 1, golpes, riega, protege, luz, desfase;
+        public int ancho = 1, alto = 1, golpes, riega, protege, luz, desfase, hogar;
         public List<Suelta> suelta = new List<Suelta>();
         public List<Proceso> procesa = new List<Proceso>();
     }
@@ -66,6 +66,17 @@ namespace HuertaNueva
     public class TablaBotin { public int tiradas; public List<EntradaBotin> entradas = new List<EntradaBotin>(); public List<Cantidad> garantizado = new List<Cantidad>(); }
 
     public class PersonajeDef { public string id, nombre, titulo, personalidad; }
+
+    /// <summary>Edificio de la aldea: se construye con la acción "construir", nunca va en la mochila.</summary>
+    public class EdificioDef
+    {
+        public string id, nombre, descripcion, requiereEdificio;
+        public int requiereResidentes;
+        public List<Cantidad> coste = new List<Cantidad>();
+    }
+
+    /// <summary>Mossling rescatable: duerme en un farol apagado de un piso concreto de una mazmorra.</summary>
+    public class ResidenteDef { public string id, nombre, sprite, descripcion, trabajo, rescateMazmorra; public int rescatePiso; }
     public class SpriteDef { public string id; public int ancho, alto; }
 
     public class Def
@@ -82,6 +93,10 @@ namespace HuertaNueva
         public Dictionary<string, TablaBotin> botines = new Dictionary<string, TablaBotin>();
         public List<PersonajeDef> personajes = new List<PersonajeDef>();
         public List<string> ropas = new List<string>();
+        public List<EdificioDef> edificios = new List<EdificioDef>();
+        public Dictionary<string, EdificioDef> EDIF = new Dictionary<string, EdificioDef>();
+        public List<ResidenteDef> residentes = new List<ResidenteDef>();
+        public Dictionary<string, ResidenteDef> RES = new Dictionary<string, ResidenteDef>();
         public List<Cantidad> inventarioInicio = new List<Cantidad>();
         public Dictionary<string, SpriteDef> sprites = new Dictionary<string, SpriteDef>();
         public List<string> tilesets = new List<string>();
@@ -134,7 +149,7 @@ namespace HuertaNueva
                     id = J.S(x, "id"), sprite = J.S(x, "sprite"), accion = J.S(x, "accion"), herramienta = J.S(x, "herramienta"),
                     botin = J.S(x, "botin"), solido = J.B(x, "solido"), recoger = J.B(x, "recoger"), porTileset = J.B(x, "porTileset"),
                     ancho = J.I(x, "ancho", 1), alto = J.I(x, "alto", 1), golpes = J.I(x, "golpes"), riega = J.I(x, "riega"),
-                    protege = J.I(x, "protege"), luz = J.I(x, "luz"), desfase = J.I(x, "desfase"),
+                    protege = J.I(x, "protege"), luz = J.I(x, "luz"), desfase = J.I(x, "desfase"), hogar = J.I(x, "hogar"),
                     suelta = LeerSuelta(J.V(x, "suelta"), false),
                 };
                 foreach (var p in J.L(J.V(x, "procesa")))
@@ -204,6 +219,27 @@ namespace HuertaNueva
                 });
             }
             foreach (var o in J.L(J.V(C, "ropas"))) d.ropas.Add(J.S(J.D(o), "id"));
+            foreach (var o in J.L(J.V(C, "edificios")))
+            {
+                var x = J.D(o); var req = J.D(J.V(x, "requiere"));
+                var ed = new EdificioDef
+                {
+                    id = J.S(x, "id"), nombre = J.S(x, "nombre"), descripcion = J.S(x, "descripcion", ""),
+                    requiereEdificio = J.S(req, "edificio"), requiereResidentes = J.I(req, "residentes"),
+                };
+                foreach (var kv in J.D(J.V(x, "coste"))) ed.coste.Add(new Cantidad(kv.Key, (int)(double)kv.Value));
+                d.edificios.Add(ed); d.EDIF[ed.id] = ed;
+            }
+            foreach (var o in J.L(J.V(C, "residentes")))
+            {
+                var x = J.D(o); var res = J.D(J.V(x, "rescate"));
+                var r = new ResidenteDef
+                {
+                    id = J.S(x, "id"), nombre = J.S(x, "nombre"), sprite = J.S(x, "sprite"), descripcion = J.S(x, "descripcion", ""),
+                    trabajo = J.S(x, "trabajo", "regar"), rescateMazmorra = J.S(res, "mazmorra"), rescatePiso = J.I(res, "piso"),
+                };
+                d.residentes.Add(r); d.RES[r.id] = r;
+            }
             var inicio = J.D(J.V(C, "inicio"));
             d.dineroInicio = J.I(inicio, "dinero", 300);
             foreach (var o in J.L(J.V(inicio, "inventario"))) { var l = J.L(o); d.inventarioInicio.Add(new Cantidad((string)l[0], (int)(double)l[1])); }

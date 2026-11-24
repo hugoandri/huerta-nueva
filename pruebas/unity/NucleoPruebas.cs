@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -157,11 +158,101 @@ public static class NucleoPruebas
                 }
                 finally { horno.ancho = ancho; horno.alto = alto; }
             });
-            Console.WriteLine("10 pruebas C# correctas.");
+            Prueba("construir edificios de la aldea", () =>
+            {
+                var e = Nuevo(); Campo(e); var j = e.BuscarJugador("yo"); var g = e.granja;
+                var (fx, fy) = Reglas.CeldaFrente(def, j);
+                Despejar(e, fx - 2, fy - 2, 6, 6);
+                Actuar(e, new Accion { tipo = "construir", item = "hoguera", x = fx, y = fy });
+                Exigir(!g.objetos.Any(o => o.id == "hoguera"), "Sin materiales no se construye");
+                Inventario.Agregar(def, j, "madera", 200); Inventario.Agregar(def, j, "piedra", 200); Inventario.Agregar(def, j, "fibra", 50);
+                Actuar(e, new Accion { tipo = "construir", item = "casita_musgo", x = fx, y = fy });
+                Exigir(!g.objetos.Any(o => o.id == "casita_musgo"), "La Moss Hut pide antes el Lantern Hearth");
+                Actuar(e, new Accion { tipo = "construir", item = "lenera", x = fx, y = fy });
+                Exigir(!g.objetos.Any(o => o.id == "lenera"), "La Woodshed pide un Mossling");
+                Actuar(e, new Accion { tipo = "construir", item = "hoguera", x = fx, y = fy });
+                var h = g.objetos.FirstOrDefault(o => o.id == "hoguera");
+                Exigir(h != null && h.x == fx && Inventario.Cuenta(j, "madera") == 180 && Inventario.Cuenta(j, "piedra") == 180, "Construye delante y cobra los materiales");
+                Actuar(e, new Accion { tipo = "construir", item = "hoguera", x = fx, y = fy });
+                Exigir(g.objetos.Count(o => o.id == "hoguera") == 1, "No se construye encima de otro edificio");
+                Actuar(e, new Accion { tipo = "construir", item = "hoguera", x = fx + 4, y = fy });
+                Exigir(g.objetos.Count(o => o.id == "hoguera") == 1, "No se construye lejos del jugador");
+                j.sel = j.inv.FindIndex(s => s != null && s.id == "hacha");
+                Actuar(e, new Accion { tipo = "usar", x = fx, y = fy });
+                Exigir(!g.objetos.Any(o => o.id == "hoguera") && Inventario.Cuenta(j, "madera") == 200, "Demoler con el hacha devuelve los materiales");
+            });
+            Prueba("rescatar un Mossling en la Mina", () =>
+            {
+                var e = Nuevo(); var j = e.BuscarJugador("yo");
+                var rd = def.residentes.First();
+                var z = Mazmorra.GenerarPiso(def, rd.rescateMazmorra, 5, rd.rescatePiso);
+                e.mazmorra.actual = rd.rescateMazmorra; e.mazmorra.piso = rd.rescatePiso; e.mazmorra.nivel = z; e.mazmorra.enCurso = true; j.lugar = "mazmorra";
+                Reglas.ColocarRescates(e, def, z);
+                var farol = z.objetos.FirstOrDefault(o => o.id == "farol_apagado");
+                Exigir(farol != null, "El farol apagado aparece en su piso");
+                j.x = (farol.x + 0.5f) * def.T; j.y = (farol.y + 1) * def.T + 16; j.dir = "north";
+                j.sel = j.inv.FindIndex(s => s != null && s.id == "hacha");
+                Actuar(e, new Accion { tipo = "usar", x = farol.x, y = farol.y });
+                Exigir(e.residentes.Count == 0 && z.objetos.Contains(farol), "Sin antorcha no se rescata");
+                Inventario.Agregar(def, j, "antorcha", 1); j.sel = j.inv.FindIndex(s => s != null && s.id == "antorcha");
+                Actuar(e, new Accion { tipo = "usar", x = farol.x, y = farol.y });
+                Exigir(e.residentes.Count == 1 && e.residentes[0].id == rd.id && e.residentes[0].casa == 0, "La antorcha despierta al Mossling");
+                Exigir(!z.objetos.Contains(farol) && Inventario.Cuenta(j, "antorcha") == 0, "Gasta la antorcha y quita el farol");
+                var z2 = Mazmorra.GenerarPiso(def, rd.rescateMazmorra, 6, rd.rescatePiso);
+                Reglas.ColocarRescates(e, def, z2);
+                Exigir(!z2.objetos.Any(o => o.id == "farol_apagado"), "Un Mossling rescatado no vuelve a aparecer");
+            });
+            Prueba("el Mossling come, riega y duerme la siesta", () =>
+            {
+                var e = Nuevo(); var g = e.granja;
+                var (hx, hy) = LugarLibre(e, 8, 8);
+                var casa = Mundo.Colocar(def, g, "casita_musgo", hx, hy);
+                var mesa = Mundo.Colocar(def, g, "comedero", hx + 3, hy);
+                var r = new Residente { id = def.residentes.First().id, trabajo = "regar", casa = casa.uid };
+                e.residentes.Add(r);
+                var aradas = new List<int>();
+                for (int y = hy + 3; y < hy + 6; y++) for (int x = hx; x < hx + 5; x++) { int i = Mundo.Idx(def, x, y); g.suelo[i] = 1; aradas.Add(i); }
+                mesa.datos.items = new List<Slot>(); for (int k = 0; k < 12; k++) mesa.datos.items.Add(null);
+                mesa.datos.items[0] = new Slot("rabano", 1);
+                var ev = Reglas.Aplicar(e, def, new Accion { tipo = "dormir" });
+                Exigir(!r.siesta && mesa.datos.items[0] == null, "Come un cultivo del Shared Table");
+                Exigir(aradas.Count(i => g.regado[i] != 0) >= Reglas.RIEGO_MOSSLING, "Riega las casillas aradas cerca de su casita");
+                ev = Reglas.Aplicar(e, def, new Accion { tipo = "dormir" });
+                Exigir(r.siesta && ev.Any(x => x.tipo == "resumen" && x.notas.Any(n => n.Contains("napped"))), "Sin comida duerme la siesta y lo avisa");
+            });
+            Prueba("partidas anteriores sin residentes", () =>
+            {
+                var e = Nuevo(); e.residentes = null; e.Normalizar(def);
+                Exigir(e.residentes != null && e.residentes.Count == 0, "Una partida de la v0.1 carga con la aldea vacía");
+                e.residentes.Add(new Residente { id = "no_existe" }); e.Normalizar(def);
+                Exigir(e.residentes.Count == 0, "Quita Mosslings que ya no existen en el contenido");
+            });
+            Console.WriteLine("14 pruebas C# correctas.");
             return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }
     }
 
     static void Prueba(string nombre, Action accion) { accion(); Console.WriteLine("OK: " + nombre); }
+
+    // Quita lo que haya en un rectángulo de la granja (árboles, rocas) para construir en las pruebas.
+    static void Despejar(Estado e, int x0, int y0, int w, int h)
+    {
+        e.granja.objetos.RemoveAll(o => o.x >= x0 && o.x < x0 + w && o.y >= y0 && o.y < y0 + h && def.OBJ[o.id].accion == null);
+        e.granja.ver++;
+    }
+
+    // Busca un rectángulo libre, fuera del camino y del agua, en la granja.
+    static (int, int) LugarLibre(Estado e, int w, int h)
+    {
+        for (int y = 3; y + h < def.H - 1; y++)
+            for (int x = 2; x + w < def.W - 1; x++)
+            {
+                Despejar(e, x, y, w, h);
+                bool ok = Mundo.Libre(def, e.granja, x, y, w, h);
+                for (int yy = y; yy < y + h && ok; yy++) for (int xx = x; xx < x + w && ok; xx++) if (Zona.En(e.granja.camino, Mundo.Idx(def, xx, yy))) ok = false;
+                if (ok) return (x, y);
+            }
+        throw new Exception("No hay lugar libre en la granja");
+    }
 }

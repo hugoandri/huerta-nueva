@@ -35,7 +35,7 @@ namespace HuertaNueva
         public int enCursoPiso;
     }
 
-    public static class Reglas
+    public static partial class Reglas
     {
         public const float FIN_DIA = 26 * 60, MIN_POR_SEG = 10f / 7f, VELOCIDAD = 112, DT_MAX = 0.1f;
         static readonly Dictionary<string, (int, int)> VEC = new Dictionary<string, (int, int)>
@@ -150,6 +150,8 @@ namespace HuertaNueva
                 case "cofreGuardar": CofreGuardar(e, def, j, a.uid, a.i, ev); break;
                 case "entrarMazmorra": EntrarMazmorra(e, def, j, a.mazmorra, a.piso, ev); break;
                 case "usar": Usar(e, def, j, a.x, a.y, ev); break;
+                case "construir": Construir(e, def, j, a.item, a.x, a.y, ev); break;
+                case "asignar": Asignar(e, def, j, a.i, a.item, ev); break;
                 default: ev.Add(new Evento { tipo = "error", txt = "Acción desconocida: " + a.tipo }); break;
             }
             return ev;
@@ -318,6 +320,7 @@ namespace HuertaNueva
             m.piso = piso;
             prog.record = Math.Max(prog.record, piso);
             m.nivel = Mazmorra.GenerarPiso(def, m.actual, m.semilla, piso, prog.completada);
+            ColocarRescates(e, def, m.nivel);
             m.enCurso = true;
             foreach (var p in e.jugadores) if (p.lugar == "mazmorra") EntradaDe(def, m.nivel, p);
             cfg.jefes.TryGetValue(piso, out var jefe);
@@ -479,6 +482,7 @@ namespace HuertaNueva
                         });
                         return;
                     case "salir": SalirDeMazmorra(e, def, j); Aviso(ev, j, "Returned to the farm"); return;
+                    case "rescate": Rescatar(e, def, j, g, o, it, ev); return;
                     case "bajar":
                         if (e.mazmorra.piso + 1 > def.MAZ[e.mazmorra.actual].pisos) return;
                         IrAPiso(e, def, e.mazmorra.piso + 1, ev, true);
@@ -530,6 +534,7 @@ namespace HuertaNueva
                     }
                     if (!hachaOPico) { Aviso(ev, j, "Accepts: " + string.Join(", ", d.procesa.Select(p => $"{p.n} {def.ITEMS[p.entrada].nombre.ToLower()}")), true); return; }
                 }
+                if (hachaOPico && Demoler(e, def, j, g, o, cx, cy, ev)) return;
                 if (d.herramienta != null && it != null && it.tipo == "herramienta" && (d.herramienta == s.id || d.herramienta == "cualquiera"))
                 {
                     double ep = Efecto(def, j, "energia_pico");
@@ -684,6 +689,7 @@ namespace HuertaNueva
                 }
                 if (d.accion == "maquina" && MaquinaLista(e, o)) notas.Add($"Your {def.ITEMS[o.datos.salida].nombre.ToLower()} is ready.");
             }
+            TrabajoDeLaManana(e, def, notas);
             int numArboles = g.objetos.Count(o => o.id == "arbol");
             for (int k = 0, n = 0; k < 200 && n < 4; k++)
             {

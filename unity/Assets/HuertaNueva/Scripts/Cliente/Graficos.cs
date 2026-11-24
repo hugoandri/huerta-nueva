@@ -253,6 +253,9 @@ namespace HuertaNueva
             return aspecto != null && juego.TryGetValue(aspecto, out var p) ? p : juego["base"];
         }
 
-        public Sprite Icono(Def def, string item) => def.ITEMS.TryGetValue(item ?? "", out var it) && it.sprite != null && SPR.TryGetValue(it.sprite, out var s) ? s : blanco;
+        // Ícono de un item; si no es un item (edificio, Mossling), el sprite con ese mismo id.
+        public Sprite Icono(Def def, string item) =>
+            def.ITEMS.TryGetValue(item ?? "", out var it) && it.sprite != null && SPR.TryGetValue(it.sprite, out var s) ? s
+            : SPR.TryGetValue(item ?? "", out var s2) ? s2 : blanco;
     }
 }

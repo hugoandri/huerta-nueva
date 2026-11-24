@@ -299,7 +299,27 @@
     { "id": "cofre_mazmorra", "sprite": "cofre_mazmorra", "solido": true,  "accion": "botin", "botin": "cofre_mazmorra" },
     { "id": "roca_cobre",     "sprite": "roca_cobre",     "solido": true, "herramienta": "pico", "golpes": 3, "suelta": { "mineral_cobre": [1, 3], "piedra": [0, 1] } },
     { "id": "roca_hierro",    "sprite": "roca_hierro",    "solido": true, "herramienta": "pico", "golpes": 4, "suelta": { "mineral_hierro": [1, 3], "piedra": [0, 1] } },
-    { "id": "roca_gema",      "sprite": "roca_gema",      "solido": true, "herramienta": "pico", "golpes": 5, "suelta": { "gema": [1, 1] }, "luz": 50 }
+    { "id": "roca_gema",      "sprite": "roca_gema",      "solido": true, "herramienta": "pico", "golpes": 5, "suelta": { "gema": [1, 1] }, "luz": 50 },
+
+    { "id": "farol_apagado",  "sprite": "farol_apagado",  "solido": true, "accion": "rescate", "luz": 30 },
+    { "id": "hoguera",        "sprite": "hoguera",        "solido": true, "ancho": 2, "alto": 2, "luz": 90 },
+    { "id": "casita_musgo",   "sprite": "casita_musgo",   "solido": true, "ancho": 2, "alto": 2, "hogar": 1, "luz": 40 },
+    { "id": "comedero",       "sprite": "comedero",       "solido": true, "ancho": 2, "alto": 1, "accion": "cofre" },
+    { "id": "lenera",         "sprite": "lenera",         "solido": true, "ancho": 2, "alto": 2, "accion": "cofre" }
+  ],
+
+  "_edificios": "Village buildings placed with the Build tab (action 'construir'), never carried in the backpack. 'requiere': another building that must exist, and/or how many Mosslings live in the glen. Demolish with the axe or pickaxe to get the materials back.",
+  "edificios": [
+    { "id": "hoguera",      "nombre": "Lantern Hearth", "coste": { "madera": 20, "piedra": 20 },              "descripcion": "The heart of the village. Its glow tells lost Mosslings where home is." },
+    { "id": "casita_musgo", "nombre": "Moss Hut",       "coste": { "madera": 30, "piedra": 10, "fibra": 10 }, "requiere": { "edificio": "hoguera" }, "descripcion": "A cozy home for one Mossling." },
+    { "id": "comedero",     "nombre": "Shared Table",   "coste": { "madera": 25, "fibra": 5 },                "requiere": { "edificio": "hoguera" }, "descripcion": "Leave crops or preserves here. Each Mossling eats one every morning." },
+    { "id": "lenera",       "nombre": "Woodshed",       "coste": { "madera": 15, "piedra": 10 },              "requiere": { "residentes": 1 },       "descripcion": "A Mossling assigned here stacks 6 wood inside every morning." }
+  ],
+
+  "_residentes": "Mosslings: little moss creatures with a lantern, asleep inside dark lanterns in the dungeons. Relight the lantern with a torch in hand to rescue one. 'trabajo': regar (waters 12 tilled tiles near its hut) or lena (6 wood into a Woodshed).",
+  "residentes": [
+    { "id": "sprout", "nombre": "Sprout", "sprite": "mossling_sprout", "rescate": { "mazmorra": "mina", "piso": 3 }, "trabajo": "regar",
+      "descripcion": "A sleepy Mossling with two leaf sprouts on its head. Loves watering things." }
   ],
 
   "recetas": [
