@@ -7,6 +7,9 @@ namespace HuertaNueva
 {
     public static class Mazmorra
     {
+        // Celdas (en cualquier eje) que separan la entrada de los monstruos: al bajar hay un respiro.
+        public const int DISTANCIA_ENTRADA = 8;
+
         class Sala { public int x, y, w, h; }
 
         static int EntreR(Func<double> r, int a, int b) => a + (int)Math.Floor(r() * (b - a + 1));
@@ -133,7 +136,10 @@ namespace HuertaNueva
             for (int k = 0, n = 0; k < 200 && n < cuantos; k++)
             {
                 var s = otras[EntreR(r, 0, otras.Count - 1)]; var c = CeldaEnSala(s);
+                if (s == final && jefe != null) continue;                                  // la sala del jefe es solo suya
+                if (Math.Max(Math.Abs(c.x - z.entrada.x), Math.Abs(c.y - z.entrada.y)) < DISTANCIA_ENTRADA) continue;
                 if (z.objetos.Any(o => o.x == c.x && o.y == c.y)) continue;
+                if (z.monstruos.Any(m => (int)Math.Floor(m.x / def.T) == c.x && (int)Math.Floor(m.y / def.T) == c.y)) continue;
                 CrearMonstruo(def, z, tipos[EntreR(r, 0, tipos.Count - 1)].id, c.x, c.y, piso, prestigio); n++;
             }
             return z;

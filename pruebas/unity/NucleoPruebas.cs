@@ -117,7 +117,47 @@ public static class NucleoPruebas
                 Exigir(!e.mazmorra.enCurso && e.mazmorra.nivel == null, "Cierra una expedición a una mazmorra que ya no existe");
                 Reglas.Aplicar(e, def, new Accion { tipo = "tiempo", dt = 0.05f });
             });
-            Console.WriteLine("8 pruebas C# correctas.");
+            Prueba("monstruos bien repartidos en la mazmorra", () =>
+            {
+                (int, int) Celda(Monstruo m) => ((int)Math.Floor(m.x / def.T), (int)Math.Floor(m.y / def.T));
+                foreach (var cfg in def.mazmorras)
+                    for (long semilla = 1; semilla <= 40; semilla++)
+                        for (int piso = 1; piso <= cfg.pisos; piso++)
+                        {
+                            var z = Mazmorra.GenerarPiso(def, cfg.id, semilla, piso);
+                            var donde = $"{cfg.id} semilla {semilla} piso {piso}";
+                            var normales = z.monstruos.Where(m => !def.MON[m.id].jefe).ToList();
+                            var celdas = z.monstruos.Select(Celda).ToList();
+                            Exigir(celdas.Distinct().Count() == celdas.Count, "Dos monstruos en la misma celda: " + donde);
+                            foreach (var m in normales)
+                            {
+                                var (mx, my) = Celda(m);
+                                Exigir(Math.Max(Math.Abs(mx - z.entrada.x), Math.Abs(my - z.entrada.y)) >= Mazmorra.DISTANCIA_ENTRADA, "Monstruo junto a la entrada: " + donde);
+                                if (cfg.jefes.ContainsKey(piso))
+                                    Exigir(Math.Abs(mx - z.salaFinal.x) > 4 || Math.Abs(my - z.salaFinal.y) > 3, "Monstruo normal en la sala del jefe: " + donde);
+                            }
+                        }
+            });
+            Prueba("colocar un objeto que no cabe no lo gasta", () =>
+            {
+                var e = Nuevo(); Campo(e); var j = e.BuscarJugador("yo");
+                var horno = def.OBJ["horno"]; int ancho = horno.ancho, alto = horno.alto;
+                try
+                {
+                    horno.ancho = 3; horno.alto = 3;
+                    var (x, y) = Reglas.CeldaFrente(def, j);
+                    Mundo.Colocar(def, e.granja, "antorcha", x + 1, y);   // ocupa una celda que el horno necesitaría
+                    Inventario.Agregar(def, j, "horno", 1);
+                    j.sel = j.inv.FindIndex(s => s != null && s.id == "horno");
+                    Exigir(j.sel >= 0 && j.sel < 12, "El horno debe estar en la barra");
+                    int antes = Inventario.Cuenta(j, "horno");
+                    Actuar(e, new Accion { tipo = "usar", x = x, y = y });
+                    Exigir(Inventario.Cuenta(j, "horno") == antes, "No debe gastar el horno si no se colocó");
+                    Exigir(!e.granja.objetos.Any(o => o.id == "horno"), "No debe colocarlo encima de otro objeto");
+                }
+                finally { horno.ancho = ancho; horno.alto = alto; }
+            });
+            Console.WriteLine("10 pruebas C# correctas.");
             return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }

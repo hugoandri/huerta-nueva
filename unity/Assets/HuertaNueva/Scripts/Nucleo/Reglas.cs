@@ -611,11 +611,13 @@ namespace HuertaNueva
             }
             if (it.tipo == "colocable")
             {
-                if (px == x && py == y) return;
-                if (JugadoresEn(e, g).Any(o2 => { var (ox, oy) = CeldaJugador(def, o2); return ox == x && oy == y; })) return;
+                var od = def.OBJ[it.objeto];
+                bool Pisa(int cx2, int cy2) => cx2 >= x && cx2 < x + od.ancho && cy2 >= y && cy2 < y + od.alto;
+                if (JugadoresEn(e, g).Any(o2 => { var (ox, oy) = CeldaJugador(def, o2); return Pisa(ox, oy); })) return;
                 if (!enGranja && it.objeto != "antorcha") { Aviso(ev, j, "You can only place torches in the dungeon", true); return; }
-                if (!Mundo.Libre(def, g, x, y)) { Aviso(ev, j, "Doesn't fit there", true); return; }
-                Mundo.Colocar(def, g, it.objeto, x, y);
+                // Todo el tamaño del objeto, no solo la celda señalada; y solo se gasta si de verdad se colocó.
+                if (!Mundo.Libre(def, g, x, y, od.ancho, od.alto) || Mundo.Colocar(def, g, it.objeto, x, y) == null)
+                { Aviso(ev, j, "Doesn't fit there", true); return; }
                 Inventario.GastarMano(j);
             }
         }
