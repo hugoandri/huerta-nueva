@@ -13,7 +13,7 @@ namespace HuertaNueva
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Arrancar()
         {
-            if (FindAnyObjectByType<Juego>() == null) new GameObject("Huerta Nueva").AddComponent<Juego>();
+            if (FindAnyObjectByType<Juego>() == null) new GameObject("Mosslantern").AddComponent<Juego>();
         }
 
         Def def; Graficos G; Vista vista; Interfaz ui; AlmacenLocal almacen;
@@ -29,7 +29,7 @@ namespace HuertaNueva
             perfil = Perfil.Id();
             string cuerpo = PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id);
             if (!def.personajes.Exists(p => p.id == cuerpo)) cuerpo = def.personajes[0].id;
-            almacen = new AlmacenLocal();
+            almacen = new AlmacenLocal(def);
 
             if (FindAnyObjectByType<EventSystem>() == null)
             {
@@ -45,17 +45,27 @@ namespace HuertaNueva
             // granja de fondo detrás de la portada (no se guarda)
             Conectar(new SesionLocal(HuertaNueva.Mundo.CrearEstado(def, (uint)def.semillaMundo, perfil, cuerpo), def, perfil, null));
             ui = new Interfaz(def, G, () => sesion, vista, cuerpo);
-            ui.AlNueva = c => { Empezar(NuevaPartida(c)); };
+            // Una partida nueva se guarda encima del archivo: antes se copia el guardado que hubiera.
+            ui.AlNueva = c => { bool respaldo = almacen.Respaldar() != null; Empezar(NuevaPartida(c)); if (respaldo) ui.Aviso("Your previous save was backed up"); };
             ui.AlContinuar = () =>
             {
                 var e = almacen.Cargar();
-                if (e != null && e.BuscarJugador(perfil) != null) Empezar(e);
-                else { Empezar(NuevaPartida(PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id))); ui.Aviso("No se pudo leer la partida guardada", true); }
+                if (e != null && e.BuscarJugador(perfil) == null)
+                {
+                    // Partida local de otro id (p. ej. se borraron los PlayerPrefs): se sigue jugando con ese jugador.
+                    perfil = e.jugadores[0].id;
+                    Perfil.Fijar(perfil);
+                }
+                if (e != null) { Empezar(e); return; }
+                almacen.Respaldar();
+                Empezar(NuevaPartida(PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id)));
+                ui.Aviso("Could not read saved game. A backup copy was kept.", true);
             };
-            ui.AlReiniciar = () => { almacen.Borrar(); Empezar(NuevaPartida(sesion.Yo.cuerpo)); ui.Aviso("Partida nueva"); };
+            ui.AlReiniciar = () => { almacen.Borrar(); Empezar(NuevaPartida(sesion.Yo.cuerpo)); ui.Aviso("New game started"); };
+            ui.AlSalirMenu = () => { if (jugando) sesion.Guardar(); jugando = false; ui.MostrarPortada(almacen.Existe(), almacen.Cargar()); };
             ui.AlUsar = () => { if (jugando && !ui.Abierto) UsarFrente(); };
             ui.AlComer = () => { if (jugando && !ui.Abierto) sesion.Despachar(new Accion { tipo = "comer" }); };
-            ui.MostrarPortada(almacen.Existe());
+            ui.MostrarPortada(almacen.Existe(), almacen.Cargar());
         }
 
         Estado NuevaPartida(string cuerpo) => HuertaNueva.Mundo.CrearEstado(def, (uint)Random.Range(1, int.MaxValue), perfil, cuerpo);
@@ -71,10 +81,12 @@ namespace HuertaNueva
             Conectar(new SesionLocal(e, def, perfil, almacen));
             sesion.Guardar();
             ui.OcultarPortada(); ui.Cerrar(); jugando = true;
-            ui.Aviso("Ara con la azada, siembra y riega. El puesto vende semillas.");
+            ui.Aviso("Till with the hoe, plant seeds, and water them. The stall sells seeds.");
         }
 
-        void UsarFrente() { var (x, y) = Reglas.CeldaFrente(def, sesion.Yo); sesion.Despachar(new Accion { tipo = "usar", x = x, y = y }); }
+        // Con un edificio elegido en la pestaña Village, Usar lo construye delante en vez de usar la casilla.
+        void UsarFrente() { var (x, y) = Reglas.CeldaFrente(def, sesion.Yo); UsarCelda(x, y); }
+        void UsarCelda(int x, int y) => sesion.Despachar(new Accion { tipo = ui.Construyendo != null ? "construir" : "usar", item = ui.Construyendo, x = x, y = y });
         void Seleccionar(int i) => sesion.Despachar(new Accion { tipo = "seleccionar", i = i });
 
         // En el celular la app se cierra sin avisar: guardamos al pasar a segundo plano.
@@ -101,6 +113,8 @@ namespace HuertaNueva
                 if ((Input_.Bajada(Tecla.Escape) || Input_.Bajada(Tecla.Menu) || Input_.Bajada(Tecla.MenuTab) || Input_.Bajada(Tecla.Crafteo)) && ui.Cerrable) ui.Cerrar();
                 return;
             }
+            if (Input_.Bajada(Tecla.Escape) && ui.Construyendo != null) { ui.CancelarConstruccion(); return; }
+            if (sesion.Yo.lugar != "granja" && ui.Construyendo != null) ui.CancelarConstruccion();
             if (Input_.Bajada(Tecla.Menu) || Input_.Bajada(Tecla.MenuTab)) { ui.Menu("mochila"); return; }
             if (Input_.Bajada(Tecla.Crafteo)) { ui.Menu("crafteo"); return; }
             if (Input_.Bajada(Tecla.Comer)) sesion.Despachar(new Accion { tipo = "comer" });
@@ -121,7 +135,7 @@ namespace HuertaNueva
                 if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) <= 1)
                 {
                     if (dx != 0 || dy != 0) sesion.Despachar(new Accion { tipo = "mirar", dir = Mathf.Abs(dx) > Mathf.Abs(dy) ? (dx > 0 ? "east" : "west") : (dy > 0 ? "south" : "north") });
-                    sesion.Despachar(new Accion { tipo = "usar", x = x, y = y });
+                    UsarCelda(x, y);
                 }
             }
             if (ui.Abierto) return;

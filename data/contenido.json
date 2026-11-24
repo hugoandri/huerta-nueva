@@ -1,31 +1,70 @@
 {
-  "_ayuda": "Fuente única de verdad del juego. Para agregar algo: crea un sprite en 'sprites' (con su prompt para PixelLab) y úsalo desde un item, objeto o cultivo. Luego ejecuta: node herramientas/generar-assets.mjs  (solo genera lo que falta).",
+  "_ayuda": "Single source of truth for the game. To add content: create a sprite in 'sprites' (with its PixelLab prompt) and reference it from an item, object, or crop. Then run: node herramientas/generar-assets.mjs (only generates what is missing).",
 
+  "_estilo": "Art bible: design/biblia-de-arte.md. One style for every character and creature: the slime's (cute chibi, round, soft). 'personajes' applies to playable characters and future residents.",
   "estilo": {
-    "outline": "single color black outline",
+    "outline": "single color outline",
     "shading": "basic shading",
     "detail": "medium detail",
     "view": "high top-down",
-    "sufijo": "cozy farming game pixel art, vibrant colors"
+    "sufijo": "cozy whimsical farming game pixel art, soft warm palette, mossy green and warm cream tones with small glowing blue lantern accents, dark brown outline, clear readable silhouette",
+    "personajes": {
+      "prefijo": "cute chibi, very big round head, two tiny black dot eyes, pink blush cheeks, small smile,",
+      "sufijo": "thick dark outline, flat bright cheerful colors, simple retro RPG sprite",
+      "prefijo_criaturas": "cute chibi monster, round chunky body, big head, simple black dot eyes or round glowing eyes, no ground, no shadow,",
+      "tamano": 48,
+      "realzar": false,
+      "proporciones": { "type": "custom", "head_size": 1.7, "legs_length": 0.55, "arms_length": 0.6, "shoulder_width": 0.9, "hip_width": 1.1 },
+      "view": "low top-down",
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "low detail"
+    },
+    "entorno": {
+      "prefijo": "cute chunky rounded,",
+      "sufijo": "soft warm cheerful colors, thick dark outline, simple retro RPG pixel art, no ground, no shadow",
+      "view": "low top-down",
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "medium detail"
+    }
   },
 
   "mundo": { "tile": 32, "ancho": 48, "alto": 36, "semilla": 7 },
 
-  "_personajes": "Personajes elegibles. Cada ropa es una variante (estado) del mismo personaje en PixelLab: misma cara y proporciones, otra ropa. Todos comparten las mismas ropas.",
+  "_personajes": "Playable characters. 'referencia' = approved front image (made with the slime's original pixflux settings); after generating, run herramientas/estilo_slime.py on their folders. Each outfit is a state variant of the same character in PixelLab: same face and proportions, different outfit.",
   "personajes": [
-    { "id": "granjera", "nombre": "Granjera", "basadoEn": "granjero", "edicion": "turn this character into a beautiful young woman: long braided auburn hair falling over one shoulder, delicate feminine face with long eyelashes and a gentle smile, small flower tucked in the straw hat band, feminine figure; keep the same green overalls, white shirt, brown boots and the same art style", "tamano": 48, "animacion": "walking" },
-    { "id": "granjero", "nombre": "Granjero", "descripcion": "young farmer with a wide straw hat, green overalls, white shirt and brown boots", "tamano": 48, "animacion": "walking" }
+    {
+      "id": "granjera",
+      "nombre": "Clara",
+      "titulo": "Glen Botanist & Herbalist",
+      "personalidad": "Wears a glowing blue mosslantern blossom on her straw sunhat. Spirited, observant, and happiest tending morning sprouts or brewing golden preserves.",
+      "descripcion": "cute chibi farmer girl Clara with straw hat with a blue flower, auburn braid, green overalls",
+      "referencia": "assets/referencias/granjera.png",
+      "tamano": 48,
+      "animacion": "walking"
+    },
+    {
+      "id": "granjero",
+      "nombre": "Arthur",
+      "titulo": "Ridge Craftsman & Delver",
+      "personalidad": "Wears Grandpa Aurelius's red neckerchief. Bold, warm-hearted, and eager to stoke the smelting furnaces at dawn and map the shifting tunnels below.",
+      "descripcion": "cute chibi farmer boy Arthur with straw hat, messy brown hair, red neckerchief, green overalls",
+      "referencia": "assets/referencias/granjero.png",
+      "tamano": 48,
+      "animacion": "walking"
+    }
   ],
   "ropas": [
-    { "id": "minera",     "edicion": "now wearing a yellow mining hard hat with a headlamp, a brown leather work jacket with pockets and sturdy dark boots; no straw hat" },
-    { "id": "aventurera", "edicion": "now wearing light brown leather armor with shoulder pads, a short red cape, leather gloves and boots; no hat" }
+    { "id": "minera",     "edicion": "now wearing a yellow mining hard hat with a headlamp, a brown leather work jacket with pockets and sturdy dark boots; no straw hat; keep the same cute chibi face and proportions" },
+    { "id": "aventurera", "edicion": "now wearing light tan leather armor with small round shoulder pads, a short bright red-orange cape, small gloves and boots; no hat; keep the same cute chibi face and proportions" }
   ],
 
-  "_mazmorras": "Mazmorras a las que se entra desde la cueva. Cada una tiene su tileset, monstruos, rocas y jefes. 'requiere': otra mazmorra y el piso que hay que haber alcanzado en ella.",
+  "_mazmorras": "Dungeons entered from the cliff cave. Each has its own tileset, monsters, rocks, and bosses. 'requiere': another dungeon and the floor that must be reached in it.",
   "mazmorras": [
     {
-      "id": "mina", "nombre": "Mina de cobre", "tileset": "cueva", "pisos": 10,
-      "descripcion": "Limos, murciélagos y esqueletos. Cobre, hierro y gemas.",
+      "id": "mina", "nombre": "Copper Mine", "tileset": "cueva", "pisos": 10,
+      "descripcion": "Damp old shafts under the ridge. Copper, iron, hungry slimes, and an ancient stone colossus below.",
       "jefes": { "5": "rey_limo", "10": "guardian" },
       "puntos_de_control": [1, 6],
       "monstruos_por_piso": [
@@ -42,8 +81,8 @@
       "botin_final": "mazmorra_final"
     },
     {
-      "id": "cripta", "nombre": "Cripta olvidada", "tileset": "cripta", "pisos": 10,
-      "descripcion": "Esqueletos y fantasmas. Más hierro, gemas y huesos.",
+      "id": "cripta", "nombre": "Forgotten Crypt", "tileset": "cripta", "pisos": 10, "escala_base": 1.6,
+      "descripcion": "Vaults sealed beneath the spring. Purple mist, ancient urns, blue dew gems, and restless echoes.",
       "requiere": { "mazmorra": "mina", "piso": 5 },
       "jefes": { "5": "nigromante", "10": "caballero_espectral" },
       "puntos_de_control": [1, 6],
@@ -61,25 +100,25 @@
     }
   ],
 
-  "_monstruos": "vida, daño (medio corazón = 1), velocidad en px/s, visión en casillas. 'suelta': item → [probabilidad, min, max].",
+  "_monstruos": "health, damage (half heart = 1), speed in px/s, vision in tiles. 'suelta': item → [probability, min, max].",
   "monstruos": [
-    { "id": "limo",       "nombre": "Limo",       "sprite": "limo",       "vida": 3,  "dano": 1, "velocidad": 38, "vision": 5, "suelta": { "baba": [0.8, 1, 2] } },
-    { "id": "murcielago", "nombre": "Murciélago", "sprite": "murcielago", "vida": 2,  "dano": 1, "velocidad": 70, "vision": 7, "vuela": true, "suelta": { "ala": [0.6, 1, 1] } },
-    { "id": "esqueleto", "nombre": "Esqueleto",  "sprite": "esqueleto",  "vida": 6,  "dano": 2, "velocidad": 46, "vision": 6, "suelta": { "hueso": [0.8, 1, 2], "lingote_hierro": [0.1, 1, 1] } },
-    { "id": "rey_limo", "nombre": "Rey Limo",   "sprite": "rey_limo",   "vida": 30, "dano": 2, "velocidad": 34, "vision": 9, "jefe": true, "suelta": { "baba": [1, 5, 8], "gema": [1, 1, 2] } },
-    { "id": "guardian", "nombre": "Guardián de piedra",   "sprite": "guardian",   "vida": 60, "dano": 3, "velocidad": 30, "vision": 10, "jefe": true, "suelta": { "gema": [1, 2, 3] } },
-    { "id": "fantasma",   "nombre": "Fantasma",   "sprite": "fantasma",   "vida": 4,  "dano": 2, "velocidad": 55, "vision": 8, "vuela": true, "suelta": { "gema": [0.08, 1, 1], "hueso": [0.4, 1, 1] } },
-    { "id": "nigromante", "nombre": "Nigromante", "sprite": "nigromante", "vida": 45, "dano": 3, "velocidad": 36, "vision": 9, "jefe": true, "suelta": { "hueso": [1, 4, 8], "gema": [1, 2, 3] } },
-    { "id": "caballero_espectral", "nombre": "Caballero espectral", "sprite": "caballero_espectral", "vida": 90, "dano": 4, "velocidad": 34, "vision": 10, "jefe": true, "suelta": { "gema": [1, 3, 5], "lingote_hierro": [1, 3, 5] } }
+    { "id": "limo",       "nombre": "Moss Slime",       "sprite": "limo",       "vida": 3,  "dano": 1, "velocidad": 42, "vision": 5, "suelta": { "baba": [0.8, 1, 2] }, "descripcion": "A damp jelly blob with more appetite than malice." },
+    { "id": "murcielago", "nombre": "Vein Bat",         "sprite": "murcielago", "vida": 2,  "dano": 1, "velocidad": 72, "vision": 7, "vuela": true, "suelta": { "ala": [0.6, 1, 1] }, "descripcion": "Flutters nervously whenever someone lights a torch nearby." },
+    { "id": "esqueleto",  "nombre": "Bone Miner",       "sprite": "esqueleto",  "vida": 6,  "dano": 2, "velocidad": 50, "vision": 6, "suelta": { "hueso": [0.8, 1, 2], "lingote_hierro": [0.1, 1, 1] }, "descripcion": "Forgot his shift in the tunnel ended a hundred years ago." },
+    { "id": "rey_limo",   "nombre": "Slime King",       "sprite": "rey_limo",   "vida": 30, "dano": 2, "velocidad": 46, "vision": 9, "jefe": true, "suelta": { "baba": [1, 5, 8], "gema": [1, 1, 2] }, "descripcion": "A gelatinous monarch that swallowed the key to the Forgotten Crypt." },
+    { "id": "guardian",   "nombre": "Stone Guardian",   "sprite": "guardian",   "vida": 60, "dano": 3, "velocidad": 44, "vision": 10, "jefe": true, "suelta": { "gema": [1, 2, 3] }, "descripcion": "A moss-covered colossus guarding the mother lode since Grandpa's days." },
+    { "id": "fantasma",   "nombre": "Wandering Echo",   "sprite": "fantasma",   "vida": 4,  "dano": 2, "velocidad": 58, "vision": 8, "vuela": true, "suelta": { "gema": [0.08, 1, 1], "hueso": [0.4, 1, 1] }, "descripcion": "A cold sigh drifting through stone in search of lantern light." },
+    { "id": "nigromante", "nombre": "Seal Necromancer", "sprite": "nigromante", "vida": 45, "dano": 3, "velocidad": 48, "vision": 9, "jefe": true, "suelta": { "hueso": [1, 4, 8], "gema": [1, 2, 3] }, "descripcion": "Tried to bottle up spring in clay urns and became prisoner to his own shadows." },
+    { "id": "caballero_espectral", "nombre": "Spectral Knight", "sprite": "caballero_espectral", "vida": 90, "dano": 4, "velocidad": 52, "vision": 10, "jefe": true, "vuela": true, "suelta": { "gema": [1, 3, 5], "lingote_hierro": [1, 3, 5] }, "descripcion": "The first warden of Mosslantern Glen, forever testing those who delve below." }
   ],
 
   "tilesets": [
-    { "id": "tierra", "inferior": "lush green meadow grass", "superior": "dark brown tilled farm soil with furrows", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
-    { "id": "agua", "inferior": "lush green meadow grass", "superior": "clear blue pond water with small ripples", "transicion": "muddy shore", "superior_caminable": false },
-    { "id": "cueva", "inferior": "dark jagged cave rock wall seen from above", "superior": "dusty brown cobblestone cave floor", "transicion": "rocky edge", "superior_caminable": true },
-    { "id": "acantilado", "inferior": "lush green meadow grass", "superior": "raised rocky plateau top covered with moss, grass and small bushes", "transicion": "steep grey rock cliff face", "transicion_tamano": 0.5, "superior_caminable": false, "referencia_inferior": "agua" },
-    { "id": "camino", "inferior": "lush green meadow grass", "superior": "packed light brown dirt footpath with small pebbles", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
-    { "id": "cripta", "inferior": "black void abyss with faint purple mist", "superior": "cracked grey stone brick crypt floor tiles with moss", "transicion": "broken stone edge", "superior_caminable": true }
+    { "id": "tierra", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "warm rich brown tilled soil with neat soft furrows", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
+    { "id": "agua", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "clear bright blue pond water with soft gentle ripples", "transicion": "light sandy shore", "superior_caminable": false, "invertir": true },
+    { "id": "cueva", "inferior": "warm brown rounded cave rock wall seen from above with small glowing green moss spots", "superior": "light sandy brown cobblestone cave floor with small round pebbles", "transicion": "rounded rocky edge", "superior_caminable": true },
+    { "id": "acantilado", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "raised rocky plateau top covered with moss, grass and small round bushes", "transicion": "warm grey rounded rock cliff face", "transicion_tamano": 0.5, "superior_caminable": false, "referencia_inferior": "agua" },
+    { "id": "camino", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "warm light sandy dirt footpath with small round pebbles", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
+    { "id": "cripta", "inferior": "deep indigo void with soft lavender mist and tiny faint stars", "superior": "light grey-lavender stone brick crypt floor with soft moss and tiny glowing blue mushrooms", "transicion": "worn rounded stone edge", "superior_caminable": true }
   ],
 
   "sprites": {
@@ -96,6 +135,9 @@
     "zanahoria":        { "descripcion": "fresh orange carrot with green leafy top", "ancho": 32, "alto": 32 },
     "calabaza":         { "descripcion": "round orange pumpkin with short stem", "ancho": 32, "alto": 32 },
     "conserva":         { "descripcion": "glass jar of homemade preserves with cloth lid tied with string", "ancho": 32, "alto": 32 },
+    "conserva_rabano":  { "descripcion": "glass jar of homemade red radish preserves with pink-red pickled radishes visible inside and cloth lid tied with red string", "ancho": 32, "alto": 32 },
+    "conserva_zanahoria": { "descripcion": "glass jar of homemade orange carrot preserves with bright orange carrot slices visible inside and cloth lid tied with twine", "ancho": 32, "alto": 32 },
+    "conserva_calabaza":{ "descripcion": "glass jar of golden amber pumpkin jam preserves with warm golden glow and cloth lid tied with string", "ancho": 32, "alto": 32 },
 
     "madera":           { "descripcion": "small pile of chopped wood logs", "ancho": 32, "alto": 32 },
     "piedra":           { "descripcion": "small pile of grey stones", "ancho": 32, "alto": 32 },
@@ -109,7 +151,7 @@
     "calabaza_crecida": { "descripcion": "young pumpkin vine with broad green leaves and a yellow flower", "ancho": 32, "alto": 32 },
     "calabaza_madura":  { "descripcion": "ripe orange pumpkin on a green vine with leaves", "ancho": 32, "alto": 32 },
 
-    "arbol":            { "descripcion": "leafy green oak tree with brown trunk", "ancho": 64, "alto": 96 },
+    "arbol":            { "descripcion": "big friendly round tree, huge fluffy round canopy of bright fresh leafy green with light yellow-green highlights, very short thick warm brown trunk, canopy takes most of the height", "ancho": 64, "alto": 96, "estilo": "entorno" },
     "roca":             { "descripcion": "grey boulder rock", "ancho": 32, "alto": 32 },
     "maleza":           { "descripcion": "messy clump of dry yellow-brown wild grass and thistle weeds", "ancho": 32, "alto": 32 },
     "casa":             { "descripcion": "large cozy two-story wooden farmhouse with big red tiled roof seen from above with visible ridge and eave shadow, timber frame front wall with a tall centered wooden double door, four windows with flower boxes, stone foundation, brick chimney, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 256, "alto": 240, "modelo": "pixen", "recortar": true },
@@ -118,6 +160,7 @@
     "cofre":            { "descripcion": "wooden storage chest with iron bands and a lock on the front, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 48, "modelo": "pixen", "recortar": true },
     "cerca":            { "descripcion": "short wooden fence section with two posts and horizontal rails, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 32, "modelo": "pixen", "recortar": true },
     "aspersor":         { "descripcion": "small metal garden sprinkler with a nozzle on top on a little base, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 32, "modelo": "pixen", "recortar": true },
+    "aspersor_gema":    { "descripcion": "ornate iron and glowing blue crystal garden sprinkler with four brass nozzles on a stone base, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 32, "modelo": "pixen", "recortar": true },
     "tarro":            { "descripcion": "wooden preserves keg barrel standing upright with a glass jar on top, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 48, "alto": 64, "modelo": "pixen", "recortar": true },
     "espantapajaros":   { "descripcion": "scarecrow with straw hat and patched shirt on a wooden pole, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 32, "alto": 48, "modelo": "pixen", "recortar": true },
 
@@ -147,69 +190,75 @@
     "espada_madera":    { "descripcion": "simple wooden training sword, item icon", "ancho": 32, "alto": 32 },
     "espada_cobre":     { "descripcion": "copper short sword with leather grip, item icon", "ancho": 32, "alto": 32 },
     "espada_hierro":    { "descripcion": "iron sword with crossguard, item icon", "ancho": 32, "alto": 32 },
+    "espada_espectral": { "descripcion": "magical spectral sword with glowing blue crystal gem blade and silver crossguard, item icon", "ancho": 32, "alto": 32 },
 
     "limo":             { "descripcion": "small cute green slime monster blob with big eyes", "ancho": 32, "alto": 32 },
     "murcielago":       { "descripcion": "purple cave bat monster with spread wings", "ancho": 32, "alto": 32 },
-    "esqueleto":        { "descripcion": "small skeleton warrior monster holding a rusty sword", "ancho": 32, "alto": 48 },
-    "rey_limo":         { "descripcion": "huge green slime king monster wearing a small golden crown", "ancho": 64, "alto": 64 },
-    "guardian":         { "descripcion": "ancient stone golem guardian monster with glowing blue eyes and mossy shoulders", "ancho": 64, "alto": 80 },
+    "esqueleto":        { "descripcion": "little skeleton miner, big round skull with two round black eye holes, stubby bones, small dented helmet with a candle, tiny rusty pickaxe, sleepy confused face", "ancho": 40, "alto": 40, "estilo": "personajes", "recortar": true },
+    "rey_limo":         { "descripcion": "huge round green slime king, jelly body, big shiny black dot eyes, rosy cheeks, tiny golden crown on top, happy-grumpy face", "ancho": 80, "alto": 80, "estilo": "personajes", "recortar": true },
+    "guardian":         { "descripcion": "big round stone golem guardian, huge boulder body with small head, two round glowing blue eyes, soft green moss and tiny flowers on shoulders, stubby rounded arms, grumpy gentle face, small blue lantern in one hand", "ancho": 96, "alto": 96, "estilo": "personajes", "recortar": true },
     "escalera_subir_cueva": { "descripcion": "stone archway with steps going up to daylight in the dungeon wall (pintada con inpaint-v3 sobre la muralla de cueva: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
     "escalera_bajar_cueva": { "descripcion": "wooden ladder leaning on the dungeon wall up to a glowing trapdoor in the ceiling (pintada con inpaint-v3 sobre la muralla de cueva: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
     "escalera_subir_cripta": { "descripcion": "stone archway with steps going up to daylight in the dungeon wall (pintada con inpaint-v3 sobre la muralla de cripta: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
     "escalera_bajar_cripta": { "descripcion": "wooden ladder leaning on the dungeon wall up to a glowing trapdoor in the ceiling (pintada con inpaint-v3 sobre la muralla de cripta: ver herramientas/escaleras-muralla)", "ancho": 96, "alto": 80, "fijo": true },
     "fantasma":         { "descripcion": "floating translucent pale blue ghost monster with hollow eyes", "ancho": 32, "alto": 40 },
-    "nigromante":       { "descripcion": "hooded necromancer boss in dark purple robes holding a glowing skull staff", "ancho": 64, "alto": 72 },
-    "caballero_espectral": { "descripcion": "huge spectral knight boss in ghostly glowing blue armor with a big sword", "ancho": 72, "alto": 88 },
-    "urna":             { "descripcion": "old cracked clay funeral urn with purple markings", "ancho": 32, "alto": 32 }
+    "nigromante":       { "descripcion": "small round hooded necromancer, oversized soft lavender hood with two big round glowing eyes in the dark inside, little round body in a purple robe, crooked wooden staff topped with a smiling skull candle with a blue flame", "ancho": 96, "alto": 96, "estilo": "personajes", "recortar": true },
+    "caballero_espectral": { "descripcion": "tall chunky armored knight standing upright, big round knight helmet with a visor slit and two round glowing blue eyes, small plume on top, rounded pale silver-blue armor with moss in the joints, short stubby legs, holding an oversized glowing blue crystal sword point down, short ghostly cape", "ancho": 96, "alto": 96, "estilo": "personajes", "recortar": true },
+    "urna":             { "descripcion": "old cracked clay funeral urn with purple markings", "ancho": 32, "alto": 32 },
+    "portada_fondo":    { "descripcion": "scenic 16-bit pixel art game home screen background landscape", "ancho": 384, "alto": 216, "fijo": true },
+    "portada_logo":     { "descripcion": "ornate 16-bit pixel art RPG game title plaque banner", "ancho": 256, "alto": 96, "fijo": true },
+    "portada_boton":    { "descripcion": "clean 16-bit pixel art game menu button plaque", "ancho": 160, "alto": 48, "fijo": true }
   },
 
   "items": [
-    { "id": "azada",    "nombre": "Azada",    "tipo": "herramienta", "sprite": "azada",    "descripcion": "Ara el césped para poder sembrar." },
-    { "id": "regadera", "nombre": "Regadera", "tipo": "herramienta", "sprite": "regadera", "descripcion": "Riega la tierra. Se rellena en el agua.", "capacidad": 20 },
-    { "id": "hacha",    "nombre": "Hacha",    "tipo": "herramienta", "sprite": "hacha",    "descripcion": "Tala árboles y quita maleza." },
-    { "id": "pico",     "nombre": "Pico",     "tipo": "herramienta", "sprite": "pico",     "descripcion": "Rompe rocas." },
+    { "id": "azada",    "nombre": "Hoe",          "tipo": "herramienta", "sprite": "azada",    "descripcion": "Tills grass so you can plant seeds. Grandpa Aurelius carved his initials on the handle." },
+    { "id": "regadera", "nombre": "Watering Can", "tipo": "herramienta", "sprite": "regadera", "descripcion": "Waters tilled soil. Refill it at the farm pond.", "capacidad": 20 },
+    { "id": "hacha",    "nombre": "Axe",          "tipo": "herramienta", "sprite": "hacha",    "descripcion": "Chops trees, clears weeds, and picks up placed objects." },
+    { "id": "pico",     "nombre": "Pickaxe",      "tipo": "herramienta", "sprite": "pico",     "descripcion": "Breaks boulders and ore veins. Essential beneath the cliff." },
 
-    { "id": "semilla_rabano",    "nombre": "Semillas de rábano",    "tipo": "semilla", "sprite": "semilla_rabano",    "cultivo": "rabano",    "compra": 20, "venta": 10 },
-    { "id": "semilla_zanahoria", "nombre": "Semillas de zanahoria", "tipo": "semilla", "sprite": "semilla_zanahoria", "cultivo": "zanahoria", "compra": 35, "venta": 17 },
-    { "id": "semilla_calabaza",  "nombre": "Semillas de calabaza",  "tipo": "semilla", "sprite": "semilla_calabaza",  "cultivo": "calabaza",  "compra": 80, "venta": 40 },
+    { "id": "semilla_rabano",    "nombre": "Radish Seeds",  "tipo": "semilla", "sprite": "semilla_rabano",    "cultivo": "rabano",    "compra": 20, "venta": 10, "descripcion": "Sprouts in 3 watered days. Great for impatient hands." },
+    { "id": "semilla_zanahoria", "nombre": "Carrot Seeds",  "tipo": "semilla", "sprite": "semilla_zanahoria", "cultivo": "zanahoria", "compra": 35, "venta": 17, "descripcion": "Takes 4 watered days. Sweet, crunchy, and a favorite of crows." },
+    { "id": "semilla_calabaza",  "nombre": "Pumpkin Seeds", "tipo": "semilla", "sprite": "semilla_calabaza",  "cultivo": "calabaza",  "compra": 80, "venta": 40, "descripcion": "6 days of care, but each pumpkin is worth its weight in copper." },
 
-    { "id": "rabano",    "nombre": "Rábano",    "tipo": "cultivo", "sprite": "rabano",    "venta": 45,  "conserva": "conserva_rabano" },
-    { "id": "zanahoria", "nombre": "Zanahoria", "tipo": "cultivo", "sprite": "zanahoria", "venta": 80,  "conserva": "conserva_zanahoria" },
-    { "id": "calabaza",  "nombre": "Calabaza",  "tipo": "cultivo", "sprite": "calabaza",  "venta": 220, "conserva": "conserva_calabaza" },
+    { "id": "rabano",    "nombre": "Radish",  "tipo": "cultivo", "sprite": "rabano",    "venta": 45,  "conserva": "conserva_rabano",    "descripcion": "Crisp and peppery. Eat it raw for a quick energy boost." },
+    { "id": "zanahoria", "nombre": "Carrot",  "tipo": "cultivo", "sprite": "zanahoria", "venta": 80,  "conserva": "conserva_zanahoria", "descripcion": "Smells like fresh damp earth. Sells well or makes a hearty snack." },
+    { "id": "calabaza",  "nombre": "Pumpkin", "tipo": "cultivo", "sprite": "calabaza",  "venta": 220, "conserva": "conserva_calabaza",  "descripcion": "The pride of Mosslantern Glen. Turned into preserves, it fetches a small fortune." },
 
-    { "id": "conserva_rabano",    "nombre": "Conserva de rábano",    "tipo": "artesanal", "sprite": "conserva", "venta": 140 },
-    { "id": "conserva_zanahoria", "nombre": "Conserva de zanahoria", "tipo": "artesanal", "sprite": "conserva", "venta": 210 },
-    { "id": "conserva_calabaza",  "nombre": "Conserva de calabaza",  "tipo": "artesanal", "sprite": "conserva", "venta": 490 },
+    { "id": "conserva_rabano",    "nombre": "Pickled Radish",    "tipo": "artesanal", "sprite": "conserva_rabano",    "venta": 140, "descripcion": "Radishes pickled with glen herbs. Crunchy the moment you pop the lid." },
+    { "id": "conserva_zanahoria", "nombre": "Carrot Preserves",  "tipo": "artesanal", "sprite": "conserva_zanahoria", "venta": 210, "descripcion": "Sweet and bright like late afternoon sun." },
+    { "id": "conserva_calabaza",  "nombre": "Golden Pumpkin Jam","tipo": "artesanal", "sprite": "conserva_calabaza",  "venta": 490, "descripcion": "Aurelius's secret recipe. Folks across the glen bid high for every jar." },
 
-    { "id": "madera", "nombre": "Madera", "tipo": "material", "sprite": "madera", "venta": 2 },
-    { "id": "piedra", "nombre": "Piedra", "tipo": "material", "sprite": "piedra", "venta": 2 },
-    { "id": "fibra",  "nombre": "Fibra",  "tipo": "material", "sprite": "fibra",  "venta": 1 },
+    { "id": "madera", "nombre": "Wood",        "tipo": "material", "sprite": "madera", "venta": 2, "descripcion": "Sturdy glen oak, fragrant with fresh resin." },
+    { "id": "piedra", "nombre": "Stone",       "tipo": "material", "sprite": "piedra", "venta": 2, "descripcion": "Grey cliff stone, solid enough for furnaces and sprinklers." },
+    { "id": "fibra",  "nombre": "Plant Fiber", "tipo": "material", "sprite": "fibra",  "venta": 1, "descripcion": "Tough dry stalks; useful for tying almost anything together." },
 
-    { "id": "cofre",          "nombre": "Cofre",          "tipo": "colocable", "sprite": "cofre",          "objeto": "cofre",          "venta": 0,  "descripcion": "Guarda hasta 12 objetos." },
-    { "id": "cerca",          "nombre": "Cerca",          "tipo": "colocable", "sprite": "cerca",          "objeto": "cerca",          "venta": 1,  "descripcion": "Decoración que bloquea el paso." },
-    { "id": "aspersor",       "nombre": "Aspersor",       "tipo": "colocable", "sprite": "aspersor",       "objeto": "aspersor",       "venta": 30, "descripcion": "Cada mañana riega las 4 casillas vecinas." },
-    { "id": "tarro",          "nombre": "Tarro de conservas", "tipo": "colocable", "sprite": "tarro",      "objeto": "tarro",          "venta": 50, "descripcion": "Convierte un cultivo en conserva en 1 día." },
-    { "id": "espantapajaros", "nombre": "Espantapájaros", "tipo": "colocable", "sprite": "espantapajaros", "objeto": "espantapajaros", "venta": 20, "descripcion": "Protege los cultivos de los cuervos en un radio de 8 casillas." },
-    { "id": "horno",          "nombre": "Horno de fundición", "tipo": "colocable", "sprite": "horno",    "objeto": "horno",          "venta": 40, "descripcion": "Funde 3 minerales en un lingote en unas horas." },
-    { "id": "antorcha",       "nombre": "Antorcha",       "tipo": "colocable", "sprite": "antorcha",       "objeto": "antorcha",       "venta": 2,  "descripcion": "Ilumina la granja de noche y la mazmorra." },
+    { "id": "cofre",          "nombre": "Chest",             "tipo": "colocable", "sprite": "cofre",          "objeto": "cofre",          "venta": 0,   "descripcion": "Stores up to 12 items. A tidy farm brings peace of mind." },
+    { "id": "cerca",          "nombre": "Wooden Fence",      "tipo": "colocable", "sprite": "cerca",          "objeto": "cerca",          "venta": 1,   "descripcion": "Sturdy timber post that borders your plots and blocks passage." },
+    { "id": "aspersor",       "nombre": "Sprinkler",         "tipo": "colocable", "sprite": "aspersor",       "objeto": "aspersor",       "compra": 450, "venta": 30,  "descripcion": "Waters the 4 adjacent cardinal tiles every morning." },
+    { "id": "aspersor_gema",  "nombre": "Lantern Sprinkler", "tipo": "colocable", "sprite": "aspersor_gema",  "objeto": "aspersor_gema",  "compra": 1800, "venta": 240, "descripcion": "Set with a Lantern Gem: waters all 8 surrounding tiles (3×3) every morning." },
+    { "id": "tarro",          "nombre": "Preserves Jar",     "tipo": "colocable", "sprite": "tarro",          "objeto": "tarro",          "compra": 600, "venta": 50,  "descripcion": "Turns a raw crop into artisan preserves in 20 hours." },
+    { "id": "espantapajaros", "nombre": "Scarecrow",         "tipo": "colocable", "sprite": "espantapajaros", "objeto": "espantapajaros", "venta": 20,  "descripcion": "Wearing Grandpa's old hat: keeps crows away within an 8-tile radius." },
+    { "id": "horno",          "nombre": "Smelting Furnace",  "tipo": "colocable", "sprite": "horno",          "objeto": "horno",          "venta": 40,  "descripcion": "Smelts 3 raw ores into a gleaming ingot in a few hours." },
+    { "id": "antorcha",       "nombre": "Torch",             "tipo": "colocable", "sprite": "antorcha",       "objeto": "antorcha",       "venta": 2,   "descripcion": "Warm flame that pushes back the dark on the farm and in dungeons." },
 
-    { "id": "ropa_granjera",   "nombre": "Ropa de granja",   "tipo": "ropa", "uso": "campo",   "sprite": "ropa_granjera",   "aspecto": "base",       "venta": 0,  "efecto": { "energia_campo": 0.5 }, "descripcion": "Arar y regar gastan la mitad de energía." },
-    { "id": "ropa_minera",     "nombre": "Traje de minería",    "tipo": "ropa", "uso": "batalla", "sprite": "ropa_minera",     "aspecto": "minera",     "venta": 60, "efecto": { "luz": 1.7, "energia_pico": 0.5 }, "descripcion": "Casco con lámpara: más luz en la mazmorra y el pico gasta la mitad." },
-    { "id": "ropa_aventurera", "nombre": "Armadura de aventura", "tipo": "ropa", "uso": "batalla", "sprite": "ropa_aventurera", "aspecto": "aventurera", "venta": 90, "efecto": { "defensa": 0.3, "vida": 2 }, "descripcion": "Ropa de batalla: recibes menos daño y tienes 1 corazón más." },
+    { "id": "ropa_granjera",   "nombre": "Farm Overalls",    "tipo": "ropa", "uso": "campo",   "sprite": "ropa_granjera",   "aspecto": "base",       "venta": 0,  "efecto": { "energia_campo": 0.5 }, "descripcion": "Comfy moss-green overalls: tilling and watering use half the energy." },
+    { "id": "ropa_minera",     "nombre": "Mining Gear",      "tipo": "ropa", "uso": "batalla", "sprite": "ropa_minera",     "aspecto": "minera",     "compra": 500, "venta": 60, "efecto": { "luz": 1.7, "energia_pico": 0.5 }, "descripcion": "Hard hat with headlamp: brighter light underground and pickaxe uses half energy." },
+    { "id": "ropa_aventurera", "nombre": "Adventurer Armor", "tipo": "ropa", "uso": "batalla", "sprite": "ropa_aventurera", "aspecto": "aventurera", "compra": 1200, "venta": 90, "efecto": { "defensa": 0.3, "vida": 2 }, "descripcion": "Cured leather and red cloak: reduces damage by 30% and adds +1 heart." },
 
-    { "id": "espada_madera", "nombre": "Espada de madera", "tipo": "arma", "sprite": "espada_madera", "dano": 1, "venta": 5,   "descripcion": "Daño 1. Mejor que pelear con la azada." },
-    { "id": "espada_cobre",  "nombre": "Espada de cobre",  "tipo": "arma", "sprite": "espada_cobre",  "dano": 2, "venta": 60,  "descripcion": "Daño 2." },
-    { "id": "espada_hierro", "nombre": "Espada de hierro", "tipo": "arma", "sprite": "espada_hierro", "dano": 4, "venta": 150, "descripcion": "Daño 4." },
-    { "id": "pocion",        "nombre": "Poción de vida",   "tipo": "pocion", "sprite": "pocion", "cura": 6, "venta": 30, "descripcion": "Recupera 3 corazones (tecla F)." },
+    { "id": "espada_madera",    "nombre": "Wooden Sword",   "tipo": "arma", "sprite": "espada_madera",    "dano": 2, "venta": 5,   "descripcion": "Damage 2. Carved from oak; much better than swatting slimes with a hoe." },
+    { "id": "espada_cobre",     "nombre": "Copper Sword",   "tipo": "arma", "sprite": "espada_cobre",     "dano": 3, "venta": 60,  "descripcion": "Damage 3. A keen bronze-red blade for pushing deeper into the mine." },
+    { "id": "espada_hierro",    "nombre": "Iron Sword",     "tipo": "arma", "sprite": "espada_hierro",    "dano": 5, "venta": 150, "descripcion": "Damage 5. Tempered with ancient bone; cuts through the shadows of the Crypt." },
+    { "id": "espada_espectral", "nombre": "Lanternblade",   "tipo": "arma", "sprite": "espada_espectral", "dano": 8, "venta": 450, "descripcion": "Damage 8. Forged with Lantern Gems; hums with the blue glow of the deep glen." },
+    { "id": "pocion",           "nombre": "Health Potion",  "tipo": "pocion", "sprite": "pocion", "cura": 6, "compra": 120, "venta": 30, "descripcion": "Radish tonic infused with slime essence. Restores 3 hearts (press F)." },
 
-    { "id": "mineral_cobre",  "nombre": "Mineral de cobre",  "tipo": "material", "sprite": "mineral_cobre",  "venta": 5 },
-    { "id": "mineral_hierro", "nombre": "Mineral de hierro", "tipo": "material", "sprite": "mineral_hierro", "venta": 10 },
-    { "id": "lingote_cobre",  "nombre": "Lingote de cobre",  "tipo": "material", "sprite": "lingote_cobre",  "venta": 25 },
-    { "id": "lingote_hierro", "nombre": "Lingote de hierro", "tipo": "material", "sprite": "lingote_hierro", "venta": 50 },
-    { "id": "gema",           "nombre": "Gema azul",         "tipo": "material", "sprite": "gema",           "venta": 120 },
-    { "id": "baba",           "nombre": "Baba de limo",      "tipo": "material", "sprite": "baba",           "venta": 3 },
-    { "id": "ala",            "nombre": "Ala de murciélago", "tipo": "material", "sprite": "ala",            "venta": 6 },
-    { "id": "hueso",          "nombre": "Hueso",             "tipo": "material", "sprite": "hueso",          "venta": 8 }
+    { "id": "mineral_cobre",  "nombre": "Copper Ore",  "tipo": "material", "sprite": "mineral_cobre",  "venta": 5,   "descripcion": "Rock streaked with warm orange copper. Smelt 3 in a furnace for an ingot." },
+    { "id": "mineral_hierro", "nombre": "Iron Ore",    "tipo": "material", "sprite": "mineral_hierro", "venta": 10,  "descripcion": "Dense metal from the deeper shafts. Needs a hot furnace." },
+    { "id": "lingote_cobre",  "nombre": "Copper Ingot","tipo": "material", "sprite": "lingote_cobre",  "venta": 25,  "descripcion": "Home-smelted copper bar, ready for forging blades or mining gear." },
+    { "id": "lingote_hierro", "nombre": "Iron Ingot",  "tipo": "material", "sprite": "lingote_hierro", "venta": 50,  "descripcion": "Heavy pure iron bar. The pride of any glen forge." },
+    { "id": "gema",           "nombre": "Lantern Gem", "tipo": "material", "sprite": "gema",           "venta": 120, "descripcion": "'Mosslantern Crystal'. Blue subterranean crystal that glows like a lantern in the dark." },
+    { "id": "baba",           "nombre": "Slime Gel",   "tipo": "material", "sprite": "baba",           "venta": 3,   "descripcion": "Sticky, but mixed with radish it brews into a wonderful healing tonic." },
+    { "id": "ala",            "nombre": "Bat Wing",    "tipo": "material", "sprite": "ala",            "venta": 6,   "descripcion": "Light as night air, ideal for lining sturdy adventurer armor." },
+    { "id": "hueso",          "nombre": "Ancient Bone","tipo": "material", "sprite": "hueso",          "venta": 8,   "descripcion": "Mineral-soaked bone fragment; reinforces iron blades and cuirasses." }
   ],
 
   "cultivos": [
@@ -228,11 +277,12 @@
     { "id": "cofre",          "sprite": "cofre",          "solido": true, "accion": "cofre", "recoger": true },
     { "id": "cerca",          "sprite": "cerca",          "solido": true, "recoger": true },
     { "id": "aspersor",       "sprite": "aspersor",       "solido": true, "recoger": true, "riega": 1 },
+    { "id": "aspersor_gema",  "sprite": "aspersor_gema",  "solido": true, "recoger": true, "riega": 2, "luz": 55 },
     { "id": "tarro",          "sprite": "tarro",          "solido": true, "accion": "maquina", "recoger": true,
       "procesa": [
-        { "entrada": "rabano",    "n": 1, "salida": "conserva_rabano",    "minutos": 1440 },
-        { "entrada": "zanahoria", "n": 1, "salida": "conserva_zanahoria", "minutos": 1440 },
-        { "entrada": "calabaza",  "n": 1, "salida": "conserva_calabaza",  "minutos": 1440 }
+        { "entrada": "rabano",    "n": 1, "salida": "conserva_rabano",    "minutos": 1200 },
+        { "entrada": "zanahoria", "n": 1, "salida": "conserva_zanahoria", "minutos": 1200 },
+        { "entrada": "calabaza",  "n": 1, "salida": "conserva_calabaza",  "minutos": 1200 }
       ] },
     { "id": "horno",          "sprite": "horno",          "solido": true, "accion": "maquina", "recoger": true,
       "procesa": [
@@ -249,38 +299,70 @@
     { "id": "cofre_mazmorra", "sprite": "cofre_mazmorra", "solido": true,  "accion": "botin", "botin": "cofre_mazmorra" },
     { "id": "roca_cobre",     "sprite": "roca_cobre",     "solido": true, "herramienta": "pico", "golpes": 3, "suelta": { "mineral_cobre": [1, 3], "piedra": [0, 1] } },
     { "id": "roca_hierro",    "sprite": "roca_hierro",    "solido": true, "herramienta": "pico", "golpes": 4, "suelta": { "mineral_hierro": [1, 3], "piedra": [0, 1] } },
-    { "id": "roca_gema",      "sprite": "roca_gema",      "solido": true, "herramienta": "pico", "golpes": 5, "suelta": { "gema": [1, 1] }, "luz": 50 }
+    { "id": "roca_gema",      "sprite": "roca_gema",      "solido": true, "herramienta": "pico", "golpes": 5, "suelta": { "gema": [1, 1] }, "luz": 50 },
+
+    { "id": "farol_apagado",  "sprite": "farol_apagado",  "solido": true, "accion": "rescate", "luz": 30 },
+    { "id": "hoguera",        "sprite": "hoguera",        "solido": true, "ancho": 2, "alto": 2, "luz": 90 },
+    { "id": "casita_musgo",   "sprite": "casita_musgo",   "solido": true, "ancho": 2, "alto": 2, "hogar": 1, "luz": 40 },
+    { "id": "comedero",       "sprite": "comedero",       "solido": true, "ancho": 2, "alto": 1, "accion": "cofre" },
+    { "id": "lenera",         "sprite": "lenera",         "solido": true, "ancho": 2, "alto": 2, "accion": "cofre" }
+  ],
+
+  "_edificios": "Village buildings placed with the Build tab (action 'construir'), never carried in the backpack. 'requiere': another building that must exist, and/or how many Mosslings live in the glen. Demolish with the axe or pickaxe to get the materials back.",
+  "edificios": [
+    { "id": "hoguera",      "nombre": "Lantern Hearth", "coste": { "madera": 20, "piedra": 20 },              "descripcion": "The heart of the village. Its glow tells lost Mosslings where home is." },
+    { "id": "casita_musgo", "nombre": "Moss Hut",       "coste": { "madera": 30, "piedra": 10, "fibra": 10 }, "requiere": { "edificio": "hoguera" }, "descripcion": "A cozy home for one Mossling." },
+    { "id": "comedero",     "nombre": "Shared Table",   "coste": { "madera": 25, "fibra": 5 },                "requiere": { "edificio": "hoguera" }, "descripcion": "Leave crops or preserves here. Each Mossling eats one every morning." },
+    { "id": "lenera",       "nombre": "Woodshed",       "coste": { "madera": 15, "piedra": 10 },              "requiere": { "residentes": 1 },       "descripcion": "A Mossling assigned here stacks 6 wood inside every morning." }
+  ],
+
+  "_residentes": "Mosslings: little moss creatures with a lantern, asleep inside dark lanterns in the dungeons. Relight the lantern with a torch in hand to rescue one. 'trabajo': regar (waters 12 tilled tiles near its hut) or lena (6 wood into a Woodshed).",
+  "residentes": [
+    { "id": "sprout", "nombre": "Sprout", "sprite": "mossling_sprout", "rescate": { "mazmorra": "mina", "piso": 3 }, "trabajo": "regar",
+      "descripcion": "A sleepy Mossling with two leaf sprouts on its head. Loves watering things." }
   ],
 
   "recetas": [
-    { "resultado": "cerca",          "cantidad": 2, "ingredientes": { "madera": 2 } },
-    { "resultado": "espantapajaros", "cantidad": 1, "ingredientes": { "madera": 8, "fibra": 5 } },
-    { "resultado": "cofre",          "cantidad": 1, "ingredientes": { "madera": 20 } },
-    { "resultado": "aspersor",       "cantidad": 1, "ingredientes": { "piedra": 8, "madera": 4 } },
-    { "resultado": "tarro",          "cantidad": 1, "ingredientes": { "madera": 12, "piedra": 8, "fibra": 4 } },
-    { "resultado": "antorcha",       "cantidad": 3, "ingredientes": { "madera": 2, "fibra": 1 } },
-    { "resultado": "horno",          "cantidad": 1, "ingredientes": { "piedra": 20, "madera": 6 } },
-    { "resultado": "espada_madera",  "cantidad": 1, "ingredientes": { "madera": 10 } },
-    { "resultado": "espada_cobre",   "cantidad": 1, "ingredientes": { "lingote_cobre": 3, "madera": 2 } },
-    { "resultado": "espada_hierro",  "cantidad": 1, "ingredientes": { "lingote_hierro": 3, "hueso": 2 } },
-    { "resultado": "pocion",         "cantidad": 2, "ingredientes": { "baba": 3, "rabano": 1 } },
-    { "resultado": "ropa_minera",    "cantidad": 1, "ingredientes": { "lingote_cobre": 2, "fibra": 10 } },
-    { "resultado": "ropa_aventurera","cantidad": 1, "ingredientes": { "hueso": 5, "ala": 4, "fibra": 10 } },
-    { "resultado": "ropa_granjera",  "cantidad": 1, "ingredientes": { "fibra": 5 } }
+    { "resultado": "cerca",            "cantidad": 2, "ingredientes": { "madera": 2 } },
+    { "resultado": "espantapajaros",   "cantidad": 1, "ingredientes": { "madera": 8, "fibra": 5 } },
+    { "resultado": "cofre",            "cantidad": 1, "ingredientes": { "madera": 20 } },
+    { "resultado": "aspersor",         "cantidad": 1, "ingredientes": { "piedra": 8, "madera": 4 } },
+    { "resultado": "aspersor_gema",    "cantidad": 1, "ingredientes": { "lingote_hierro": 2, "gema": 2 } },
+    { "resultado": "tarro",            "cantidad": 1, "ingredientes": { "madera": 12, "piedra": 8, "fibra": 4 } },
+    { "resultado": "antorcha",         "cantidad": 3, "ingredientes": { "madera": 2, "fibra": 1 } },
+    { "resultado": "horno",            "cantidad": 1, "ingredientes": { "piedra": 20, "madera": 6 } },
+    { "resultado": "espada_madera",    "cantidad": 1, "ingredientes": { "madera": 10 } },
+    { "resultado": "espada_cobre",     "cantidad": 1, "ingredientes": { "lingote_cobre": 3, "madera": 2 } },
+    { "resultado": "espada_hierro",    "cantidad": 1, "ingredientes": { "lingote_hierro": 3, "hueso": 2 } },
+    { "resultado": "espada_espectral", "cantidad": 1, "ingredientes": { "lingote_hierro": 3, "gema": 4, "hueso": 4 } },
+    { "resultado": "pocion",           "cantidad": 2, "ingredientes": { "baba": 3, "rabano": 1 } },
+    { "resultado": "ropa_minera",      "cantidad": 1, "ingredientes": { "lingote_cobre": 2, "fibra": 10 } },
+    { "resultado": "ropa_aventurera",  "cantidad": 1, "ingredientes": { "hueso": 5, "ala": 4, "fibra": 10 } },
+    { "resultado": "ropa_granjera",    "cantidad": 1, "ingredientes": { "fibra": 5 } }
   ],
 
-  "tienda": ["semilla_rabano", "semilla_zanahoria", "semilla_calabaza"],
+  "tienda": [
+    "semilla_rabano",
+    "semilla_zanahoria",
+    "semilla_calabaza",
+    "pocion",
+    "aspersor",
+    "tarro",
+    "ropa_minera",
+    "ropa_aventurera",
+    "aspersor_gema"
+  ],
 
-  "_botines": "Tablas de botín para las mazmorras (próxima etapa). Cada jugador sortea su propio botín.",
+  "_botines": "Loot tables for dungeons. Each player rolls their own instanced loot.",
   "botines": {
     "cripta_final": {
       "tiradas": 5,
-      "garantizado": [{ "item": "gema", "n": 5 }],
+      "garantizado": [{ "item": "gema", "n": 5 }, { "item": "espada_espectral", "n": 1 }],
       "entradas": [
-        { "item": "lingote_hierro", "peso": 30, "min": 3, "max": 6 },
-        { "item": "gema",           "peso": 25, "min": 2, "max": 4 },
-        { "item": "pocion",         "peso": 25, "min": 3, "max": 5 },
-        { "item": "espada_hierro",  "peso": 20, "min": 1, "max": 1 }
+        { "item": "lingote_hierro",   "peso": 30, "min": 3, "max": 6 },
+        { "item": "gema",             "peso": 25, "min": 2, "max": 4 },
+        { "item": "pocion",           "peso": 25, "min": 3, "max": 5 },
+        { "item": "aspersor_gema",    "peso": 20, "min": 1, "max": 2 }
       ]
     },
     "cofre_mazmorra": {
@@ -319,5 +401,116 @@
   "inicio": {
     "dinero": 300,
     "inventario": [["azada", 1], ["regadera", 1], ["hacha", 1], ["pico", 1], ["semilla_rabano", 15]]
+  },
+
+  "_historia": "Mosslantern Glen flavor, dynamic lines from Brisa at the stall, and Grandpa Aurelius's craft notes. Endless day-to-day farming, crafting, and dungeon runs.",
+  "historia": {
+    "subtitulo": "Mosslantern Glen",
+    "lema_portada": "Your cozy corner in Mosslantern Glen: farm day by day, craft preserves, smelt ore, and delve into endless shifting dungeons.",
+    "mercader": {
+      "nombre": "Aunt Brisa",
+      "titulo_puesto": "Aunt Brisa's Stall",
+      "saludos": {
+        "inicio": "\"Aurelius always said the soil listens. Grab some radish seeds—they sprout fast and forgive mistakes.\"",
+        "lluvia": "\"Rainy day, easy day. Let the clouds water the fields while you head underground to mine.\"",
+        "hito_1": "\"Smells like furnace smoke and fresh earth. You've got your grandpa's hands already.\"",
+        "hito_conserva": "\"Is that sweet spice in the air? Nothing beats a fresh jar of Mosslantern preserves on a cool evening.\"",
+        "hito_2": "\"The cliff rumbled last night... So you unsealed the Forgotten Crypt. Bring pumpkins and good iron.\"",
+        "hito_3": "\"Word is you conquered the bottom of the mine. Every time you return, the mountain grows richer and tougher.\"",
+        "hito_linterna": "\"Look at that blue crystal glow on your gear! True Mosslantern craftsmanship, just like Aurelius used to forge.\"",
+        "hito_4": "\"The mist in the tunnel shifts every day. Long as you have furnaces and potions, the loot never runs dry.\"",
+        "hito_final": "\"You crossed blades with the Spectral Knight, yet the Crypt never truly sleeps—each run holds more gems and greater challenges.\""
+      },
+      "charlas": [
+        "\"Why is it called Mosslantern Glen? Step out near the northern cliff at dusk—the damp moss feeds on crystal dust from the caves and glows like little blue lanterns.\"",
+        "\"Your Grandpa Aurelius never believed in 'finishing' a farm. He'd say a farm is like a good hearth fire: you tend it every morning, and it warms you every night.\"",
+        "\"If you ever put something in the shipping bin by mistake, just interact with it empty-handed before you go to sleep to take it back.\"",
+        "\"Merchants from across the ridge pay triple for Golden Pumpkin Jam. Keep a row of Preserves Jars busy and you'll never want for gold.\"",
+        "\"The tunnels under the cliff shift their halls every time a delver clears the tenth floor. Deeper runs mean fiercer monsters, but the treasure chests overflow.\"",
+        "\"Never head into the Forgotten Crypt without a stack of Health Potions. Three Slime Gels and one fresh Radish—simple, sharp, and life-saving!\""
+      ]
+    },
+    "murmullos": [
+      "✨ Blue moss lanterns along the cliff trail faded softly into the morning mist.",
+      "🌿 A cool breeze carries the scent of damp oak and wild clover across Mosslantern Glen.",
+      "⛏️ Faint echoes ring from the Copper Mine entrance; the mountain veins feel restless today.",
+      "🍯 Aunt Brisa is humming an old glen tune while arranging seed packets at her stall.",
+      "💧 Dew glistens on the farmhouse roof—a peaceful morning for tending furrows or stoking furnaces.",
+      "🕯️ The lantern crystals beneath the ridge pulsed with a quiet azure hum before sunrise.",
+      "🦉 An owl glided over the pond at dawn, leaving the glen calm and bright."
+    ],
+    "cartas": [
+      {
+        "id": "intro",
+        "titulo": "Note on the Pine Table",
+        "autor": "Grandpa Aurelius",
+        "disparador": "inicio",
+        "resumen": "Note 1 · The Rhythm of Mosslantern Glen",
+        "texto": "If you're reading this, I've hung up my hoe and the farm is yours. There's no rush or finish line here—each morning you decide whether to plant, fire up the furnaces, or delve into the cliff tunnel. I left you tools, radish seeds, and Aunt Brisa's stall right next door."
+      },
+      {
+        "id": "hito_1",
+        "titulo": "Furrow and Forge",
+        "autor": "Grandpa Aurelius",
+        "disparador": "cosecha_o_lingote",
+        "resumen": "Note 2 · First Harvest or First Smelted Ingot",
+        "texto": "A fresh root pulled from the soil or a warm ingot from the furnace—that's the heart of the craft. The more you automate your fields with sprinklers and preserves jars, the more time and supplies you'll have to mine rare ores below."
+      },
+      {
+        "id": "hito_conserva",
+        "titulo": "Sweetness in a Jar",
+        "autor": "Grandpa Aurelius",
+        "disparador": "conserva",
+        "resumen": "Note 3 · Collected Your First Artisan Preserve",
+        "texto": "There's magic in patience. A single pumpkin or radish sealed in a wooden keg with glen herbs turns into a delicacy that funds entire expeditions. Line up several jars by the farmhouse and let time work for you."
+      },
+      {
+        "id": "hito_2",
+        "titulo": "The Floor 5 Seal",
+        "autor": "Grandpa Aurelius",
+        "disparador": "jefe:rey_limo",
+        "resumen": "Note 4 · Defeated the Slime King & Opened the Crypt",
+        "texto": "Found the passage behind that crowned jelly, did you? You can now enter the Forgotten Crypt from the cave entrance. Its halls shift on every run, and it's where iron and blue lantern gems are most abundant for your best recipes."
+      },
+      {
+        "id": "hito_3",
+        "titulo": "Veins That Never Run Dry",
+        "autor": "Grandpa Aurelius",
+        "disparador": "jefe:guardian",
+        "resumen": "Note 5 · Cleared Floor 10 of the Copper Mine",
+        "texto": "The Stone Guardian watches over the mother lode, and the mountain is alive: every time you clear the mine and return, its denizens grow tougher and its chests roll extra loot. It's always worth diving back in."
+      },
+      {
+        "id": "hito_linterna",
+        "titulo": "Secrets of the Lantern Crystal",
+        "autor": "Grandpa Aurelius",
+        "disparador": "linterna",
+        "resumen": "Note 6 · Crafted Lantern-Infused Gear",
+        "texto": "When you set a Lantern Gem into iron, it remembers the underground spring. A Lantern Sprinkler waters an entire 3×3 plot every dawn, and a Lanternblade cuts through crypt shadows like morning light."
+      },
+      {
+        "id": "hito_4",
+        "titulo": "The Shifting Halls",
+        "autor": "Grandpa Aurelius",
+        "disparador": "jefe:nigromante",
+        "resumen": "Note 7 · Cleared Floor 5 of the Forgotten Crypt",
+        "texto": "The Necromancer rearranges the Crypt walls on every expedition. Use the Floor 6 checkpoint whenever you want to drop straight into the deep gem veins to craft lantern-infused gear."
+      },
+      {
+        "id": "hito_final",
+        "titulo": "The Endless Watch",
+        "autor": "Grandpa Aurelius",
+        "disparador": "jefe:caballero_espectral",
+        "resumen": "Note 8 · Bested the Spectral Knight (Crypt Mastery)",
+        "texto": "Few have ever crossed blades with the Spectral Knight and walked back out. In Mosslantern Glen the adventure never ends—each victory awakens stronger foes and richer treasure to keep growing your farm day after day."
+      }
+    ],
+    "notas_amanecer": {
+      "lluvia": "Gentle rain falls over Mosslantern Glen: all tilled soil woke up watered.",
+      "cuervo": "An early crow feasted on a {cultivo} plant. A scarecrow will keep them away.",
+      "desmayo_hora": "The night watch found you nodding off in the fields at 2:00 AM. Aunt Brisa tucked you in and charged {multa} gold for herbal tea.",
+      "desmayo_cueva": "Aunt Brisa dragged you out of the tunnel mouth and charged {multa} gold for bandages.",
+      "sin_ventas": "The shipping bin slept empty last night, but the morning air smells like promising soil."
+    }
   }
 }

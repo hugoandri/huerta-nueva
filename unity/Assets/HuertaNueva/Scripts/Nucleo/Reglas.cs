@@ -24,7 +24,7 @@ namespace HuertaNueva
 
     public class Evento
     {
-        public string tipo, jugador, txt, panel, color, titulo, jefe;
+        public string tipo, jugador, txt, panel, color, titulo, jefe, item;
         public bool malo, bajada;
         public float x, y, n;
         public int uid, dia, total, multa, piso;
@@ -35,7 +35,7 @@ namespace HuertaNueva
         public int enCursoPiso;
     }
 
-    public static class Reglas
+    public static partial class Reglas
     {
         public const float FIN_DIA = 26 * 60, MIN_POR_SEG = 10f / 7f, VELOCIDAD = 112, DT_MAX = 0.1f;
         static readonly Dictionary<string, (int, int)> VEC = new Dictionary<string, (int, int)>
@@ -47,7 +47,13 @@ namespace HuertaNueva
         public static (int, int) CeldaFrente(Def def, Jugador j) { var (cx, cy) = CeldaJugador(def, j); var (dx, dy) = VEC[j.dir]; return (cx + dx, cy + dy); }
         public static int TiempoAbs(Estado e) => e.tiempo.dia * 1440 + (int)e.tiempo.min;
         public static double Efecto(Def def, Jugador j, string k) => def.ITEMS.TryGetValue(Mundo.RopaActual(j) ?? "", out var it) ? it.Efecto(k) : 0;
-        static void RecalcularVida(Def def, Jugador j) { j.vidaMax = Mundo.VIDA_BASE + (float)Efecto(def, j, "vida"); j.vida = Math.Min(j.vida, j.vidaMax); }
+        static void RecalcularVida(Def def, Jugador j)
+        {
+            float prevMax = j.vidaMax > 0 ? j.vidaMax : Mundo.VIDA_BASE;
+            j.vidaMax = Mundo.VIDA_BASE + (float)Efecto(def, j, "vida");
+            if (j.vida >= prevMax) j.vida = j.vidaMax;
+            else j.vida = Math.Min(j.vida, j.vidaMax);
+        }
         public static Progreso ProgresoDe(Estado e, string id)
         {
             var p = e.mazmorra.progreso.Find(x => x.id == id);
@@ -57,17 +63,37 @@ namespace HuertaNueva
         public static bool MaquinaLista(Estado e, ObjMundo o) => !string.IsNullOrEmpty(o.datos.salida) && TiempoAbs(e) >= o.datos.listoEn;
         public static List<Jugador> JugadoresEn(Estado e, Zona z) => e.jugadores.Where(j => Mundo.ZonaDe(e, j) == z).ToList();
 
-        public static bool Solido(Def def, Zona g, float px, float py)
+        public static bool Solido(Def def, Zona g, float px, float py, bool vuela = false)
         {
             int x = (int)Math.Floor(px / def.T), y = (int)Math.Floor(py / def.T);
             if (!Mundo.Dentro(def, x, y)) return true;
             int i = Mundo.Idx(def, x, y);
-            if (Zona.En(g.agua, i) || Zona.En(g.muro, i) || Zona.En(g.acantilado, i)) return true;
+            if (Zona.En(g.muro, i) || Zona.En(g.acantilado, i)) return true;
+            if (vuela) return false;
+            if (Zona.En(g.agua, i)) return true;
             var o = Mundo.ObjetoEn(def, g, x, y);
             return o != null && def.OBJ[o.id].solido;
         }
-        public static bool Choca(Def def, Zona g, float x, float y, float r = 8) =>
-            Solido(def, g, x - r, y - 6) || Solido(def, g, x + r, y - 6) || Solido(def, g, x - r, y + 2) || Solido(def, g, x + r, y + 2);
+        public static bool Choca(Def def, Zona g, float x, float y, float r = 8, bool vuela = false) =>
+            Solido(def, g, x - r, y - 6, vuela) || Solido(def, g, x + r, y - 6, vuela) || Solido(def, g, x - r, y + 2, vuela) || Solido(def, g, x + r, y + 2, vuela);
+
+        static void DesbloquearHito(Estado e, Def def, List<Evento> ev, string disparador)
+        {
+            if (def.historia?.cartas == null) return;
+            if (e.hitos == null) e.hitos = new List<string> { "intro" };
+            foreach (var c in def.historia.cartas)
+            {
+                if (c.disparador == disparador && !e.hitos.Contains(c.id))
+                {
+                    e.hitos.Add(c.id);
+                    foreach (var j in e.jugadores)
+                    {
+                        Aviso(ev, j, $"📜 Grandpa's Note: \"{c.titulo}\" (see Journal)");
+                        ev.Add(new Evento { tipo = "carta", jugador = j.id, txt = c.id });
+                    }
+                }
+            }
+        }
 
         // ---------------------------------------------------------------- eventos
         static void Aviso(List<Evento> ev, Jugador j, string txt, bool malo = false) => ev.Add(new Evento { tipo = "aviso", jugador = j.id, txt = txt, malo = malo });
@@ -79,12 +105,12 @@ namespace HuertaNueva
             if (n <= 0) return 0;
             int sobra = Inventario.Agregar(def, j, id, n);
             if (n - sobra > 0) Flotar(ev, x, y, $"+{n - sobra} {def.ITEMS[id].nombre}", color);
-            if (sobra > 0) Aviso(ev, j, "La mochila está llena", true);
+            if (sobra > 0) Aviso(ev, j, "Backpack is full", true);
             return sobra;
         }
         static bool GastarEnergia(List<Evento> ev, Jugador j, float e)
         {
-            if (j.energia < e) { Aviso(ev, j, "Estás agotada. Come algo o duerme.", true); return false; }
+            if (j.energia < e) { Aviso(ev, j, "You're exhausted. Eat something or go to sleep.", true); return false; }
             j.energia = Math.Max(0, j.energia - e);
             return true;
         }
@@ -94,26 +120,38 @@ namespace HuertaNueva
         {
             var ev = new List<Evento>();
             Jugador j = a.jugador != null ? e.BuscarJugador(a.jugador) : null;
-            if (a.jugador != null && j == null) { ev.Add(new Evento { tipo = "error", txt = "Jugador desconocido" }); return ev; }
-            if (j == null && a.tipo != "tiempo" && a.tipo != "dormir") { ev.Add(new Evento { tipo = "error", txt = "Falta el jugador" }); return ev; }
+            if (a.jugador != null && j == null) { ev.Add(new Evento { tipo = "error", txt = "Unknown player" }); return ev; }
+            if (j == null && a.tipo != "tiempo" && a.tipo != "dormir") { ev.Add(new Evento { tipo = "error", txt = "Missing player" }); return ev; }
             switch (a.tipo)
             {
                 case "mover": Mover(e, def, a, j); break;
                 case "mirar": if (a.dir != null && VEC.ContainsKey(a.dir)) j.dir = a.dir; break;
                 case "seleccionar": if (a.i >= 0 && a.i < 12) j.sel = a.i; break;
                 case "moverInv":
-                    if (a.de >= 0 && a.a >= 0 && a.de < j.inv.Count && a.a < j.inv.Count && a.de != a.a) { var t = j.inv[a.de]; j.inv[a.de] = j.inv[a.a]; j.inv[a.a] = t; }
+                    if (a.de >= 0 && a.a >= 0 && a.de < j.inv.Count && a.a < j.inv.Count && a.de != a.a)
+                    {
+                        var sDe = j.inv[a.de]; var sA = j.inv[a.a];
+                        if (sDe != null && sA != null && sDe.id == sA.id && !Inventario.EsHerramienta(def, sDe.id))
+                        {
+                            int cabe = Math.Min(sDe.n, Inventario.PILA_MAX - sA.n);
+                            if (cabe > 0) { sA.n += cabe; sDe.n -= cabe; if (sDe.n <= 0) j.inv[a.de] = null; break; }
+                        }
+                        var t = j.inv[a.de]; j.inv[a.de] = j.inv[a.a]; j.inv[a.a] = t;
+                    }
                     break;
+                case "deshacerEnvio": DeshacerEnvio(def, j, ev); break;
                 case "tiempo": Tiempo(e, def, a, ev); break;
                 case "dormir": NuevoDia(e, def, ev, false); break;
                 case "comer": Comer(def, j, ev); break;
                 case "vestir": Vestir(def, j, a.i >= 0 ? a.i : j.sel, ev); break;
-                case "fabricar": Fabricar(def, j, a.receta, ev); break;
+                case "fabricar": Fabricar(e, def, j, a.receta, ev); break;
                 case "comprar": Comprar(def, j, a.item, a.n, ev); break;
                 case "cofreSacar": CofreSacar(e, def, j, a.uid, a.i, ev); break;
                 case "cofreGuardar": CofreGuardar(e, def, j, a.uid, a.i, ev); break;
                 case "entrarMazmorra": EntrarMazmorra(e, def, j, a.mazmorra, a.piso, ev); break;
                 case "usar": Usar(e, def, j, a.x, a.y, ev); break;
+                case "construir": Construir(e, def, j, a.item, a.x, a.y, ev); break;
+                case "asignar": Asignar(e, def, j, a.i, a.item, ev); break;
                 default: ev.Add(new Evento { tipo = "error", txt = "Acción desconocida: " + a.tipo }); break;
             }
             return ev;
@@ -132,6 +170,16 @@ namespace HuertaNueva
             if (!Choca(def, g, j.x, j.y + dy * v)) j.y += dy * v;
         }
 
+        static void DeshacerEnvio(Def def, Jugador j, List<Evento> ev)
+        {
+            if (j.envios == null || j.envios.Count == 0) { Aviso(ev, j, "No pending shipments today", true); return; }
+            var ult = j.envios[j.envios.Count - 1];
+            if (Inventario.EspacioPara(def, j, ult.id) < ult.n) { Aviso(ev, j, "Backpack is full", true); return; }
+            j.envios.RemoveAt(j.envios.Count - 1);
+            Inventario.Agregar(def, j, ult.id, ult.n);
+            Aviso(ev, j, $"Retrieved {ult.n} {def.ITEMS[ult.id].nombre.ToLower()} from the shipping bin");
+        }
+
         static void Tiempo(Estado e, Def def, Accion a, List<Evento> ev)
         {
             float dt = Math.Min(DT_MAX, Math.Max(0, a.dt));
@@ -147,17 +195,17 @@ namespace HuertaNueva
             ItemDef it = s != null ? def.ITEMS[s.id] : null;
             if (it != null && it.tipo == "pocion")
             {
-                if (j.vida >= j.vidaMax) { Aviso(ev, j, "Tienes la vida al máximo"); return; }
+                if (j.vida >= j.vidaMax) { Aviso(ev, j, "Your health is already full"); return; }
                 j.vida = Math.Min(j.vidaMax, j.vida + it.cura); Inventario.GastarMano(j);
                 Flotar(ev, j.x, j.y - 40, $"+{it.cura / 2f} ♥", "#e2674f");
                 return;
             }
-            if (it == null || (it.tipo != "cultivo" && it.tipo != "artesanal")) { Aviso(ev, j, "Ten en la mano un cultivo, una conserva o una poción", true); return; }
-            if (j.energia >= j.energiaMax) { Aviso(ev, j, "Tienes la energía al máximo"); return; }
+            if (it == null || (it.tipo != "cultivo" && it.tipo != "artesanal")) { Aviso(ev, j, "Hold a crop, preserve, or potion in your hand", true); return; }
+            if (j.energia >= j.energiaMax) { Aviso(ev, j, "Your energy is already full"); return; }
             int ganancia = Math.Max(10, (int)Math.Round(it.venta / 4.0, MidpointRounding.AwayFromZero));
             j.energia = Math.Min(j.energiaMax, j.energia + ganancia);
             Inventario.GastarMano(j);
-            Flotar(ev, j.x, j.y - 40, $"+{ganancia} energía", "#79c267");
+            Flotar(ev, j.x, j.y - 40, $"+{ganancia} energy", "#79c267");
         }
 
         // La ropa va a su puesto: de batalla (mazmorra) o de granja; la anterior vuelve a la casilla.
@@ -172,19 +220,20 @@ namespace HuertaNueva
             if (batalla) j.ropaBatalla = s.id; else j.ropa = s.id;
             j.inv[i] = anterior != null ? new Slot(anterior, 1) : null;
             RecalcularVida(def, j);
-            Aviso(ev, j, $"{(batalla ? "Ropa de batalla" : "Ropa de granja")}: {it.nombre}");
+            Aviso(ev, j, $"{(batalla ? "Battle outfit" : "Farm outfit")}: {it.nombre}");
             ev.Add(new Evento { tipo = "ropa", jugador = j.id });
         }
 
-        static void Fabricar(Def def, Jugador j, int indice, List<Evento> ev)
+        static void Fabricar(Estado e, Def def, Jugador j, int indice, List<Evento> ev)
         {
             if (indice < 0 || indice >= def.recetas.Count) return;
             var r = def.recetas[indice];
-            if (!r.ingredientes.All(c => Inventario.Cuenta(j, c.id) >= c.n)) { Aviso(ev, j, "Te faltan materiales", true); return; }
-            if (Inventario.EspacioPara(def, j, r.resultado) < r.cantidad) { Aviso(ev, j, "La mochila está llena", true); return; }
+            if (!r.ingredientes.All(c => Inventario.Cuenta(j, c.id) >= c.n)) { Aviso(ev, j, "Missing materials", true); return; }
+            if (Inventario.EspacioPara(def, j, r.resultado) < r.cantidad) { Aviso(ev, j, "Backpack is full", true); return; }
             foreach (var c in r.ingredientes) Inventario.Sacar(j, c.id, c.n);
             Inventario.Agregar(def, j, r.resultado, r.cantidad);
-            Aviso(ev, j, $"Fabricaste: {def.ITEMS[r.resultado].nombre}{(r.cantidad > 1 ? " ×" + r.cantidad : "")}");
+            Aviso(ev, j, $"Crafted: {def.ITEMS[r.resultado].nombre}{(r.cantidad > 1 ? " ×" + r.cantidad : "")}");
+            if (r.resultado == "aspersor_gema" || r.resultado == "espada_espectral") DesbloquearHito(e, def, ev, "linterna");
         }
 
         static void Comprar(Def def, Jugador j, string item, int n, List<Evento> ev)
@@ -192,11 +241,11 @@ namespace HuertaNueva
             if (item == null || !def.ITEMS.TryGetValue(item, out var it) || !def.tienda.Contains(item)) return;
             n = Math.Max(1, Math.Min(99, n));
             int caben = Math.Min(n, Inventario.EspacioPara(def, j, item));
-            if (caben == 0) { Aviso(ev, j, "La mochila está llena", true); return; }
-            if (j.dinero < it.compra * caben) { Aviso(ev, j, "No te alcanza el dinero", true); return; }
+            if (caben == 0) { Aviso(ev, j, "Backpack is full", true); return; }
+            if (j.dinero < it.compra * caben) { Aviso(ev, j, "Not enough coins", true); return; }
             j.dinero -= it.compra * caben;
             Inventario.Agregar(def, j, item, caben);
-            Aviso(ev, j, $"Compraste {caben} {it.nombre.ToLower()}");
+            Aviso(ev, j, $"Bought {caben} {it.nombre.ToLower()}");
         }
 
         static void CofreSacar(Estado e, Def def, Jugador j, int uid, int i, List<Evento> ev)
@@ -206,7 +255,7 @@ namespace HuertaNueva
             var s = o.datos.items[i];
             if (s == null) return;
             s.n = Inventario.Agregar(def, j, s.id, s.n);
-            if (s.n == 0) o.datos.items[i] = null; else Aviso(ev, j, "La mochila está llena", true);
+            if (s.n == 0) o.datos.items[i] = null; else Aviso(ev, j, "Backpack is full", true);
         }
 
         static void CofreGuardar(Estado e, Def def, Jugador j, int uid, int i, List<Evento> ev)
@@ -219,7 +268,7 @@ namespace HuertaNueva
             var items = o.datos.items;
             int k = Inventario.EsHerramienta(def, s.id) ? -1 : items.FindIndex(x => x != null && x.id == s.id);
             if (k < 0) k = items.FindIndex(x => x == null);
-            if (k < 0) { Aviso(ev, j, "El cofre está lleno", true); return; }
+            if (k < 0) { Aviso(ev, j, "Chest is full", true); return; }
             if (items[k] != null) items[k].n += s.n; else items[k] = new Slot(s.id, s.n);
             j.inv[i] = null;
         }
@@ -237,7 +286,7 @@ namespace HuertaNueva
             return new InfoMazmorra
             {
                 id = cfg.id, nombre = cfg.nombre, descripcion = cfg.descripcion, pisos = cfg.pisos, abierta = MazmorraAbierta(e, cfg),
-                requiere = cfg.requiereMazmorra != null ? $"Llega al piso {cfg.requierePiso} de {def.MAZ[cfg.requiereMazmorra].nombre}" : null,
+                requiere = cfg.requiereMazmorra != null ? $"Reach floor {cfg.requierePiso} of {def.MAZ[cfg.requiereMazmorra].nombre}" : null,
                 disponibles = PisosDisponibles(e, cfg), record = p.record, completada = p.completada,
             };
         }).ToList();
@@ -252,8 +301,8 @@ namespace HuertaNueva
             if (!m.enCurso)
             {
                 if (id == null || !def.MAZ.TryGetValue(id, out var cfg)) return;
-                if (!MazmorraAbierta(e, cfg)) { Aviso(ev, j, "Esa mazmorra todavía está cerrada", true); return; }
-                if (!PisosDisponibles(e, cfg).Contains(piso)) { Aviso(ev, j, "Todavía no llegaste a ese piso", true); return; }
+                if (!MazmorraAbierta(e, cfg)) { Aviso(ev, j, "That dungeon is still locked", true); return; }
+                if (!PisosDisponibles(e, cfg).Contains(piso)) { Aviso(ev, j, "You haven't reached that floor yet", true); return; }
                 m.actual = cfg.id;
                 m.semilla = (long)Math.Floor(Azar.Siguiente(e) * 4294967296.0);
                 IrAPiso(e, def, piso, ev, false);
@@ -261,7 +310,7 @@ namespace HuertaNueva
             j.lugar = "mazmorra";
             RecalcularVida(def, j);
             EntradaDe(def, m.nivel, j);
-            Aviso(ev, j, $"{def.MAZ[m.actual].nombre} · piso {m.piso} · llevas: {def.ITEMS[j.ropaBatalla].nombre}");
+            Aviso(ev, j, $"{def.MAZ[m.actual].nombre} · floor {m.piso} · wearing: {def.ITEMS[j.ropaBatalla].nombre}");
             ev.Add(new Evento { tipo = "ropa", jugador = j.id });
         }
 
@@ -270,7 +319,8 @@ namespace HuertaNueva
             var m = e.mazmorra; var cfg = def.MAZ[m.actual]; var prog = ProgresoDe(e, m.actual);
             m.piso = piso;
             prog.record = Math.Max(prog.record, piso);
-            m.nivel = Mazmorra.GenerarPiso(def, m.actual, m.semilla, piso);
+            m.nivel = Mazmorra.GenerarPiso(def, m.actual, m.semilla, piso, prog.completada);
+            ColocarRescates(e, def, m.nivel);
             m.enCurso = true;
             foreach (var p in e.jugadores) if (p.lugar == "mazmorra") EntradaDe(def, m.nivel, p);
             cfg.jefes.TryGetValue(piso, out var jefe);
@@ -310,6 +360,7 @@ namespace HuertaNueva
             if (!arma && !GastarEnergia(ev, j, 1)) return true;
             j.cdAtaque = 0.35f;
             ev.Add(new Evento { tipo = "golpe", x = cx, y = cy });
+            ev.Add(new Evento { tipo = "accion", jugador = j.id, txt = "golpear", item = arma ? s.id : "espada_madera", x = cx, y = cy });
             foreach (var m in blancos)
             {
                 m.vida -= dano; m.golpe = 0.15f;
@@ -328,24 +379,32 @@ namespace HuertaNueva
             zona.monstruos.Remove(m);
             foreach (var s in M.suelta)
                 if (Azar.Siguiente(e) < s.prob) DarItem(def, ev, j, s.item, s.min + (int)Math.Floor(Azar.Siguiente(e) * (s.max - s.min + 1)), m.x, m.y - 20, "#f2c14e");
+            if (M.jefe) DesbloquearHito(e, def, ev, "jefe:" + m.id);
             if (!M.jefe) return;
             var cfg = def.MAZ[zona.mazmorra]; int piso = zona.piso;
             if (piso < cfg.pisos)
             {
                 Mazmorra.PonerBajada(def, zona);
-                foreach (var p in JugadoresEn(e, zona)) Aviso(ev, p, $"¡Venciste a {M.nombre}! Bajó una escalera hacia el piso {piso + 1}.");
+                foreach (var p in JugadoresEn(e, zona)) Aviso(ev, p, $"You defeated {M.nombre}! A ladder to floor {piso + 1} appeared.");
                 return;
             }
-            // último jefe: cada jugador presente recibe su propio botín
+            // último jefe: cada jugador presente recibe su propio botín (con tiradas extra por cada vez completada)
             var presentes = JugadoresEn(e, zona);
-            var reparto = Botin.Repartir(def.botines[cfg.botinFinal], presentes.Select(p => p.id), e.mazmorra.semilla);
+            var prog = ProgresoDe(e, cfg.id);
+            var tablaBase = def.botines[cfg.botinFinal];
+            var tabla = prog.completada > 0 ? new TablaBotin { tiradas = tablaBase.tiradas + Math.Min(6, prog.completada), entradas = tablaBase.entradas, garantizado = tablaBase.garantizado } : tablaBase;
+            var reparto = Botin.Repartir(tabla, presentes.Select(p => p.id), e.mazmorra.semilla);
             foreach (var p in presentes)
             {
                 var items = reparto[p.id];
-                foreach (var c in items) Inventario.Agregar(def, p, c.id, c.n);
-                ev.Add(new Evento { tipo = "botin", jugador = p.id, titulo = $"¡{cfg.nombre} completada!", items = items });
+                foreach (var c in items)
+                {
+                    int sobra = Inventario.Agregar(def, p, c.id, c.n);
+                    if (sobra > 0) p.envios.Add(new Envio { id = c.id, n = sobra });
+                }
+                ev.Add(new Evento { tipo = "botin", jugador = p.id, titulo = $"{cfg.nombre} cleared{(prog.completada > 0 ? $" (Rank {prog.completada + 1})" : "")}!", items = items });
             }
-            ProgresoDe(e, cfg.id).completada++;
+            prog.completada++;
             Mazmorra.PonerSalidaFinal(def, zona);
         }
 
@@ -361,12 +420,12 @@ namespace HuertaNueva
                 Jugador obj = null; float dist = float.MaxValue;
                 foreach (var p in jugadores) { float d = Dist(p.x, p.y, m.x, m.y); if (d < dist) { dist = d; obj = p; } }
                 if (obj == null || dist > M.vision * def.T) continue;
-                float alcance = M.jefe ? 30 : 16;
+                float alcance = M.jefe ? 36 : 16;
                 if (dist > alcance)
                 {
                     float v = M.velocidad * dt, ux = (obj.x - m.x) / dist, uy = (obj.y - m.y) / dist, r = M.jefe ? 14 : 6;
-                    if (!Choca(def, zona, m.x + ux * v, m.y, r)) m.x += ux * v;
-                    if (!Choca(def, zona, m.x, m.y + uy * v, r)) m.y += uy * v;
+                    if (!Choca(def, zona, m.x + ux * v, m.y, r, M.vuela)) m.x += ux * v;
+                    if (!Choca(def, zona, m.x, m.y + uy * v, r, M.vuela)) m.y += uy * v;
                     if (Math.Abs(ux) > 0.1f) m.dir = Math.Sign(ux);
                 }
                 else if (m.cd <= 0)
@@ -422,41 +481,60 @@ namespace HuertaNueva
                             enCursoId = e.mazmorra.enCurso ? e.mazmorra.actual : null, enCursoPiso = e.mazmorra.piso,
                         });
                         return;
-                    case "salir": SalirDeMazmorra(e, def, j); Aviso(ev, j, "Volviste a la granja"); return;
+                    case "salir": SalirDeMazmorra(e, def, j); Aviso(ev, j, "Returned to the farm"); return;
+                    case "rescate": Rescatar(e, def, j, g, o, it, ev); return;
                     case "bajar":
                         if (e.mazmorra.piso + 1 > def.MAZ[e.mazmorra.actual].pisos) return;
                         IrAPiso(e, def, e.mazmorra.piso + 1, ev, true);
                         return;
                     case "botin":
+                        var tirada = Botin.Tirar(def.botines[d.botin], () => Azar.Siguiente(e));
+                        if (tirada.Any(c => Inventario.EspacioPara(def, j, c.id) < c.n)) { Aviso(ev, j, "Backpack is full", true); return; }
                         Mundo.Quitar(g, o);
-                        foreach (var c in Botin.Tirar(def.botines[d.botin], () => Azar.Siguiente(e))) DarItem(def, ev, j, c.id, c.n, cx, cy, "#f2c14e");
+                        foreach (var c in tirada) DarItem(def, ev, j, c.id, c.n, cx, cy, "#f2c14e");
                         return;
                 }
                 if (d.accion == "cofre" && !hachaOPico) { Abrir(ev, j, "cofre", o.uid); return; }
                 if (d.accion == "vender")
                 {
-                    if (it == null || it.tipo == "herramienta" || it.venta == 0) { Aviso(ev, j, "Ten en la mano lo que quieras vender", true); return; }
+                    if (it == null || it.tipo == "herramienta" || it.venta == 0)
+                    {
+                        if (j.envios != null && j.envios.Count > 0) { DeshacerEnvio(def, j, ev); return; }
+                        Aviso(ev, j, "Hold an item you want to sell (or use empty hand to undo last shipment)", true);
+                        return;
+                    }
                     j.envios.Add(new Envio { id = s.id, n = s.n });
-                    Aviso(ev, j, $"Enviaste {s.n} {it.nombre.ToLower()} · cobras al dormir");
+                    Aviso(ev, j, $"Shipped {s.n} {it.nombre.ToLower()} · use with empty hand to undo");
                     j.inv[j.sel] = null;
                     return;
                 }
                 if (d.accion == "maquina")
                 {
                     var md = o.datos;
-                    if (MaquinaLista(e, o)) { if (DarItem(def, ev, j, md.salida, 1, cx, cy) == 0) o.datos = new ObjDatos(); return; }
-                    if (!string.IsNullOrEmpty(md.salida)) { Aviso(ev, j, $"Listo en {(int)Math.Ceiling((md.listoEn - TiempoAbs(e)) / 60.0)} h de juego"); return; }
+                    if (MaquinaLista(e, o))
+                    {
+                        string salida = md.salida;
+                        if (DarItem(def, ev, j, salida, 1, cx, cy) == 0)
+                        {
+                            o.datos = new ObjDatos();
+                            if (salida == "lingote_cobre" || salida == "lingote_hierro") DesbloquearHito(e, def, ev, "cosecha_o_lingote");
+                            if (def.ITEMS.TryGetValue(salida, out var itSal) && itSal.tipo == "artesanal") DesbloquearHito(e, def, ev, "conserva");
+                        }
+                        return;
+                    }
+                    if (!string.IsNullOrEmpty(md.salida)) { Aviso(ev, j, $"Ready in {(int)Math.Ceiling((md.listoEn - TiempoAbs(e)) / 60.0)} in-game h"); return; }
                     var receta = s != null ? d.procesa.Find(p => p.entrada == s.id) : null;
                     if (receta != null)
                     {
-                        if (Inventario.Cuenta(j, s.id) < receta.n) { Aviso(ev, j, $"Necesitas {receta.n} {it.nombre.ToLower()}", true); return; }
+                        if (Inventario.Cuenta(j, s.id) < receta.n) { Aviso(ev, j, $"You need {receta.n} {it.nombre.ToLower()}", true); return; }
                         Inventario.Sacar(j, s.id, receta.n);
-                        o.datos = new ObjDatos { entrada = s.id, salida = receta.salida, listoEn = TiempoAbs(e) + receta.minutos };
-                        Aviso(ev, j, $"Preparando: {def.ITEMS[receta.salida].nombre}");
+                        o.datos = new ObjDatos { entrada = s.id, salida = receta.salida, inicioEn = TiempoAbs(e), listoEn = TiempoAbs(e) + receta.minutos };
+                        Aviso(ev, j, $"Processing: {def.ITEMS[receta.salida].nombre}");
                         return;
                     }
-                    if (!hachaOPico) { Aviso(ev, j, "Acepta: " + string.Join(", ", d.procesa.Select(p => $"{p.n} {def.ITEMS[p.entrada].nombre.ToLower()}")), true); return; }
+                    if (!hachaOPico) { Aviso(ev, j, "Accepts: " + string.Join(", ", d.procesa.Select(p => $"{p.n} {def.ITEMS[p.entrada].nombre.ToLower()}")), true); return; }
                 }
+                if (hachaOPico && Demoler(e, def, j, g, o, cx, cy, ev)) return;
                 if (d.herramienta != null && it != null && it.tipo == "herramienta" && (d.herramienta == s.id || d.herramienta == "cualquiera"))
                 {
                     double ep = Efecto(def, j, "energia_pico");
@@ -464,22 +542,28 @@ namespace HuertaNueva
                     if (!GastarEnergia(ev, j, coste)) return;
                     o.golpes--;
                     ev.Add(new Evento { tipo = "sacudir", uid = o.uid });
+                    ev.Add(new Evento { tipo = "accion", jugador = j.id, txt = s.id == "pico" ? "picar" : "talar", item = s.id, x = cx, y = cy });
                     if (o.golpes <= 0)
                     {
                         Mundo.Quitar(g, o);
-                        foreach (var su in d.suelta) DarItem(def, ev, j, su.item, su.min + (int)Math.Floor(Azar.Siguiente(e) * (su.max - su.min + 1)), cx, cy);
+                        foreach (var su in d.suelta)
+                        {
+                            int cant = su.min + (int)Math.Floor(Azar.Siguiente(e) * (su.max - su.min + 1));
+                            int sobra = DarItem(def, ev, j, su.item, cant, cx, cy);
+                            if (sobra > 0 && def.ITEMS.TryGetValue(su.item, out var itS) && itS.venta > 0) j.envios.Add(new Envio { id = su.item, n = sobra });
+                        }
                     }
                     return;
                 }
                 if (d.recoger && hachaOPico)
                 {
-                    if (o.datos.items != null && o.datos.items.Any(x2 => x2 != null)) { Aviso(ev, j, "Vacía el cofre antes de recogerlo", true); return; }
-                    if (!string.IsNullOrEmpty(o.datos.salida)) { Aviso(ev, j, "Espera a que termine", true); return; }
-                    if (Inventario.EspacioPara(def, j, o.id) < 1) { Aviso(ev, j, "La mochila está llena", true); return; }
+                    if (o.datos.items != null && o.datos.items.Any(x2 => x2 != null)) { Aviso(ev, j, "Empty the chest before picking it up", true); return; }
+                    if (!string.IsNullOrEmpty(o.datos.salida)) { Aviso(ev, j, "Wait for it to finish", true); return; }
+                    if (Inventario.EspacioPara(def, j, o.id) < 1) { Aviso(ev, j, "Backpack is full", true); return; }
                     Mundo.Quitar(g, o); DarItem(def, ev, j, o.id, 1, cx, cy);
                     return;
                 }
-                if (d.herramienta != null) Aviso(ev, j, d.herramienta == "cualquiera" ? "Necesitas una herramienta" : "Necesitas el " + def.ITEMS[d.herramienta].nombre.ToLower(), true);
+                if (d.herramienta != null) Aviso(ev, j, d.herramienta == "cualquiera" ? "You need a tool" : "You need the " + def.ITEMS[d.herramienta].nombre.ToLower(), true);
                 return;
             }
 
@@ -487,9 +571,11 @@ namespace HuertaNueva
             if (cult != null && cult.dias >= def.CULT[cult.id].dias)
             {
                 string prod = def.CULT[cult.id].producto;
-                if (Inventario.EspacioPara(def, j, prod) < 1) { Aviso(ev, j, "La mochila está llena", true); return; }
+                if (Inventario.EspacioPara(def, j, prod) < 1) { Aviso(ev, j, "Backpack is full", true); return; }
                 g.cultivos.Remove(cult);
+                ev.Add(new Evento { tipo = "accion", jugador = j.id, txt = "cosechar", item = prod, x = cx, y = cy });
                 DarItem(def, ev, j, prod, 1, cx, cy, "#f2c14e");
+                DesbloquearHito(e, def, ev, "cosecha_o_lingote");
                 return;
             }
             if (it == null) return;
@@ -500,38 +586,43 @@ namespace HuertaNueva
             if (s.id == "azada" && enGranja)
             {
                 if (Zona.En(g.agua, i) || Zona.En(g.suelo, i)) return;
-                if (Zona.En(g.camino, i)) { Aviso(ev, j, "No se puede arar el camino", true); return; }
+                if (Zona.En(g.camino, i)) { Aviso(ev, j, "Cannot till the path", true); return; }
                 for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++)
-                    if (Mundo.Dentro(def, x + dx, y + dy) && g.agua[Mundo.Idx(def, x + dx, y + dy)] != 0) { Aviso(ev, j, "Muy cerca del agua para arar", true); return; }
+                    if (Mundo.Dentro(def, x + dx, y + dy) && g.agua[Mundo.Idx(def, x + dx, y + dy)] != 0) { Aviso(ev, j, "Too close to water to till", true); return; }
                 if (!GastarEnergia(ev, j, costeCampo)) return;
                 g.suelo[i] = 1;
                 if (e.tiempo.lluvia) g.regado[i] = 1;
+                ev.Add(new Evento { tipo = "accion", jugador = j.id, txt = "arar", item = "azada", x = cx, y = cy });
                 return;
             }
             if (s.id == "regadera" && enGranja)
             {
-                if (Zona.En(g.agua, i)) { j.aguaRegadera = def.ITEMS["regadera"].capacidad; Flotar(ev, cx, cy, "Regadera llena", "#5aa9e6"); return; }
+                if (Zona.En(g.agua, i)) { j.aguaRegadera = def.ITEMS["regadera"].capacidad; ev.Add(new Evento { tipo = "accion", jugador = j.id, txt = "regar", item = "regadera", x = cx, y = cy }); Flotar(ev, cx, cy, "Watering can full", "#5aa9e6"); return; }
                 if (!Zona.En(g.suelo, i) || Zona.En(g.regado, i)) return;
-                if (j.aguaRegadera <= 0) { Aviso(ev, j, "La regadera está vacía: úsala frente al estanque", true); return; }
+                if (j.aguaRegadera <= 0) { Aviso(ev, j, "Watering can is empty: use it facing the pond", true); return; }
                 if (!GastarEnergia(ev, j, Math.Max(1, costeCampo / 2))) return;
                 j.aguaRegadera--; g.regado[i] = 1;
+                ev.Add(new Evento { tipo = "accion", jugador = j.id, txt = "regar", item = "regadera", x = cx, y = cy });
                 return;
             }
             if (it.tipo == "semilla" && enGranja)
             {
-                if (!Zona.En(g.suelo, i)) { Aviso(ev, j, "Primero ara la tierra con la azada", true); return; }
+                if (!Zona.En(g.suelo, i)) { Aviso(ev, j, "Till the soil with the hoe first", true); return; }
                 if (cult != null) return;
                 g.cultivos.Add(new Cultivo { i = i, id = it.cultivo, dias = 0 });
                 Inventario.GastarMano(j);
+                ev.Add(new Evento { tipo = "accion", jugador = j.id, txt = "cosechar", item = s.id, x = cx, y = cy });
                 return;
             }
             if (it.tipo == "colocable")
             {
-                if (px == x && py == y) return;
-                if (JugadoresEn(e, g).Any(o2 => { var (ox, oy) = CeldaJugador(def, o2); return ox == x && oy == y; })) return;
-                if (!enGranja && it.objeto != "antorcha") { Aviso(ev, j, "En la mazmorra solo puedes colocar antorchas", true); return; }
-                if (!Mundo.Libre(def, g, x, y)) { Aviso(ev, j, "No cabe ahí", true); return; }
-                Mundo.Colocar(def, g, it.objeto, x, y);
+                var od = def.OBJ[it.objeto];
+                bool Pisa(int cx2, int cy2) => cx2 >= x && cx2 < x + od.ancho && cy2 >= y && cy2 < y + od.alto;
+                if (JugadoresEn(e, g).Any(o2 => { var (ox, oy) = CeldaJugador(def, o2); return Pisa(ox, oy); })) return;
+                if (!enGranja && it.objeto != "antorcha") { Aviso(ev, j, "You can only place torches in the dungeon", true); return; }
+                // Todo el tamaño del objeto, no solo la celda señalada; y solo se gasta si de verdad se colocó.
+                if (!Mundo.Libre(def, g, x, y, od.ancho, od.alto) || Mundo.Colocar(def, g, it.objeto, x, y) == null)
+                { Aviso(ev, j, "Doesn't fit there", true); return; }
                 Inventario.GastarMano(j);
             }
         }
@@ -569,7 +660,7 @@ namespace HuertaNueva
             if (sinProteger.Count >= 8 && Azar.Siguiente(e) < 0.6)
             {
                 var c = sinProteger[(int)Math.Floor(Azar.Siguiente(e) * sinProteger.Count)];
-                notas.Add($"Un cuervo se comió una planta de {def.ITEMS[def.CULT[c.id].producto].nombre.ToLower()}. Un espantapájaros lo evita.");
+                notas.Add($"A crow ate a {def.ITEMS[def.CULT[c.id].producto].nombre.ToLower()} plant. A scarecrow prevents this.");
                 g.cultivos.Remove(c);
             }
             for (int i = 0; i < W * H; i++)
@@ -581,29 +672,40 @@ namespace HuertaNueva
             e.tiempo.dia++;
             e.tiempo.min = Mundo.INICIO_DIA;
             e.tiempo.lluvia = Azar.Siguiente(e) < 0.2;
-            if (e.tiempo.lluvia) { for (int i = 0; i < W * H; i++) if (g.suelo[i] != 0) g.regado[i] = 1; notas.Add("Llueve: la tierra arada amaneció regada."); }
+            if (e.tiempo.lluvia) { for (int i = 0; i < W * H; i++) if (g.suelo[i] != 0) g.regado[i] = 1; notas.Add("It's raining: all tilled soil woke up watered."); }
             foreach (var o in g.objetos)
             {
                 var d = def.OBJ[o.id];
                 if (d.riega > 0)
-                    foreach (var (dx, dy) in new[] { (1, 0), (-1, 0), (0, 1), (0, -1) })
+                {
+                    var dirs = d.riega >= 2
+                        ? new[] { (1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1) }
+                        : new[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
+                    foreach (var (dx, dy) in dirs)
                     {
                         int x = o.x + dx, y = o.y + dy;
                         if (Mundo.Dentro(def, x, y) && g.suelo[Mundo.Idx(def, x, y)] != 0) g.regado[Mundo.Idx(def, x, y)] = 1;
                     }
-                if (d.accion == "maquina" && MaquinaLista(e, o)) notas.Add($"Tienes lista una {def.ITEMS[o.datos.salida].nombre.ToLower()}.");
+                }
+                if (d.accion == "maquina" && MaquinaLista(e, o)) notas.Add($"Your {def.ITEMS[o.datos.salida].nombre.ToLower()} is ready.");
             }
+            TrabajoDeLaManana(e, def, notas);
+            int numArboles = g.objetos.Count(o => o.id == "arbol");
             for (int k = 0, n = 0; k < 200 && n < 4; k++)
             {
                 int x = 2 + (int)Math.Floor(Azar.Siguiente(e) * (W - 4)), y = 3 + (int)Math.Floor(Azar.Siguiente(e) * (H - 5));
-                if (!Mundo.EnClaro(x, y) && !Zona.En(g.camino, Mundo.Idx(def, x, y)) && Mundo.Colocar(def, g, n == 0 ? "roca" : "maleza", x, y) != null) n++;
+                string tipoNuevo = n == 0 ? "roca" : (n == 1 && numArboles < 45 ? "arbol" : "maleza");
+                if (!Mundo.EnClaro(x, y) && !Zona.En(g.camino, Mundo.Idx(def, x, y)) && Mundo.Colocar(def, g, tipoNuevo, x, y) != null) n++;
             }
+
+            if (def.historia?.murmullos != null && def.historia.murmullos.Count > 0)
+                notas.Add(def.historia.murmullos[(e.tiempo.dia - 1) % def.historia.murmullos.Count]);
 
             foreach (var j in e.jugadores)
             {
                 var c = cobros[j.id];
                 var lista = new List<string>();
-                if (desmayo) lista.Add($"Te desmayaste a las 2:00 y alguien te llevó a casa. Pagaste {c.multa} de atención.");
+                if (desmayo) lista.Add($"You passed out at 2:00 AM and someone carried you home. You paid {c.multa} coins for care.");
                 lista.AddRange(notas);
                 ev.Add(new Evento { tipo = "resumen", jugador = j.id, dia = e.tiempo.dia, ventas = c.ventas, total = c.total, notas = lista });
             }

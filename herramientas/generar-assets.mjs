@@ -147,6 +147,23 @@ const guardarEstado = () => fs.writeFile(RUTA_ESTADO, JSON.stringify(estado, nul
 // ---------- sprites (objetos, cultivos, íconos): create-image-pixflux, síncrono ----------
 async function generarSprite(id, s) {
   const destino = dir(`sprites/${id}.png`);
+  // "estilo": "personajes" → monstruos y criaturas con la misma receta chibi que los personajes;
+  // "estilo": "entorno" → árboles y objetos del mundo con contorno y colores planos que combinan con ellos
+  if (s.estilo && estilo[s.estilo]) {
+    const ep = estilo[s.estilo];
+    const prefijo = s.estilo === 'personajes' ? ep.prefijo_criaturas : ep.prefijo;
+    s = { view: ep.view, outline: ep.outline, shading: ep.shading, detail: ep.detail, ...s,
+      descripcion: [prefijo || '', s.descripcion].join(' ').trim() };
+    const { datos } = await api('POST', '/create-image-pixflux', {
+      description: `${s.descripcion}, ${ep.sufijo || estilo.sufijo}`,
+      image_size: { width: s.ancho, height: s.alto },
+      no_background: true, outline: s.outline, shading: s.shading, detail: s.detail, view: s.view, direction: 'south',
+      ...(s.semilla != null ? { seed: s.semilla } : {}),
+    });
+    await guardarBase64(datos.image.base64, destino);
+    if (s.recortar) await fs.writeFile(destino, recortar(await fs.readFile(destino)));
+    return datos.usage;
+  }
   // "modelo": "pixen" → modelo Pixen: mejor para construcciones de frente, con volumen y mirando hacia abajo.
   const { datos } = s.modelo === 'pixen' ? await api('POST', '/create-image-pixen', {
     description: `${s.descripcion}, ${estilo.sufijo}`,
@@ -304,14 +321,26 @@ async function generarPersonaje(p) {
         character_id: origen, edit_description: p.edicion, state_name: p.id, no_background: true, use_color_palette_from_reference: true,
       });
       cid = datos.character_id;
-    } else {
-      const { datos } = await api('POST', '/create-character-with-4-directions', {
+    } else if (p.referencia) {
+      // "referencia": imagen de frente aprobada (assets/referencias/<id>.png); el modelo v3 la gira
+      // a las 4 direcciones respetando el dibujo. Cuesta ~1 generación con 48×48.
+      const { datos } = await api('POST', '/create-character-v3', {
         description: p.descripcion,
-        image_size: { width: p.tamano, height: p.tamano },
-        view: 'high top-down',
-        outline: estilo.outline,
-        shading: estilo.shading,
-        detail: estilo.detail,
+        reference_image: { type: 'base64', base64: (await fs.readFile(path.join(RAIZ, p.referencia))).toString('base64'), format: 'png' },
+        n_directions: 4, view: p.view || 'high top-down', template_id: 'mannequin', no_background: true,
+      });
+      cid = datos.character_id;
+    } else {
+      // estilo.personajes: un mismo estilo chibi para todos los personajes (design/biblia-de-arte.md)
+      const ep = estilo.personajes || {};
+      const { datos } = await api('POST', '/create-character-with-4-directions', {
+        description: [ep.prefijo, p.descripcion + ',', ep.sufijo || estilo.sufijo].filter(Boolean).join(' ').replace(/,\s*,/g, ','),
+        image_size: { width: ep.tamano || p.tamano, height: ep.tamano || p.tamano },
+        ...(ep.proporciones ? { proportions: ep.proporciones } : {}),
+        view: p.view || ep.view || 'high top-down',
+        outline: ep.outline || estilo.outline,
+        shading: ep.shading || estilo.shading,
+        detail: ep.detail || estilo.detail,
       });
       cid = datos.character_id;
     }
@@ -374,8 +403,10 @@ async function animarYDescargar(p, cid, claveAnim, carpeta, consultaZip = '') {
           cuadros[d] = frames.length;
           for (let i = 0; i < frames.length; i++) await fs.writeFile(`${carpeta}/caminar_${d}_${i}.png`, limpiarBordes(archivos[frames[i]]));
         }
-        await fs.writeFile(`${carpeta}/info.json`, JSON.stringify({ tamano: info.size, cuadros }));
-        await realzarCarpeta(carpeta);
+        // El estilo chibi ya sale con colores planos y vivos: realzar solo si se pide (estilo.personajes.realzar).
+        const realzarlo = estilo.personajes?.realzar !== false;
+        await fs.writeFile(`${carpeta}/info.json`, JSON.stringify({ tamano: info.size, cuadros, ...(realzarlo ? {} : { realzado: true }) }));
+        if (realzarlo) await realzarCarpeta(carpeta);
         return;
       }
     }

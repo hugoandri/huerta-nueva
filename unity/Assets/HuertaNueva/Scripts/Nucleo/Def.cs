@@ -22,7 +22,7 @@ namespace HuertaNueva
     {
         public string id, sprite, accion, herramienta, botin;
         public bool solido, recoger, porTileset;
-        public int ancho = 1, alto = 1, golpes, riega, protege, luz, desfase;
+        public int ancho = 1, alto = 1, golpes, riega, protege, luz, desfase, hogar;
         public List<Suelta> suelta = new List<Suelta>();
         public List<Proceso> procesa = new List<Proceso>();
     }
@@ -31,7 +31,7 @@ namespace HuertaNueva
 
     public class MonDef
     {
-        public string id, nombre, sprite;
+        public string id, nombre, sprite, descripcion;
         public int vida, dano, velocidad, vision;
         public bool jefe, vuela;
         public List<Suelta> suelta = new List<Suelta>();
@@ -43,9 +43,21 @@ namespace HuertaNueva
     {
         public string id, nombre, tileset, descripcion, botinFinal, requiereMazmorra;
         public int pisos, requierePiso;
+        public double escalaBase = 1;
         public Dictionary<int, string> jefes = new Dictionary<int, string>();
         public List<int> puntosDeControl = new List<int>();
         public List<Rango> monstruos = new List<Rango>(), rocas = new List<Rango>();
+    }
+
+    public class CartaDef { public string id, titulo, autor, disparador, resumen, texto; }
+
+    public class HistoriaDef
+    {
+        public string subtitulo, lemaPortada, nombreMercader = "Aunt Brisa", tituloPuesto = "Aunt Brisa's Stall";
+        public Dictionary<string, string> saludos = new Dictionary<string, string>();
+        public List<string> charlas = new List<string>();
+        public List<string> murmullos = new List<string>();
+        public List<CartaDef> cartas = new List<CartaDef>();
     }
 
     public class Receta { public string resultado; public int cantidad; public List<Cantidad> ingredientes = new List<Cantidad>(); }
@@ -53,7 +65,18 @@ namespace HuertaNueva
     public class EntradaBotin { public string item; public int peso, min, max; }
     public class TablaBotin { public int tiradas; public List<EntradaBotin> entradas = new List<EntradaBotin>(); public List<Cantidad> garantizado = new List<Cantidad>(); }
 
-    public class PersonajeDef { public string id, nombre; }
+    public class PersonajeDef { public string id, nombre, titulo, personalidad; }
+
+    /// <summary>Edificio de la aldea: se construye con la acción "construir", nunca va en la mochila.</summary>
+    public class EdificioDef
+    {
+        public string id, nombre, descripcion, requiereEdificio;
+        public int requiereResidentes;
+        public List<Cantidad> coste = new List<Cantidad>();
+    }
+
+    /// <summary>Mossling rescatable: duerme en un farol apagado de un piso concreto de una mazmorra.</summary>
+    public class ResidenteDef { public string id, nombre, sprite, descripcion, trabajo, rescateMazmorra; public int rescatePiso; }
     public class SpriteDef { public string id; public int ancho, alto; }
 
     public class Def
@@ -70,9 +93,14 @@ namespace HuertaNueva
         public Dictionary<string, TablaBotin> botines = new Dictionary<string, TablaBotin>();
         public List<PersonajeDef> personajes = new List<PersonajeDef>();
         public List<string> ropas = new List<string>();
+        public List<EdificioDef> edificios = new List<EdificioDef>();
+        public Dictionary<string, EdificioDef> EDIF = new Dictionary<string, EdificioDef>();
+        public List<ResidenteDef> residentes = new List<ResidenteDef>();
+        public Dictionary<string, ResidenteDef> RES = new Dictionary<string, ResidenteDef>();
         public List<Cantidad> inventarioInicio = new List<Cantidad>();
         public Dictionary<string, SpriteDef> sprites = new Dictionary<string, SpriteDef>();
         public List<string> tilesets = new List<string>();
+        public HistoriaDef historia = new HistoriaDef();
 
         static List<Suelta> LeerSuelta(object o, bool conProbabilidad)
         {
@@ -121,7 +149,7 @@ namespace HuertaNueva
                     id = J.S(x, "id"), sprite = J.S(x, "sprite"), accion = J.S(x, "accion"), herramienta = J.S(x, "herramienta"),
                     botin = J.S(x, "botin"), solido = J.B(x, "solido"), recoger = J.B(x, "recoger"), porTileset = J.B(x, "porTileset"),
                     ancho = J.I(x, "ancho", 1), alto = J.I(x, "alto", 1), golpes = J.I(x, "golpes"), riega = J.I(x, "riega"),
-                    protege = J.I(x, "protege"), luz = J.I(x, "luz"), desfase = J.I(x, "desfase"),
+                    protege = J.I(x, "protege"), luz = J.I(x, "luz"), desfase = J.I(x, "desfase"), hogar = J.I(x, "hogar"),
                     suelta = LeerSuelta(J.V(x, "suelta"), false),
                 };
                 foreach (var p in J.L(J.V(x, "procesa")))
@@ -141,7 +169,8 @@ namespace HuertaNueva
                 var x = J.D(o);
                 d.MON[J.S(x, "id")] = new MonDef
                 {
-                    id = J.S(x, "id"), nombre = J.S(x, "nombre"), sprite = J.S(x, "sprite"), vida = J.I(x, "vida"), dano = J.I(x, "dano"),
+                    id = J.S(x, "id"), nombre = J.S(x, "nombre"), sprite = J.S(x, "sprite"), descripcion = J.S(x, "descripcion", ""),
+                    vida = J.I(x, "vida"), dano = J.I(x, "dano"),
                     velocidad = J.I(x, "velocidad"), vision = J.I(x, "vision"), jefe = J.B(x, "jefe"), vuela = J.B(x, "vuela"),
                     suelta = LeerSuelta(J.V(x, "suelta"), true),
                 };
@@ -152,7 +181,7 @@ namespace HuertaNueva
                 var m = new MazDef
                 {
                     id = J.S(x, "id"), nombre = J.S(x, "nombre"), tileset = J.S(x, "tileset"), descripcion = J.S(x, "descripcion", ""),
-                    botinFinal = J.S(x, "botin_final"), pisos = J.I(x, "pisos", 10),
+                    botinFinal = J.S(x, "botin_final"), pisos = J.I(x, "pisos", 10), escalaBase = J.F(x, "escala_base", 1),
                 };
                 var req = J.V(x, "requiere") as Dictionary<string, object>;
                 if (req != null) { m.requiereMazmorra = J.S(req, "mazmorra"); m.requierePiso = J.I(req, "piso"); }
@@ -178,11 +207,66 @@ namespace HuertaNueva
                 foreach (var e in J.L(J.V(x, "garantizado"))) { var q = J.D(e); t.garantizado.Add(new Cantidad(J.S(q, "item"), J.I(q, "n"))); }
                 d.botines[kv.Key] = t;
             }
-            foreach (var o in J.L(J.V(C, "personajes"))) { var x = J.D(o); d.personajes.Add(new PersonajeDef { id = J.S(x, "id"), nombre = J.S(x, "nombre") }); }
+            foreach (var o in J.L(J.V(C, "personajes")))
+            {
+                var x = J.D(o);
+                d.personajes.Add(new PersonajeDef
+                {
+                    id = J.S(x, "id"),
+                    nombre = J.S(x, "nombre"),
+                    titulo = J.S(x, "titulo", "Homestead Farmer"),
+                    personalidad = J.S(x, "personalidad", ""),
+                });
+            }
             foreach (var o in J.L(J.V(C, "ropas"))) d.ropas.Add(J.S(J.D(o), "id"));
+            foreach (var o in J.L(J.V(C, "edificios")))
+            {
+                var x = J.D(o); var req = J.D(J.V(x, "requiere"));
+                var ed = new EdificioDef
+                {
+                    id = J.S(x, "id"), nombre = J.S(x, "nombre"), descripcion = J.S(x, "descripcion", ""),
+                    requiereEdificio = J.S(req, "edificio"), requiereResidentes = J.I(req, "residentes"),
+                };
+                foreach (var kv in J.D(J.V(x, "coste"))) ed.coste.Add(new Cantidad(kv.Key, (int)(double)kv.Value));
+                d.edificios.Add(ed); d.EDIF[ed.id] = ed;
+            }
+            foreach (var o in J.L(J.V(C, "residentes")))
+            {
+                var x = J.D(o); var res = J.D(J.V(x, "rescate"));
+                var r = new ResidenteDef
+                {
+                    id = J.S(x, "id"), nombre = J.S(x, "nombre"), sprite = J.S(x, "sprite"), descripcion = J.S(x, "descripcion", ""),
+                    trabajo = J.S(x, "trabajo", "regar"), rescateMazmorra = J.S(res, "mazmorra"), rescatePiso = J.I(res, "piso"),
+                };
+                d.residentes.Add(r); d.RES[r.id] = r;
+            }
             var inicio = J.D(J.V(C, "inicio"));
             d.dineroInicio = J.I(inicio, "dinero", 300);
             foreach (var o in J.L(J.V(inicio, "inventario"))) { var l = J.L(o); d.inventarioInicio.Add(new Cantidad((string)l[0], (int)(double)l[1])); }
+            var hist = J.V(C, "historia") as Dictionary<string, object>;
+            if (hist != null)
+            {
+                d.historia.subtitulo = J.S(hist, "subtitulo", "Mosslantern Glen");
+                d.historia.lemaPortada = J.S(hist, "lema_portada", "");
+                var merc = J.V(hist, "mercader") as Dictionary<string, object>;
+                if (merc != null)
+                {
+                    d.historia.nombreMercader = J.S(merc, "nombre", "Aunt Brisa");
+                    d.historia.tituloPuesto = J.S(merc, "titulo_puesto", "Aunt Brisa's Stall");
+                    foreach (var kv in J.D(J.V(merc, "saludos"))) d.historia.saludos[kv.Key] = (string)kv.Value;
+                    foreach (var ch in J.L(J.V(merc, "charlas"))) d.historia.charlas.Add((string)ch);
+                }
+                foreach (var mu in J.L(J.V(hist, "murmullos"))) d.historia.murmullos.Add((string)mu);
+                foreach (var o in J.L(J.V(hist, "cartas")))
+                {
+                    var cx = J.D(o);
+                    d.historia.cartas.Add(new CartaDef
+                    {
+                        id = J.S(cx, "id"), titulo = J.S(cx, "titulo"), autor = J.S(cx, "autor"),
+                        disparador = J.S(cx, "disparador"), resumen = J.S(cx, "resumen"), texto = J.S(cx, "texto"),
+                    });
+                }
+            }
             return d;
         }
     }

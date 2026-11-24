@@ -1,11 +1,11 @@
 {
-  "name": "huerta-nueva",
+  "name": "mosslantern",
   "private": true,
   "type": "module",
-  "description": "Juego de granja y crafteo con gráficos de PixelLab",
+  "description": "Mosslantern — Cozy farming, crafting, and endless dungeon RPG in Mosslantern Glen (Unity 6)",
   "scripts": {
-    "test": "node --test pruebas/*.test.js",
+    "test": "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"C:\\Users\\valki\\Documents\\Huerto_Nuevo\\herramientas\\unity\\verificar-nucleo.ps1\" < /dev/null",
     "assets": "node herramientas/generar-assets.mjs",
-    "servir": "npx serve ."
+    "sync": "python3 herramientas/unity/sincronizar.py"
   }
 }

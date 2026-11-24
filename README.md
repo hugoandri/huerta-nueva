@@ -14,7 +14,7 @@ Controles: `WASD`/flechas para caminar, `Espacio` o clic para usar, `1`–`0` pa
 
 ### Versión Unity 6
 
-El mismo juego traducido a C# está en [`unity/`](unity/LEEME.md): se crea un proyecto **Universal 2D** en Unity Hub, se copia `unity/Assets/HuertaNueva` y se pulsa Play.
+El proyecto completo en C# está en [`unity/`](unity/LEEME.md). En Unity Hub usa **Add → Add project from disk**, selecciona esa carpeta y ábrela con **Unity 6000.6.9f1**. Abre `Assets/Scenes/SampleScene.unity` y pulsa **Play**. Incluye la configuración de URP 2D, paquetes, gráficos e interfaz.
 
 ## Cómo está armado
 
