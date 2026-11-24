@@ -45,8 +45,9 @@ pocos colores vivos y contorno oscuro continuo. El dueño descartó la versión 
    48×48. Se guarda en `assets/referencias/<id>.png` y se pone como `"referencia"` del personaje.
 2. `node herramientas/generar-assets.mjs --solo=<id> --forzar`: el modelo v3 la gira a 4 direcciones (~1
    generación), la anima caminando y crea los trajes (`ropas`) como estados del mismo personaje.
-3. `python herramientas/animar-personajes.py --locales --alinear`: baja la caminata para que los pies coincidan
-   con la pose quieta y arma idle, arar, talar, golpear y cosechar.
+3. `python herramientas/igualar_escala.py <carpetas>`: PixelLab entrega la pose quieta más grande que la
+   caminata; la pose quieta pasa a ser el cuadro más neutro de la caminata (mismo tamaño, sin reescalar).
+   Después `python herramientas/animar-personajes.py --locales` arma idle, arar, talar, golpear y cosechar.
 4. `python herramientas/estilo_slime.py assets/personaje/<id> assets/personaje/<id>/ropa_*`: el filtro del slime
    (24 colores, contorno oscuro continuo teñido, sin sombra pintada). Se aplica a **todo** cuadro de personaje.
 5. `python herramientas/unity/sincronizar.py`.
