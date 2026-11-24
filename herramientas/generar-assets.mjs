@@ -305,13 +305,16 @@ async function generarPersonaje(p) {
       });
       cid = datos.character_id;
     } else {
+      // estilo.personajes: un mismo estilo chibi para todos los personajes (design/biblia-de-arte.md)
+      const ep = estilo.personajes || {};
       const { datos } = await api('POST', '/create-character-with-4-directions', {
-        description: p.descripcion,
-        image_size: { width: p.tamano, height: p.tamano },
-        view: 'high top-down',
-        outline: estilo.outline,
-        shading: estilo.shading,
-        detail: estilo.detail,
+        description: [ep.prefijo, p.descripcion + ',', ep.sufijo || estilo.sufijo].filter(Boolean).join(' ').replace(/,\s*,/g, ','),
+        image_size: { width: ep.tamano || p.tamano, height: ep.tamano || p.tamano },
+        ...(ep.proporciones ? { proportions: ep.proporciones } : {}),
+        view: p.view || ep.view || 'high top-down',
+        outline: ep.outline || estilo.outline,
+        shading: ep.shading || estilo.shading,
+        detail: ep.detail || estilo.detail,
       });
       cid = datos.character_id;
     }
@@ -374,8 +377,10 @@ async function animarYDescargar(p, cid, claveAnim, carpeta, consultaZip = '') {
           cuadros[d] = frames.length;
           for (let i = 0; i < frames.length; i++) await fs.writeFile(`${carpeta}/caminar_${d}_${i}.png`, limpiarBordes(archivos[frames[i]]));
         }
-        await fs.writeFile(`${carpeta}/info.json`, JSON.stringify({ tamano: info.size, cuadros }));
-        await realzarCarpeta(carpeta);
+        // El estilo chibi ya sale con colores planos y vivos: realzar solo si se pide (estilo.personajes.realzar).
+        const realzarlo = estilo.personajes?.realzar !== false;
+        await fs.writeFile(`${carpeta}/info.json`, JSON.stringify({ tamano: info.size, cuadros, ...(realzarlo ? {} : { realzado: true }) }));
+        if (realzarlo) await realzarCarpeta(carpeta);
         return;
       }
     }

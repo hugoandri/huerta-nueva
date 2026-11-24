@@ -89,59 +89,59 @@
  "personajes": {
   "granjera": {
    "base": {
-    "pie": 58,
+    "pie": 55,
     "cuadros": {
-     "south": 4,
-     "west": 4,
-     "east": 4,
-     "north": 4
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
     }
    },
    "minera": {
-    "pie": 58,
+    "pie": 56,
     "cuadros": {
-     "south": 4,
-     "west": 4,
-     "east": 4,
-     "north": 4
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
     }
    },
    "aventurera": {
-    "pie": 58,
+    "pie": 55,
     "cuadros": {
-     "south": 4,
-     "west": 4,
-     "east": 4,
-     "north": 4
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
     }
    }
   },
   "granjero": {
    "base": {
-    "pie": 58,
+    "pie": 54,
     "cuadros": {
-     "south": 4,
-     "west": 4,
-     "east": 4,
-     "north": 4
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
     }
    },
    "minera": {
-    "pie": 58,
+    "pie": 54,
     "cuadros": {
-     "south": 4,
-     "west": 4,
-     "east": 4,
-     "north": 4
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
     }
    },
    "aventurera": {
-    "pie": 58,
+    "pie": 54,
     "cuadros": {
-     "south": 4,
-     "west": 4,
-     "east": 4,
-     "north": 4
+     "south": 6,
+     "west": 6,
+     "east": 6,
+     "north": 6
     }
    }
   }

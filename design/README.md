@@ -35,6 +35,18 @@ sus personajes, nombres, temas ni arte.
    en la mazmorra) y se empieza con **gestión ligera** de la aldea (el primer hito jugable), dejando el
    constructor completo para cuando el bucle de la comunidad funcione.
 
+## Receta aprobada para personajes (2026-11-24)
+
+El dueño eligió como guía de estilo los RPG retro de 8/16 bits: cabeza enorme, **ojos de punto negros**,
+mejillas rosadas, contorno oscuro grueso y colores planos. Clara y Arthur (con sus trajes) ya están hechos así.
+Para que PixelLab lo respete no basta el texto del prompt: hace falta su ajuste de proporciones.
+
+- `contenido.json` → `estilo.personajes`: lienzo 48, `proportions` personalizadas (cabeza ×1,7, piernas ×0,55,
+  brazos ×0,6), `low top-down`, contorno negro, `low detail`, sin realce de color.
+- Si la animación de caminar de PixelLab cambia la ropa de un traje (pasó con los dos de Arthur), la caminata se
+  arma desde el propio dibujo: `python herramientas/animar-personajes.py --locales --caminar-simple=granjero/ropa_minera`.
+- Después: `python herramientas/animar-personajes.py --locales` (acciones) y `python herramientas/unity/sincronizar.py`.
+
 ## Orden de trabajo recomendado
 
 1. **Arreglos baratos ya comprobados en el código** (no necesitan decisiones):

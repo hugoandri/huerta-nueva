@@ -92,6 +92,11 @@ PERSONAJES_V4 = {
 
 BASE_URL = 'https://backblaze.pixellab.ai/file/pixellab-characters/fdcffbfd-2690-4958-a77c-2da3ba5889c6'
 
+# Proporciones del cuerpo (fracción de la altura visible) para articular las poses.
+# Chibi (design/biblia-de-arte.md): la cabeza ocupa ~la mitad de la figura.
+CUELLO, CADERA = 0.50, 0.74
+OJOS = (0.26, 0.46)
+
 
 def descargar_img(url):
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -218,8 +223,8 @@ def parpadear_rostro(im, dir_name):
     x0, y0, x1, y1 = bbox_alfa(im)
     alto = y1 - y0 + 1
     # La línea de los ojos en low top-down 64x64 está entre el 22% y el 35% de la altura
-    fy0 = y0 + int(alto * 0.22)
-    fy1 = y0 + int(alto * 0.35)
+    fy0 = y0 + int(alto * OJOS[0])
+    fy1 = y0 + int(alto * OJOS[1])
     fx0 = x0 + int((x1 - x0) * 0.22)
     fx1 = x1 - int((x1 - x0) * 0.22)
 
@@ -271,8 +276,8 @@ def articular_pose(
     x0, y0, x1, y1 = bbox_alfa(base_im)
     cx = (x0 + x1) // 2
 
-    y_cuello = y0 + int((y1 - y0) * 0.44)
-    y_cadera = y0 + int((y1 - y0) * 0.68)
+    y_cuello = y0 + int((y1 - y0) * CUELLO)
+    y_cadera = y0 + int((y1 - y0) * CADERA)
 
     # Limitar la separación relativa brazo-torso y cabeza-torso a ±2px para que jamás se rompa la silueta
     al_dx = torso_dx + max(-1, min(1, arm_l_dx - torso_dx))
@@ -483,7 +488,98 @@ def generar_clips_personalidad(rot, walk):
     return clips
 
 
+def caminar_simple(base, d, n=6):
+    """
+    Caminata armada desde la rotación del propio traje (estilo RPG retro): el cuerpo sube y baja
+    1 px y las piernas se alternan. Sirve cuando la animación de PixelLab cambia la ropa del traje.
+    """
+    w, h = base.size
+    x0, y0, x1, y1 = bbox_alfa(base)
+    cx = (x0 + x1) // 2
+    y_cadera = y0 + int((y1 - y0) * CADERA)
+    src = base.load()
+    cuadros = []
+    for i in range(n):
+        fase = i % 4                      # 0: neutro, 1: pierna A arriba, 2: neutro, 3: pierna B arriba
+        bob = -1 if fase in (1, 3) else 0
+        lienzo = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+        dst = lienzo.load()
+        for y in range(h):
+            for x in range(w):
+                c = src[x, y]
+                if c[3] == 0:
+                    continue
+                dx, dy = 0, bob
+                if y >= y_cadera:
+                    dy = 0
+                    if d in ('south', 'north'):
+                        izquierda = x < cx
+                        if (fase == 1 and izquierda) or (fase == 3 and not izquierda):
+                            dy = -1
+                    else:
+                        delante = (x > cx) == (d == 'east')
+                        if fase == 1:
+                            dx = 1 if delante else -1
+                        elif fase == 3:
+                            dx = -1 if delante else 1
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < w and 0 <= ny < h and dst[nx, ny][3] == 0:
+                    dst[nx, ny] = c
+        # al subir el torso queda una fila vacía sobre las piernas: se rellena con el píxel de abajo
+        for y in range(max(1, y_cadera - 2), min(h - 1, y_cadera + 2)):
+            for x in range(w):
+                if dst[x, y][3] == 0 and dst[x, y - 1][3] > 0 and dst[x, y + 1][3] > 0:
+                    dst[x, y] = dst[x, y + 1]
+        cuadros.append(limpiar_bordes(lienzo))
+    return cuadros
+
+
+def animar_locales():
+    """
+    Modo --locales: usa las rotaciones y la caminata que generar-assets.mjs ya bajó a
+    assets/personaje/<id>/ (y sus ropa_*), con cualquier número de cuadros, y construye
+    los clips idle, arar, talar, golpear y cosechar. No descarga nada ni toca los ids.
+    """
+    import glob, sys
+    # --caminar-simple=granjero/ropa_minera,granjero/ropa_aventurera : rehace la caminata de esas carpetas
+    simples = set()
+    for a in sys.argv:
+        if a.startswith('--caminar-simple='):
+            simples |= {os.path.normpath(os.path.join(ASSETS_PJ, s)) for s in a.split('=', 1)[1].split(',') if s}
+    carpetas = []
+    for pj in sorted(os.listdir(ASSETS_PJ)):
+        base = os.path.join(ASSETS_PJ, pj)
+        if os.path.isdir(base):
+            carpetas.append(base)
+            carpetas += sorted(c for c in glob.glob(os.path.join(base, 'ropa_*')) if os.path.isdir(c))
+    for carpeta in carpetas:
+        if not all(os.path.exists(os.path.join(carpeta, f'{d}.png')) for d in DIRS):
+            continue
+        rot, walk = {}, {}
+        for d in DIRS:
+            rot[d] = limpiar_bordes(Image.open(os.path.join(carpeta, f'{d}.png')).convert('RGBA'))
+            n = len(glob.glob(os.path.join(carpeta, f'caminar_{d}_*.png')))
+            if os.path.normpath(carpeta) in simples:
+                walk[d] = caminar_simple(rot[d], d, n or 6)
+                for i, im_f in enumerate(walk[d]):
+                    im_f.save(os.path.join(carpeta, f'caminar_{d}_{i}.png'))
+            else:
+                walk[d] = [limpiar_bordes(Image.open(os.path.join(carpeta, f'caminar_{d}_{i}.png')).convert('RGBA')) for i in range(n)]
+        for clip in ('idle', 'arar', 'talar', 'golpear', 'cosechar'):
+            for f in glob.glob(os.path.join(carpeta, f'{clip}_*.png')):
+                os.remove(f)
+        for nombre_clip, por_dir in generar_clips_personalidad(rot, walk).items():
+            for d, lista_im in por_dir.items():
+                for i, im_f in enumerate(lista_im):
+                    im_f.save(os.path.join(carpeta, f'{nombre_clip}_{d}_{i}.png'))
+        print('Animado:', os.path.relpath(carpeta, RAIZ))
+
+
 def main():
+    import sys
+    if '--locales' in sys.argv:
+        animar_locales()
+        return
     for pj_id, aspectos in PERSONAJES_V4.items():
         for asp_id, cfg in aspectos.items():
             cid = cfg['id']

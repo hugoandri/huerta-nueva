@@ -90,42 +90,42 @@
     "granjera": {
       "carpeta": "assets/personaje/granjera",
       "tamano": {
-        "width": 64,
-        "height": 64
+        "width": 68,
+        "height": 68
       },
       "cuadros": {
-        "south": 4,
-        "east": 4,
-        "west": 4,
-        "north": 4
+        "south": 6,
+        "west": 6,
+        "east": 6,
+        "north": 6
       },
       "realzado": true,
       "ropas": {
         "minera": {
           "carpeta": "assets/personaje/granjera/ropa_minera",
           "tamano": {
-            "width": 64,
-            "height": 64
+            "width": 68,
+            "height": 68
           },
           "cuadros": {
-            "south": 4,
-            "east": 4,
-            "west": 4,
-            "north": 4
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
           },
           "realzado": true
         },
         "aventurera": {
           "carpeta": "assets/personaje/granjera/ropa_aventurera",
           "tamano": {
-            "width": 64,
-            "height": 64
+            "width": 68,
+            "height": 68
           },
           "cuadros": {
-            "south": 4,
-            "east": 4,
-            "west": 4,
-            "north": 4
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
           },
           "realzado": true
         }
@@ -134,42 +134,42 @@
     "granjero": {
       "carpeta": "assets/personaje/granjero",
       "tamano": {
-        "width": 64,
-        "height": 64
+        "width": 68,
+        "height": 68
       },
       "cuadros": {
-        "south": 4,
-        "east": 4,
-        "west": 4,
-        "north": 4
+        "south": 6,
+        "west": 6,
+        "east": 6,
+        "north": 6
       },
       "realzado": true,
       "ropas": {
         "minera": {
           "carpeta": "assets/personaje/granjero/ropa_minera",
           "tamano": {
-            "width": 64,
-            "height": 64
+            "width": 68,
+            "height": 68
           },
           "cuadros": {
-            "south": 4,
-            "east": 4,
-            "west": 4,
-            "north": 4
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
           },
           "realzado": true
         },
         "aventurera": {
           "carpeta": "assets/personaje/granjero/ropa_aventurera",
           "tamano": {
-            "width": 64,
-            "height": 64
+            "width": 68,
+            "height": 68
           },
           "cuadros": {
-            "south": 4,
-            "east": 4,
-            "west": 4,
-            "north": 4
+            "south": 6,
+            "west": 6,
+            "east": 6,
+            "north": 6
           },
           "realzado": true
         }

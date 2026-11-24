@@ -1,12 +1,24 @@
 {
   "_ayuda": "Single source of truth for the game. To add content: create a sprite in 'sprites' (with its PixelLab prompt) and reference it from an item, object, or crop. Then run: node herramientas/generar-assets.mjs (only generates what is missing).",
 
+  "_estilo": "Art bible: design/biblia-de-arte.md. One style for every character and creature: the slime's (cute chibi, round, soft). 'personajes' applies to playable characters and future residents.",
   "estilo": {
-    "outline": "single color black outline",
+    "outline": "single color outline",
     "shading": "basic shading",
     "detail": "medium detail",
     "view": "high top-down",
-    "sufijo": "cozy farming game pixel art, vibrant colors"
+    "sufijo": "cozy whimsical farming game pixel art, soft warm palette, mossy green and warm cream tones with small glowing blue lantern accents, dark brown outline, clear readable silhouette",
+    "personajes": {
+      "prefijo": "cute chibi, very big round head, two tiny black dot eyes, pink blush cheeks, small smile,",
+      "sufijo": "thick dark outline, flat bright cheerful colors, simple retro RPG sprite",
+      "tamano": 48,
+      "realzar": false,
+      "proporciones": { "type": "custom", "head_size": 1.7, "legs_length": 0.55, "arms_length": 0.6, "shoulder_width": 0.9, "hip_width": 1.1 },
+      "view": "low top-down",
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "low detail"
+    }
   },
 
   "mundo": { "tile": 32, "ancho": 48, "alto": 36, "semilla": 7 },
@@ -18,7 +30,7 @@
       "nombre": "Clara",
       "titulo": "Glen Botanist & Herbalist",
       "personalidad": "Wears a glowing blue mosslantern blossom on her straw sunhat. Spirited, observant, and happiest tending morning sprouts or brewing golden preserves.",
-      "descripcion": "charming young female farmer of Mosslantern Glen, standing in a natural relaxed posture with arms resting comfortably down at her sides, wide-brimmed woven straw sun hat with a small glowing blue flower tucked in the band, long thick auburn hair in a side braid over one shoulder, big bright expressive eyes and a warm cheerful smile, cream rolled-sleeve linen blouse under moss-green bib overalls with brass buttons, brown leather belt with a small seed pouch and tiny blue crystal lantern charm at her hip, brown leather boots, cozy 16-bit RPG pixel art",
+      "descripcion": "girl farmer, small round straw hat with a tiny blue flower, auburn braid, cream shirt, moss-green overalls, brown boots",
       "tamano": 64,
       "animacion": "walking"
     },
@@ -27,14 +39,14 @@
       "nombre": "Arthur",
       "titulo": "Ridge Craftsman & Delver",
       "personalidad": "Wears Grandpa Aurelius's red neckerchief. Bold, warm-hearted, and eager to stoke the smelting furnaces at dawn and map the shifting tunnels below.",
-      "descripcion": "charismatic young male farmer of Mosslantern Glen, standing in a natural relaxed posture with arms resting comfortably down at his sides, wide-brimmed straw farmer hat tilted slightly back over tousled dark brown hair, bright friendly eyes and a warm confident smile, red bandana neckerchief, warm cream rolled-sleeve work shirt under forest-green bib overalls with leather straps, utility belt with a small pouch and tiny blue crystal lantern charm at his hip, sturdy brown leather boots, cozy 16-bit RPG pixel art",
+      "descripcion": "boy farmer, small round straw hat, messy dark brown hair, red neckerchief, cream shirt, forest-green overalls, brown boots",
       "tamano": 64,
       "animacion": "walking"
     }
   ],
   "ropas": [
-    { "id": "minera",     "edicion": "now wearing a yellow mining hard hat with a headlamp, a brown leather work jacket with pockets and sturdy dark boots; no straw hat" },
-    { "id": "aventurera", "edicion": "now wearing light brown leather armor with shoulder pads, a short red cape, leather gloves and boots; no hat" }
+    { "id": "minera",     "edicion": "now wearing a yellow mining hard hat with a headlamp, a brown leather work jacket with pockets and sturdy dark boots; no straw hat; keep the same cute chibi face and proportions" },
+    { "id": "aventurera", "edicion": "now wearing light tan leather armor with small round shoulder pads, a short bright red-orange cape, small gloves and boots; no hat; keep the same cute chibi face and proportions" }
   ],
 
   "_mazmorras": "Dungeons entered from the cliff cave. Each has its own tileset, monsters, rocks, and bosses. 'requiere': another dungeon and the floor that must be reached in it.",
