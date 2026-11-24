@@ -19,6 +19,14 @@
       "outline": "single color black outline",
       "shading": "basic shading",
       "detail": "low detail"
+    },
+    "entorno": {
+      "prefijo": "cute chunky rounded,",
+      "sufijo": "soft warm cheerful colors, thick dark outline, simple retro RPG pixel art, no ground, no shadow",
+      "view": "low top-down",
+      "outline": "single color black outline",
+      "shading": "basic shading",
+      "detail": "medium detail"
     }
   },
 
@@ -103,12 +111,12 @@
   ],
 
   "tilesets": [
-    { "id": "tierra", "inferior": "lush green meadow grass", "superior": "dark brown tilled farm soil with furrows", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
-    { "id": "agua", "inferior": "lush green meadow grass", "superior": "clear blue pond water with small ripples", "transicion": "muddy shore", "superior_caminable": false },
-    { "id": "cueva", "inferior": "dark jagged cave rock wall seen from above", "superior": "dusty brown cobblestone cave floor", "transicion": "rocky edge", "superior_caminable": true },
-    { "id": "acantilado", "inferior": "lush green meadow grass", "superior": "raised rocky plateau top covered with moss, grass and small bushes", "transicion": "steep grey rock cliff face", "transicion_tamano": 0.5, "superior_caminable": false, "referencia_inferior": "agua" },
-    { "id": "camino", "inferior": "lush green meadow grass", "superior": "packed light brown dirt footpath with small pebbles", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
-    { "id": "cripta", "inferior": "black void abyss with faint purple mist", "superior": "cracked grey stone brick crypt floor tiles with moss", "transicion": "broken stone edge", "superior_caminable": true }
+    { "id": "tierra", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "warm rich brown tilled soil with neat soft furrows", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
+    { "id": "agua", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "clear bright blue pond water with soft gentle ripples", "transicion": "light sandy shore", "superior_caminable": false, "invertir": true },
+    { "id": "cueva", "inferior": "warm brown rounded cave rock wall seen from above with small glowing green moss spots", "superior": "light sandy brown cobblestone cave floor with small round pebbles", "transicion": "rounded rocky edge", "superior_caminable": true },
+    { "id": "acantilado", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "raised rocky plateau top covered with moss, grass and small round bushes", "transicion": "warm grey rounded rock cliff face", "transicion_tamano": 0.5, "superior_caminable": false, "referencia_inferior": "agua" },
+    { "id": "camino", "inferior": "soft warm green meadow grass with tiny clovers and a few tiny flowers", "superior": "warm light sandy dirt footpath with small round pebbles", "transicion": "grass edge", "superior_caminable": true, "referencia_inferior": "agua" },
+    { "id": "cripta", "inferior": "deep indigo void with soft lavender mist and tiny faint stars", "superior": "light grey-lavender stone brick crypt floor with soft moss and tiny glowing blue mushrooms", "transicion": "worn rounded stone edge", "superior_caminable": true }
   ],
 
   "sprites": {
@@ -141,7 +149,7 @@
     "calabaza_crecida": { "descripcion": "young pumpkin vine with broad green leaves and a yellow flower", "ancho": 32, "alto": 32 },
     "calabaza_madura":  { "descripcion": "ripe orange pumpkin on a green vine with leaves", "ancho": 32, "alto": 32 },
 
-    "arbol":            { "descripcion": "leafy green oak tree with brown trunk", "ancho": 64, "alto": 96 },
+    "arbol":            { "descripcion": "big friendly round tree, huge fluffy round canopy of bright fresh leafy green with light yellow-green highlights, very short thick warm brown trunk, canopy takes most of the height", "ancho": 64, "alto": 96, "estilo": "entorno" },
     "roca":             { "descripcion": "grey boulder rock", "ancho": 32, "alto": 32 },
     "maleza":           { "descripcion": "messy clump of dry yellow-brown wild grass and thistle weeds", "ancho": 32, "alto": 32 },
     "casa":             { "descripcion": "large cozy two-story wooden farmhouse with big red tiled roof seen from above with visible ridge and eave shadow, timber frame front wall with a tall centered wooden double door, four windows with flower boxes, stone foundation, brick chimney, for a top-down farming RPG, camera looking down from the south, front facing straight toward the viewer, rich 3D shading and depth, frontal symmetrical view, not isometric", "ancho": 256, "alto": 240, "modelo": "pixen", "recortar": true },

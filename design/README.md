@@ -49,6 +49,11 @@ Para que PixelLab lo respete no basta el texto del prompt: hace falta su ajuste 
 - **Monstruos y criaturas**: en `sprites`, `"estilo": "personajes"` usa la misma receta (prefijo `prefijo_criaturas`,
   contorno negro, colores planos). Ya están así el esqueleto, el rey slime y los tres jefes; los jefes miden
   ~1,6× la jugadora. Si PixelLab pinta una sombra debajo, se quita: el juego ya dibuja la suya.
+- **Entorno**: `estilo.entorno` (contorno negro, colores cálidos, sin suelo pintado). Hechos: el árbol y los 6 suelos
+  (césped con tréboles, tierra, camino, estanque, acantilado, cueva y cripta). Si PixelLab pinta un tileset con los
+  terrenos al revés, `"invertir": true` y regenerar sin `--forzar` lo corrige gratis; los tilesets que usan
+  `referencia_inferior` se regeneran **después** de su referencia. La casa, el puesto y los objetos se dejaron:
+  ya eran acogedores y legibles.
 - `sincronizar.py` borra y recrea los `.meta`: tras ejecutarlo, recupera con git los de gráficos que no cambiaron.
 
 ## Orden de trabajo recomendado

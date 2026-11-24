@@ -147,11 +147,13 @@ const guardarEstado = () => fs.writeFile(RUTA_ESTADO, JSON.stringify(estado, nul
 // ---------- sprites (objetos, cultivos, íconos): create-image-pixflux, síncrono ----------
 async function generarSprite(id, s) {
   const destino = dir(`sprites/${id}.png`);
-  // "estilo": "personajes" → monstruos y criaturas con la misma receta chibi que los personajes
-  if (s.estilo === 'personajes' && estilo.personajes) {
-    const ep = estilo.personajes;
+  // "estilo": "personajes" → monstruos y criaturas con la misma receta chibi que los personajes;
+  // "estilo": "entorno" → árboles y objetos del mundo con contorno y colores planos que combinan con ellos
+  if (s.estilo && estilo[s.estilo]) {
+    const ep = estilo[s.estilo];
+    const prefijo = s.estilo === 'personajes' ? ep.prefijo_criaturas : ep.prefijo;
     s = { view: ep.view, outline: ep.outline, shading: ep.shading, detail: ep.detail, ...s,
-      descripcion: [ep.prefijo_criaturas || '', s.descripcion].join(' ').trim() };
+      descripcion: [prefijo || '', s.descripcion].join(' ').trim() };
     const { datos } = await api('POST', '/create-image-pixflux', {
       description: `${s.descripcion}, ${ep.sufijo || estilo.sufijo}`,
       image_size: { width: s.ancho, height: s.alto },
