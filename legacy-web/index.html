@@ -1,0 +1,381 @@
+<title>Mosslantern</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&display=swap">
+<style>
+/* Concepto: el juego ocupa toda la pantalla; la interfaz flota en paneles de madera oscura
+   como un cartel de huerta al anochecer. Un solo mundo visual (oscuro), deliberado. */
+:root {
+  --fondo: #161b17;
+  --panel: #262d25;
+  --panel-2: #313a2f;
+  --borde: #586650;
+  --borde-luz: #7d8c6f;
+  --tinta: #f3eedb;
+  --tinta-suave: #b8b69c;
+  --acento: #f2c14e;
+  --energia: #79c267;
+  --agua: #5aa9e6;
+  --peligro: #e2674f;
+  --f-ui: "Pixelify Sans", ui-monospace, "Cascadia Mono", Menlo, monospace;
+  --f-texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: var(--fondo); color: var(--tinta); font-family: var(--f-ui);
+  overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+#juego { position: fixed; inset: 0; }
+canvas#lienzo { display: block; width: 100%; height: 100%; image-rendering: pixelated; cursor: crosshair; }
+
+/* ---------- HUD ---------- */
+.hud {
+  position: fixed; z-index: 5; display: flex; gap: 8px; align-items: stretch;
+  top: calc(10px + env(safe-area-inset-top, 0px)); left: max(10px, env(safe-area-inset-left, 0px));
+}
+.placa {
+  background: var(--panel); border: 2px solid var(--borde); border-radius: 6px;
+  box-shadow: inset 0 0 0 2px #1a1f19, 0 3px 0 #0d100d; padding: 6px 10px;
+}
+.reloj { display: grid; gap: 1px; min-width: 128px; }
+.reloj .dia { font-size: 13px; color: var(--tinta-suave); letter-spacing: .04em; }
+.reloj .hora { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.reloj .clima { font-size: 12px; color: var(--agua); }
+.dinero { display: flex; align-items: center; gap: 6px; font-size: 20px; font-weight: 700; color: var(--acento); font-variant-numeric: tabular-nums; }
+.dinero::before { content: ""; width: 12px; height: 12px; background: var(--acento); border-radius: 50%; box-shadow: inset -2px -2px 0 #b8892a; }
+
+.hud { flex-wrap: wrap; max-width: calc(100vw - 110px); }
+.vida { display: flex; align-items: center; gap: 3px; }
+.corazon { width: 14px; height: 13px; background: #3a2a2a;
+  clip-path: polygon(0 25%, 25% 0, 50% 20%, 75% 0, 100% 25%, 100% 50%, 50% 100%, 0 50%); }
+.corazon.lleno { background: var(--peligro); }
+.corazon.medio { background: linear-gradient(90deg, var(--peligro) 50%, #3a2a2a 50%); }
+.jefe { position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(var(--alto-barra, 104px) + env(safe-area-inset-bottom, 0px));
+  width: min(420px, calc(100vw - 40px)); display: grid; gap: 4px; justify-items: center;
+  font-size: 15px; font-weight: 700; color: var(--tinta); text-shadow: 1px 1px 0 #000; }
+.barra-jefe { width: 100%; height: 10px; background: #121512; border: 2px solid var(--borde); border-radius: 4px; overflow: hidden; }
+#jefe-vida { height: 100%; background: var(--peligro); transition: width .15s; }
+.medidores {
+  position: fixed; z-index: 5; display: flex; gap: 6px; align-items: flex-end;
+  top: calc(10px + env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px));
+}
+.medidor { display: grid; justify-items: center; gap: 4px; font-size: 11px; color: var(--tinta-suave); }
+.medidor .tubo { width: 18px; height: 110px; background: #121512; border: 2px solid var(--borde); border-radius: 4px; position: relative; overflow: hidden; }
+.medidor .relleno { position: absolute; left: 0; right: 0; bottom: 0; transition: height .25s; }
+#m-energia .relleno { background: var(--energia); }
+#m-agua .relleno { background: var(--agua); }
+.medidor.bajo .relleno { background: var(--peligro); }
+
+/* ---------- barra de objetos ---------- */
+.barra-wrap {
+  position: fixed; z-index: 5; left: 50%; transform: translateX(-50%);
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  display: grid; justify-items: center; gap: 6px; max-width: calc(100vw - 20px);
+}
+.nombre-sel { font-size: 14px; padding: 2px 10px; background: rgba(22,27,23,.82); border-radius: 4px; min-height: 1.4em; }
+.barra { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; padding: 5px; }
+.casilla {
+  position: relative; width: 44px; height: 44px; display: grid; place-items: center;
+  background: var(--panel-2); border: 2px solid #1a1f19; border-radius: 4px; cursor: pointer; padding: 0;
+  color: inherit; font: inherit;
+}
+.casilla:hover { border-color: var(--borde-luz); }
+.casilla:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.casilla.sel { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); background: #3d4636; }
+.casilla.marcada { border-color: var(--agua); }
+.casilla img { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; }
+.casilla .n { position: absolute; right: 2px; bottom: 0; font-size: 12px; font-weight: 700; text-shadow: 1px 1px 0 #000, -1px 0 0 #000; }
+.casilla .tecla { position: absolute; left: 3px; top: 0; font-size: 9px; color: var(--tinta-suave); }
+
+/* ---------- paneles ---------- */
+.velo { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(10,13,10,.55);
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.panel {
+  background: var(--panel); border: 3px solid var(--borde); border-radius: 8px;
+  box-shadow: inset 0 0 0 3px #1a1f19, 0 6px 0 #0b0d0b; width: min(640px, 100%);
+  max-height: 100%; display: flex; flex-direction: column; min-height: 0;
+}
+.panel-cab { display: flex; align-items: center; gap: 8px; padding: 12px 14px 0; flex-wrap: wrap; }
+.panel-cab h2 { font-size: 22px; margin: 0; margin-right: auto; text-wrap: balance; }
+.pestanas { display: flex; gap: 4px; flex-wrap: wrap; }
+.panel-cuerpo { padding: 12px 14px 14px; overflow: auto; min-height: 0; }
+.btn {
+  font: inherit; font-size: 15px; color: var(--tinta); background: var(--panel-2);
+  border: 2px solid var(--borde); border-radius: 5px; padding: 6px 12px; cursor: pointer;
+  box-shadow: 0 2px 0 #0d100d;
+}
+.btn:hover:not(:disabled) { border-color: var(--borde-luz); }
+.btn:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
+.btn:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.primario { background: var(--acento); color: #2a210b; border-color: #b8892a; font-weight: 700; }
+.btn.activo { border-color: var(--acento); color: var(--acento); }
+.cerrar { min-width: 36px; }
+.grilla { display: grid; grid-template-columns: repeat(auto-fill, 44px); gap: 4px; }
+.ayuda { font-family: var(--f-texto); font-size: 13px; color: var(--tinta-suave); line-height: 1.5; margin: 0 0 10px; }
+.lista { display: grid; gap: 6px; }
+.fila {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  background: var(--panel-2); border: 2px solid #1a1f19; border-radius: 6px; padding: 6px 8px;
+}
+.fila img { width: 32px; height: 32px; image-rendering: pixelated; }
+.fila .titulo { font-size: 16px; }
+.fila .det { font-family: var(--f-texto); font-size: 12px; color: var(--tinta-suave); margin-top: 2px; }
+.ing { display: inline-flex; align-items: center; gap: 3px; margin-right: 10px; font-family: var(--f-ui); font-size: 13px; }
+.ing img { width: 18px; height: 18px; }
+.ing.falta { color: var(--peligro); }
+.precio { color: var(--acento); font-variant-numeric: tabular-nums; }
+.acciones { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.sub { font-size: 14px; color: var(--tinta-suave); margin: 12px 0 6px; letter-spacing: .04em; }
+.resumen td { padding: 3px 8px; font-variant-numeric: tabular-nums; }
+.resumen td:last-child { text-align: right; color: var(--acento); }
+.resumen tfoot td { border-top: 2px solid var(--borde); font-weight: 700; }
+
+/* ---------- portada (Main Menu profesional) ---------- */
+#portada {
+  background: radial-gradient(circle at 50% 35%, rgba(36, 58, 48, 0.45) 0%, rgba(10, 14, 12, 0.82) 100%);
+  backdrop-filter: blur(2px);
+}
+#portada .panel {
+  width: min(680px, 100%);
+  border-color: #6b8c78;
+  box-shadow: inset 0 0 0 3px #18221c, 0 12px 32px rgba(0,0,0,.75), 0 0 28px rgba(90, 169, 230, .16);
+}
+.portada-hero {
+  position: relative;
+  text-align: center;
+  padding: 18px 20px 14px;
+  background: linear-gradient(180deg, rgba(45, 66, 53, 0.65) 0%, rgba(38, 45, 37, 0) 100%);
+  border-bottom: 2px solid #394739;
+}
+.portada-sello {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--agua); background: rgba(20, 32, 28, .85);
+  border: 1px solid rgba(90, 169, 230, .45); border-radius: 999px;
+  padding: 3px 12px; margin-bottom: 8px;
+}
+.marca {
+  font-size: clamp(38px, 8vw, 56px); font-weight: 700; color: var(--acento);
+  margin: 0; line-height: 1; letter-spacing: .04em;
+  text-shadow: 0 0 18px rgba(90, 169, 230, .35), 3px 3px 0 #4d350f;
+}
+.lema { font-family: var(--f-texto); font-size: 14px; color: var(--tinta-suave); margin: 8px auto 0; max-width: 520px; line-height: 1.45; }
+.menu-nav {
+  display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+  padding: 10px 14px 0;
+}
+.menu-nav .btn { font-size: 14px; padding: 6px 14px; }
+.tarjeta-guardado {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  background: linear-gradient(135deg, #2b382d 0%, #232b23 100%);
+  border: 2px solid var(--acento); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px;
+  box-shadow: inset 0 0 0 2px #1a2119, 0 4px 12px rgba(0,0,0,.35);
+}
+.tarjeta-guardado img { width: 56px; height: 56px; image-rendering: pixelated; background: #1a201a; border-radius: 6px; border: 2px solid var(--borde); }
+.tarjeta-guardado .tg-titulo { font-size: 18px; font-weight: 700; color: var(--acento); }
+.tarjeta-guardado .tg-meta { font-family: var(--f-texto); font-size: 12px; color: var(--tinta-suave); margin-top: 2px; line-height: 1.4; }
+.nueva-caja {
+  background: rgba(24, 30, 24, .75); border: 2px solid #3a4638; border-radius: 8px;
+  padding: 12px 14px; margin-bottom: 12px;
+}
+.campos-inicio {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 10px 0 12px;
+}
+.campo label { display: block; font-size: 12px; color: var(--tinta-suave); margin-bottom: 4px; letter-spacing: .04em; }
+.campo input {
+  width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; color: var(--tinta);
+  background: #141914; border: 2px solid var(--borde); border-radius: 5px; padding: 6px 9px;
+}
+.campo input:focus { outline: 2px solid var(--acento); border-color: var(--acento); }
+.portada-pie {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+  padding-top: 10px; border-top: 1px solid #364135; font-size: 12px; color: var(--tinta-suave);
+}
+.estado-assets { font-size: 12px; padding: 5px 9px; border-radius: 5px; background: #1a2019; border: 1px dashed var(--borde); }
+.estado-assets b { color: var(--energia); }
+.controles { display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; font-size: 13px; margin: 0 0 14px; }
+.controles dt { color: var(--acento); }
+.controles dd { margin: 0; font-family: var(--f-texto); color: var(--tinta-suave); }
+kbd { font-family: var(--f-ui); background: #121512; border: 1px solid var(--borde); border-radius: 3px; padding: 0 4px; }
+.btn-hud-menu {
+  position: fixed; z-index: 6;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(64px + env(safe-area-inset-right, 0px));
+}
+
+/* ---------- elegir personaje y mazmorra ---------- */
+.elige { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.elige button { display: grid; justify-items: center; gap: 2px; width: 104px; padding: 6px 4px 8px; font: inherit; font-size: 15px;
+  color: var(--tinta); background: var(--panel-2); border: 2px solid #1a1f19; border-radius: 6px; cursor: pointer; }
+.elige button[aria-checked="true"] { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); background: #3d4636; }
+.elige button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.elige img { width: 68px; height: 68px; image-rendering: pixelated; }
+.sello { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #1c221b;
+  border: 2px solid var(--borde); font-weight: 700; color: var(--acento); }
+.fila.cerrada { opacity: .6; }
+.casilla img, .fila img, .ing img { object-fit: contain; }
+
+/* ---------- avisos ---------- */
+.avisos { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); top: calc(70px + env(safe-area-inset-top, 0px)); display: grid; gap: 4px; justify-items: center; pointer-events: none; }
+.aviso { background: rgba(22,27,23,.92); border: 2px solid var(--borde); border-radius: 5px; padding: 4px 12px; font-size: 14px; animation: aparecer .18s ease-out; }
+.aviso.malo { border-color: var(--peligro); }
+@keyframes aparecer { from { transform: translateY(-6px); opacity: 0; } }
+
+/* ---------- controles táctiles ---------- */
+.tactil { display: none; }
+@media (pointer: coarse) {
+  .tactil { display: block; }
+  .barra-wrap { bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
+  :root { --alto-barra: 220px; }
+}
+.cruceta { position: fixed; z-index: 6; left: max(14px, env(safe-area-inset-left, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px); gap: 2px; }
+.botones { position: fixed; z-index: 6; right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  display: grid; grid-template-columns: repeat(2, auto); gap: 8px; align-items: end; }
+.tbtn { font: inherit; font-weight: 700; color: var(--tinta); background: rgba(38,45,37,.85); border: 2px solid var(--borde); border-radius: 8px; touch-action: none; }
+.tbtn.grande { width: 72px; height: 72px; border-radius: 50%; background: rgba(242,193,78,.85); color: #2a210b; font-size: 18px; border-color: #b8892a; grid-row: span 2; }
+.tbtn.chico { padding: 8px 10px; font-size: 13px; }
+
+@media (max-width: 620px) {
+  .casilla { width: 30px; height: 30px; }
+  .casilla img { width: 24px; height: 24px; }
+  .casilla .tecla { display: none; }
+  .barra { gap: 2px; padding: 3px; }
+  .medidor .tubo { height: 76px; width: 14px; }
+  .reloj { min-width: 104px; }
+  .reloj .hora { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .aviso { animation: none; } .medidor .relleno { transition: none; } }
+</style>
+
+<div id="juego"><canvas id="lienzo" aria-label="Game world"></canvas></div>
+
+<div class="hud" aria-live="polite">
+  <div class="placa reloj"><span class="dia" id="hud-dia">Spring · Day 1</span><span class="hora" id="hud-hora">6:00</span><span class="clima" id="hud-clima"></span></div>
+  <div class="placa dinero" id="hud-dinero">300</div>
+  <div class="placa vida" id="hud-vida" role="img" aria-label="Health"></div>
+</div>
+<button class="btn btn-hud-menu" id="btn-hud-menu" title="Open Menu (I / Esc)">☰ Menu</button>
+<div class="jefe" id="jefe" hidden><span id="jefe-nombre"></span><div class="barra-jefe"><div id="jefe-vida"></div></div></div>
+<div class="medidores">
+  <div class="medidor" id="m-agua" title="Watering can water"><div class="tubo"><div class="relleno"></div></div><span>Water</span></div>
+  <div class="medidor" id="m-energia" title="Energy"><div class="tubo"><div class="relleno"></div></div><span>Energy</span></div>
+</div>
+
+<div class="barra-wrap">
+  <div class="nombre-sel" id="nombre-sel"></div>
+  <div class="placa barra" id="barra" role="toolbar" aria-label="Hotbar"></div>
+</div>
+
+<div class="avisos" id="avisos"></div>
+
+<div class="tactil">
+  <div class="cruceta">
+    <span></span><button class="tbtn" data-dir="arriba" aria-label="Up">▲</button><span></span>
+    <button class="tbtn" data-dir="izq" aria-label="Left">◀</button><span></span><button class="tbtn" data-dir="der" aria-label="Right">▶</button>
+    <span></span><button class="tbtn" data-dir="abajo" aria-label="Down">▼</button><span></span>
+  </div>
+  <div class="botones">
+    <button class="tbtn chico" id="t-menu">Bag</button>
+    <button class="tbtn grande" id="t-accion">Use</button>
+    <button class="tbtn chico" id="t-comer">Eat</button>
+  </div>
+</div>
+
+<div class="velo" id="velo" hidden><div class="panel" id="panel" role="dialog" aria-modal="true"></div></div>
+
+<div class="velo" id="portada">
+  <div class="panel">
+    <div class="portada-hero">
+      <div class="portada-sello">🕯️ Mosslantern Glen · Endless Cozy RPG</div>
+      <h1 class="marca">MOSSLANTERN</h1>
+      <p class="lema">Your cozy corner in <b>Mosslantern Glen</b>: tend crops day by day, craft artisan preserves, smelt ore, and delve into shifting crystal dungeons.</p>
+    </div>
+    <div class="menu-nav" id="portada-tabs" role="tablist" aria-label="Main Menu Sections">
+      <button class="btn activo" data-ptab="jugar" role="tab">▶ Play</button>
+      <button class="btn" data-ptab="controles" role="tab">🎮 How to Play</button>
+      <button class="btn" data-ptab="ajustes" role="tab">⚙️ Settings & Save</button>
+      <button class="btn" data-ptab="lore" role="tab">📜 Glen Lore</button>
+    </div>
+    <div class="panel-cuerpo">
+      <!-- Pestaña 1: Jugar -->
+      <div data-pvista="jugar">
+        <div class="tarjeta-guardado" id="tarjeta-guardado" hidden>
+          <img id="tg-retrato" src="" alt="">
+          <div>
+            <div class="tg-titulo" id="tg-titulo">Saved Farm</div>
+            <div class="tg-meta" id="tg-meta">Spring · Day 1 · 300g</div>
+          </div>
+          <button class="btn primario" id="btn-continuar" hidden>▶ Continue</button>
+        </div>
+
+        <div class="nueva-caja">
+          <div class="sub" style="margin-top:0">✦ Start a New Homestead</div>
+          <div class="elige" id="elige" role="radiogroup" aria-label="Character"></div>
+          <div class="campos-inicio">
+            <div class="campo">
+              <label for="inp-nombre">Farmer Name</label>
+              <input id="inp-nombre" type="text" maxlength="20" placeholder="Clara / Arthur">
+            </div>
+            <div class="campo">
+              <label for="inp-semilla">World Seed (optional)</label>
+              <input id="inp-semilla" type="text" maxlength="16" placeholder="Random Glen Layout">
+            </div>
+          </div>
+          <div class="acciones" style="justify-content:flex-start">
+            <button class="btn primario" id="btn-nueva">✦ Start New Farm</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 2: Cómo jugar -->
+      <div data-pvista="controles" hidden>
+        <p class="ayuda">Live at your own pace in <b>Mosslantern Glen</b>. Farm by day, automate with sprinklers and kegs, and delve into endless shifting dungeons beneath the cliff.</p>
+        <dl class="controles">
+          <dt><kbd>WASD</kbd> / Arrows</dt><dd>Walk across the farm and dungeon halls (or D-Pad on mobile)</dd>
+          <dt><kbd>Space</kbd> / Click</dt><dd>Use held tool/item, attack monsters, harvest crops, ship items, or interact</dd>
+          <dt><kbd>1</kbd>–<kbd>0</kbd>, <kbd>-</kbd>, <kbd>=</kbd></dt><dd>Select hotbar slot (<kbd>Q</kbd>/<kbd>E</kbd> or mouse wheel cycles)</dd>
+          <dt><kbd>I</kbd> / <kbd>Tab</kbd> · <kbd>C</kbd></dt><dd>Open Backpack, Crafting, Grandpa's Journal & Bestiary</dd>
+          <dt><kbd>F</kbd></dt><dd>Eat held crop/preserve for energy or drink a Health Potion for hearts</dd>
+          <dt><kbd>Shift</kbd> + Click</dt><dd>Quick-move items between Hotbar and Backpack</dd>
+        </dl>
+      </div>
+
+      <!-- Pestaña 3: Ajustes y Partida -->
+      <div data-pvista="ajustes" hidden>
+        <div class="sub" style="margin-top:0">Audio & Display</div>
+        <div class="acciones" style="justify-content:flex-start;margin-bottom:14px">
+          <button class="btn" id="btn-portada-audio">🔊 Audio: On</button>
+          <button class="btn" id="btn-portada-sfx">🎵 Test Lantern Chime</button>
+          <button class="btn" id="btn-portada-full">⛶ Toggle Fullscreen</button>
+        </div>
+        <div class="sub">Save Data Backup</div>
+        <p class="ayuda">Your progress saves automatically in your browser every morning and when pausing. You can also export or import your farm as a JSON file.</p>
+        <div class="acciones" style="justify-content:flex-start">
+          <button class="btn" id="btn-exportar">⬇ Export Save (.json)</button>
+          <label class="btn" style="display:inline-flex;align-items:center;cursor:pointer">⬆ Import Save (.json)<input id="inp-importar" type="file" accept=".json,application/json" hidden></label>
+        </div>
+      </div>
+
+      <!-- Pestaña 4: Lore y Créditos -->
+      <div data-pvista="lore" hidden>
+        <div class="sub" style="margin-top:0">The Legend of Mosslantern Glen</div>
+        <p class="ayuda" style="color:var(--tinta)">High in the misty ridge lies <b>Mosslantern Glen</b>, a secluded valley where damp cliff moss feeds on subterranean crystal dust and glows like little blue lanterns at dusk.</p>
+        <p class="ayuda"><b>Grandpa Aurelius</b> spent decades tending these fields and charting the shifting caverns beneath the northern cliff. Before retiring, he left you his tools, eight field notes hidden behind farm and dungeon milestones, and the warm company of <b>Aunt Brisa</b> at her seed stall.</p>
+        <div class="sub">Technical & Art Credits</div>
+        <p class="ayuda">Built with a deterministic core shared 1:1 between <b>HTML5 Canvas</b> and <b>Unity 6</b> · 74 PixelLab pixel-art sprites, 6 autotiled terrains & 6 animated character sheets · Procedural Web Audio synthesizer.</p>
+      </div>
+
+      <div class="portada-pie">
+        <div class="estado-assets" id="estado-assets">Loading graphics…</div>
+        <span>v1.0 · Mosslantern Glen Edition</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/cliente/main.js"></script>

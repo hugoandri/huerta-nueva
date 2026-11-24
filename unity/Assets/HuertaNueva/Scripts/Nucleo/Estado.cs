@@ -14,7 +14,7 @@ namespace HuertaNueva
     {
         public List<Slot> items;              // cofres (12 casillas)
         public string entrada, salida;        // máquinas
-        public int listoEn;
+        public int inicioEn, listoEn;
         public bool Vacio => string.IsNullOrEmpty(salida) && (items == null || items.TrueForAll(s => s == null));
     }
 
@@ -95,30 +95,41 @@ namespace HuertaNueva
         public Tiempo tiempo = new Tiempo();
         public Zona granja;
         public EstadoMazmorra mazmorra = new EstadoMazmorra();
+        public List<string> hitos = new List<string> { "intro" };
         public List<Jugador> jugadores = new List<Jugador>();
 
         public Jugador BuscarJugador(string id) => jugadores.Find(j => j.id == id);
 
         // Tras cargar con JsonUtility: casillas vacías a null y cofres vacíos a null.
-        public void Normalizar()
+        public void Normalizar(Def def = null)
         {
-            foreach (var j in jugadores) for (int i = 0; i < j.inv.Count; i++) if (j.inv[i] != null && string.IsNullOrEmpty(j.inv[i].id)) j.inv[i] = null;
+            if (hitos == null || hitos.Count == 0) hitos = new List<string> { "intro" };
+            foreach (var j in jugadores)
+                for (int i = 0; i < j.inv.Count; i++)
+                    if (j.inv[i] != null && (string.IsNullOrEmpty(j.inv[i].id) || (def != null && !def.ITEMS.ContainsKey(j.inv[i].id)))) j.inv[i] = null;
             void Limpiar(Zona z)
             {
                 if (z == null) return;
+                if (def != null)
+                {
+                    z.objetos.RemoveAll(o => !def.OBJ.ContainsKey(o.id));
+                    z.cultivos.RemoveAll(c => !def.CULT.ContainsKey(c.id));
+                }
                 foreach (var o in z.objetos)
                 {
                     if (o.datos == null) o.datos = new ObjDatos();
                     if (o.datos.items != null)
                     {
                         if (o.datos.items.Count == 0) o.datos.items = null;
-                        else for (int i = 0; i < o.datos.items.Count; i++) if (o.datos.items[i] != null && string.IsNullOrEmpty(o.datos.items[i].id)) o.datos.items[i] = null;
+                        else for (int i = 0; i < o.datos.items.Count; i++)
+                            if (o.datos.items[i] != null && (string.IsNullOrEmpty(o.datos.items[i].id) || (def != null && !def.ITEMS.ContainsKey(o.datos.items[i].id)))) o.datos.items[i] = null;
                     }
                 }
                 z.ocupaVer = -1;
             }
             Limpiar(granja);
-            if (mazmorra.enCurso) Limpiar(mazmorra.nivel); else mazmorra.nivel = null;
+            if (mazmorra.enCurso && (def == null || def.MAZ.ContainsKey(mazmorra.actual ?? ""))) Limpiar(mazmorra.nivel);
+            else { mazmorra.enCurso = false; mazmorra.nivel = null; }
         }
     }
 }

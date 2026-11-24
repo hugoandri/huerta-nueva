@@ -11,6 +11,9 @@
   "zanahoria",
   "calabaza",
   "conserva",
+  "conserva_rabano",
+  "conserva_zanahoria",
+  "conserva_calabaza",
   "madera",
   "piedra",
   "fibra",
@@ -30,6 +33,7 @@
   "cofre",
   "cerca",
   "aspersor",
+  "aspersor_gema",
   "tarro",
   "espantapajaros",
   "ropa_granjera",
@@ -56,6 +60,7 @@
   "espada_madera",
   "espada_cobre",
   "espada_hierro",
+  "espada_espectral",
   "limo",
   "murcielago",
   "esqueleto",
@@ -68,7 +73,10 @@
   "fantasma",
   "nigromante",
   "caballero_espectral",
-  "urna"
+  "urna",
+  "portada_fondo",
+  "portada_logo",
+  "portada_boton"
  ],
  "tilesets": [
   "tierra",
@@ -81,59 +89,59 @@
  "personajes": {
   "granjera": {
    "base": {
-    "pie": 56,
+    "pie": 58,
     "cuadros": {
-     "south": 6,
-     "west": 6,
-     "east": 6,
-     "north": 6
+     "south": 4,
+     "west": 4,
+     "east": 4,
+     "north": 4
     }
    },
    "minera": {
-    "pie": 56,
+    "pie": 58,
     "cuadros": {
-     "south": 6,
-     "west": 6,
-     "east": 6,
-     "north": 6
+     "south": 4,
+     "west": 4,
+     "east": 4,
+     "north": 4
     }
    },
    "aventurera": {
-    "pie": 56,
+    "pie": 58,
     "cuadros": {
-     "south": 6,
-     "west": 6,
-     "east": 6,
-     "north": 6
+     "south": 4,
+     "west": 4,
+     "east": 4,
+     "north": 4
     }
    }
   },
   "granjero": {
    "base": {
-    "pie": 57,
+    "pie": 58,
     "cuadros": {
-     "south": 6,
-     "west": 6,
-     "east": 6,
-     "north": 6
+     "south": 4,
+     "west": 4,
+     "east": 4,
+     "north": 4
     }
    },
    "minera": {
-    "pie": 56,
+    "pie": 58,
     "cuadros": {
-     "south": 6,
-     "west": 6,
-     "east": 6,
-     "north": 6
+     "south": 4,
+     "west": 4,
+     "east": 4,
+     "north": 4
     }
    },
    "aventurera": {
-    "pie": 56,
+    "pie": 58,
     "cuadros": {
-     "south": 6,
-     "west": 6,
-     "east": 6,
-     "north": 6
+     "south": 4,
+     "west": 4,
+     "east": 4,
+     "north": 4
     }
    }
   }

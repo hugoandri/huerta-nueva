@@ -1,15 +1,22 @@
 # Huerta Nueva en Unity 6
 
-Esta carpeta es el mismo juego que la versión web, traducido a C#. Todo se construye por código al dar
-Play: no hay escenas, prefabs ni configuración que hacer a mano.
+Esta carpeta contiene un proyecto Unity completo con la versión C# del juego web. Incluye paquetes,
+configuración URP con Renderer 2D y una escena inicial. El mundo y la interfaz se construyen por código
+al dar Play.
 
-## Cómo abrirlo (Unity Hub + Unity 6)
+## Cómo abrirlo (Unity Hub + Unity 6000.6.9f1)
 
-1. En Unity Hub: **New project** → plantilla **Universal 2D** → crea el proyecto.
-2. Cierra Unity y copia la carpeta `unity/Assets/HuertaNueva` de este repositorio dentro de la carpeta
-   `Assets` del proyecto nuevo (queda `Assets/HuertaNueva/...`).
-3. Abre el proyecto. Unity importa los gráficos como pixel art (lo hace `Editor/TexturasImport.cs`).
-4. Abre cualquier escena (la `SampleScene` de la plantilla sirve) y pulsa **Play**.
+1. Instala **Unity 6000.6.9f1** desde Unity Hub y activa una licencia válida para tu cuenta.
+2. En Unity Hub: **Add → Add project from disk** y selecciona la carpeta `unity` de este repositorio.
+3. Abre el proyecto y espera la instalación de paquetes y la importación de gráficos. La primera
+   apertura necesita conexión para descargar los paquetes. Los PNG se importan como pixel art
+   mediante `Editor/TexturasImport.cs`.
+4. Abre `Assets/Scenes/SampleScene.unity` y pulsa **Play**. En la portada elige personaje y
+   **Nueva partida**, o **Continuar** si tienes un guardado de Unity.
+
+No necesitas crear otro proyecto ni copiar archivos. `ProjectSettings/ProjectVersion.txt` fija la
+versión del editor y `Packages/manifest.json` declara URP, Tilemap, sprites, uGUI e Input System.
+La escena inicial está incluida en la lista de escenas de compilación.
 
 Si copiaste los gráficos con Unity abierto y se ven borrosos: clic derecho en
 `Assets/HuertaNueva/Resources` → **Reimport**.
@@ -19,6 +26,19 @@ Si copiaste los gráficos con Unity abierto y se ven borrosos: clic derecho en
 - Moverse: WASD o flechas. En el celular aparece una cruceta.
 - Usar lo que tienes en la mano: Espacio, J o Enter (o clic en una casilla vecina).
 - Barra: 1-9, 0, -, =, Q/E o la rueda. F come o toma una poción. I/Tab menú, C crafteo, Esc cierra.
+
+## Crear el ejecutable para Windows
+
+En el editor usa **Huerta Nueva → Crear ejecutable de Windows**. Requiere el módulo Windows Build
+Support instalado en Unity Hub. El resultado queda en `unity/Builds/Windows/HuertaNueva.exe`.
+Para compartir el juego, entrega toda la carpeta `Windows`: el `.exe` necesita su carpeta
+`HuertaNueva_Data`, `UnityPlayer.dll` y los demás archivos generados junto a él.
+
+También puedes compilar desde PowerShell, en la raíz del repositorio:
+
+```powershell
+& 'C:\Program Files\Unity\Hub\Editor\6000.6.9f1\Editor\Unity.exe' -batchmode -nographics -quit -projectPath "$PWD\unity" -buildTarget Win64 -executeMethod HuertaNueva.Editor.CompilarJuego.Windows -logFile "$PWD\unity\compilacion-windows.log"
+```
 
 ## Cómo está armado
 
@@ -49,10 +69,29 @@ Cuando generes gráficos nuevos con `herramientas/generar-assets.mjs`, cópialos
 python3 herramientas/unity/sincronizar.py
 ```
 
-y vuelve a copiar `Assets/HuertaNueva/Resources` a tu proyecto.
+Unity importa los cambios automáticamente al volver al editor. El script necesita Python 3 y Pillow
+(`python3 -m pip install Pillow`).
 
-## Estado
+## Verificación
 
-El código C# se escribió sin poder compilarlo aquí (solo se verificó la sintaxis). Si al abrirlo Unity
-muestra algún error de compilación en la consola, cópialo tal cual y lo corrijo.
-Requisitos: los paquetes que trae la plantilla Universal 2D (URP, 2D Tilemap, uGUI, Input System).
+Los scripts de cliente, servicios, núcleo y editor se compilaron con Roslyn y las bibliotecas incluidas
+en Unity 6000.6.9f1. Se corrigieron errores de compilación del menú y del constructor de botones, y
+el recorte del sprite de las barras de estado. Quedan advertencias por una API de búsqueda de luces
+obsoleta, compatible con esta versión.
+
+Las siete pruebas C# comprueban generación reproducible, ciclo completo de cultivo, alcance de las
+acciones, fabricación, compras, generación de mazmorras con jefes y entrada desde la granja, y botín
+por jugador. Se ejecutan sin licencia del editor, usando su compilador y runtime .NET incluidos:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File herramientas/unity/verificar-nucleo.ps1
+```
+
+Ejecuta el comando desde la raíz del repositorio. Si tu editor está en otra ruta, añade
+`-Editor 'D:\Unity\6000.6.9f1\Editor'`. Los resultados se generan en `unity/Logs/PruebasNucleo`
+y no se incluyen en Git. Las pruebas web siguen disponibles con `npm test`.
+
+Con la licencia Personal activa se completaron la importación y la compilación de Windows x64 en
+Unity 6000.6.9f1. El ejecutable abrió su ventana sin registrar excepciones de arranque. Esta prueba
+no sustituye una partida completa de validación. Las partidas web no se convierten al formato de
+guardado de Unity.

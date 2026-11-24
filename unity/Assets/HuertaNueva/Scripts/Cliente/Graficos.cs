@@ -1,16 +1,31 @@
 // Carga los gráficos de PixelLab desde Resources/HuertaNueva (los copia herramientas/unity/sincronizar.py).
-// Lo que falte se dibuja provisional, así un contenido nuevo se puede probar antes de generar su sprite.
+// Incluye todas las animaciones de personalidad de ambos protagonistas:
+// respirar (idle), caminar, golpear (combate), picar/talar, arar y cosechar.
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace HuertaNueva
 {
-    // Un juego de sprites del personaje: quieto y caminando en las 4 direcciones.
     public class JuegoPersonaje
     {
         public Dictionary<string, Sprite> quieto = new Dictionary<string, Sprite>();
         public Dictionary<string, List<Sprite>> caminar = new Dictionary<string, List<Sprite>>();
+        public Dictionary<string, List<Sprite>> idle = new Dictionary<string, List<Sprite>>();
+        public Dictionary<string, List<Sprite>> golpear = new Dictionary<string, List<Sprite>>();
+        public Dictionary<string, List<Sprite>> talar = new Dictionary<string, List<Sprite>>();
+        public Dictionary<string, List<Sprite>> arar = new Dictionary<string, List<Sprite>>();
+        public Dictionary<string, List<Sprite>> cosechar = new Dictionary<string, List<Sprite>>();
+
+        public List<Sprite> ClipAccion(string tipo, string dir)
+        {
+            var dic = tipo == "golpear" ? golpear
+                : (tipo == "picar" || tipo == "talar") ? talar
+                : (tipo == "arar" || tipo == "regar") ? arar
+                : tipo == "cosechar" ? cosechar
+                : idle;
+            return dic != null && dic.TryGetValue(dir, out var l) && l != null && l.Count > 0 ? l : null;
+        }
     }
 
     public class Graficos
@@ -20,6 +35,7 @@ namespace HuertaNueva
         const string R = "HuertaNueva/";
 
         public readonly Dictionary<string, Sprite> SPR = new Dictionary<string, Sprite>();          // pivote abajo al centro
+        public readonly Dictionary<string, Sprite> SPR_CENTRO = new Dictionary<string, Sprite>();   // pivote en empuñadura para herramientas en mano
         public readonly Dictionary<string, Tile[]> TS = new Dictionary<string, Tile[]>();            // 16 piezas Wang por tileset
         public readonly Dictionary<string, Dictionary<string, JuegoPersonaje>> PJS = new Dictionary<string, Dictionary<string, JuegoPersonaje>>();
         public Sprite blanco, sombra, semillas, marco, corazon, golpe;
@@ -34,7 +50,6 @@ namespace HuertaNueva
             t.SetPixels32(vacio);
             return t;
         }
-        // y medida desde arriba, como en un lienzo.
         static void Pixel(Texture2D t, int x, int y, Color c) { if (x >= 0 && y >= 0 && x < t.width && y < t.height) t.SetPixel(x, t.height - 1 - y, c); }
         static void Caja(Texture2D t, int x, int y, int w, int h, Color c) { for (int yy = y; yy < y + h; yy++) for (int xx = x; xx < x + w; xx++) Pixel(t, xx, yy, c); }
 
@@ -67,7 +82,6 @@ namespace HuertaNueva
         }
         static Tile TileDe(Sprite s) { var tile = ScriptableObject.CreateInstance<Tile>(); tile.sprite = s; tile.colliderType = Tile.ColliderType.None; return tile; }
 
-        // Personaje provisional: una figurita de colores.
         static JuegoPersonaje PersonajeProvisional()
         {
             var P = new JuegoPersonaje();
@@ -85,11 +99,27 @@ namespace HuertaNueva
                 t.Apply();
                 return Crear(t, new Vector2(0.5f, 4f / 48f));
             }
-            foreach (var d in DIRS) { P.quieto[d] = Figura(d, 0); P.caminar[d] = new List<Sprite> { Figura(d, 1), Figura(d, 0), Figura(d, 3), Figura(d, 0) }; }
+            foreach (var d in DIRS)
+            {
+                P.quieto[d] = Figura(d, 0);
+                P.caminar[d] = new List<Sprite> { Figura(d, 1), Figura(d, 0), Figura(d, 3), Figura(d, 0) };
+                P.idle[d] = new List<Sprite> { P.quieto[d] };
+                P.golpear[d] = P.caminar[d];
+                P.talar[d] = P.caminar[d];
+                P.arar[d] = P.caminar[d];
+                P.cosechar[d] = P.caminar[d];
+            }
             return P;
         }
 
         static Texture2D Cargar(string ruta) => Resources.Load<Texture2D>(R + ruta);
+
+        static Vector2 PivoteHerramienta(string id)
+        {
+            if (id == "azada") return new Vector2(0.5f, 0.80f);
+            if (id == "regadera") return new Vector2(0.5f, 0.52f);
+            return new Vector2(0.22f, 0.22f);
+        }
 
         public Graficos(Def def)
         {
@@ -100,6 +130,7 @@ namespace HuertaNueva
                 var t = Cargar("sprites/" + s.id);
                 if (t != null) nReales++; else { nProv++; t = Provisional(s.id, s.ancho, s.alto); }
                 SPR[s.id] = Crear(t, new Vector2(0.5f, 0));
+                SPR_CENTRO[s.id] = Crear(t, PivoteHerramienta(s.id));
             }
 
             var colores = new Dictionary<string, (Color, Color)>
@@ -128,7 +159,6 @@ namespace HuertaNueva
                 TS[id] = tiles;
             }
 
-            // PJS[cuerpo][aspecto]: cada personaje (granjera, granjero) con su ropa base y sus variantes.
             var pjs = J.D(J.V(info, "personajes"));
             foreach (var c in def.personajes)
             {
@@ -156,11 +186,27 @@ namespace HuertaNueva
             var tc = Textura(7, 6);
             for (int y = 0; y < 6; y++) for (int x = 0; x < 7; x++) if (cor[y][x] == 'X') Pixel(tc, x, y, Color.white);
             tc.Apply(); corazon = Crear(tc, new Vector2(0.5f, 0.5f));
-            var tg = Textura(24, 12);
-            for (int y = 0; y < 12; y++) for (int x = 0; x < 24; x++) { float dx = (x + 0.5f - 12) / 12f, dy = (y + 0.5f - 12) / 12f, r2 = dx * dx + dy * dy; if (r2 <= 1 && r2 >= 0.6f) Pixel(tg, x, y, Color.white); }
+            var tg = Textura(28, 16);
+            for (int y = 0; y < 16; y++) for (int x = 0; x < 28; x++)
+            {
+                float dx = (x + 0.5f - 14) / 14f, dy = (y + 0.5f - 14) / 14f, r2 = dx * dx + dy * dy;
+                if (r2 <= 1 && r2 >= 0.48f) Pixel(tg, x, y, r2 > 0.78f ? new Color(1f, 0.96f, 0.78f) : new Color(0.55f, 0.86f, 1f, 0.9f));
+            }
             tg.Apply(); golpe = Crear(tg, new Vector2(0.5f, 0));
             var to = Textura(32, 32); Caja(to, 0, 0, 32, 32, new Color(0.15f, 0.086f, 0.04f, 0.38f)); to.Apply();
             oscuro = TileDe(Crear(to, new Vector2(0.5f, 0.5f)));
+        }
+
+        List<Sprite> CargarListaSprites(string carpeta, string prefijo, string dir, Vector2 piv)
+        {
+            var lista = new List<Sprite>();
+            for (int i = 0; i < 16; i++)
+            {
+                var c = Cargar($"{carpeta}{prefijo}_{dir}_{i}");
+                if (c == null) break;
+                lista.Add(Crear(c, piv));
+            }
+            return lista;
         }
 
         JuegoPersonaje CargarPersonaje(string carpeta, Dictionary<string, object> info)
@@ -171,17 +217,34 @@ namespace HuertaNueva
             {
                 var t = Cargar(carpeta + d);
                 if (t == null) return null;
-                // el pie es la fila opaca más baja: el pivote queda ahí para que el personaje se apoye en el suelo
                 int pie = J.I(info, "pie", Mathf.RoundToInt(t.height * 0.85f));
                 var piv = new Vector2(0.5f, (t.height - pie) / (float)t.height);
                 P.quieto[d] = Crear(t, piv);
                 P.caminar[d] = new List<Sprite>();
                 for (int i = 0; i < J.I(cuadros, d); i++) { var c = Cargar($"{carpeta}caminar_{d}_{i}"); if (c != null) P.caminar[d].Add(Crear(c, piv)); }
+
+                // Animaciones de personalidad generadas con PixelLab (con respaldo fluido si un traje usa las poses base)
+                var lIdle = CargarListaSprites(carpeta, "idle", d, piv);
+                var lGolpear = CargarListaSprites(carpeta, "golpear", d, piv);
+                var lTalar = CargarListaSprites(carpeta, "talar", d, piv);
+                var lArar = CargarListaSprites(carpeta, "arar", d, piv);
+                var lCosechar = CargarListaSprites(carpeta, "cosechar", d, piv);
+
+                Sprite w0 = P.caminar[d].Count > 0 ? P.caminar[d][0] : P.quieto[d];
+                Sprite w1 = P.caminar[d].Count > 1 ? P.caminar[d][1] : P.quieto[d];
+                Sprite w2 = P.caminar[d].Count > 2 ? P.caminar[d][2] : w0;
+                Sprite w3 = P.caminar[d].Count > 3 ? P.caminar[d][3] : w1;
+                Sprite w4 = P.caminar[d].Count > 4 ? P.caminar[d][4] : w0;
+
+                P.idle[d] = lIdle.Count > 0 ? lIdle : new List<Sprite> { P.quieto[d], w1, P.quieto[d], w4 };
+                P.golpear[d] = lGolpear.Count > 0 ? lGolpear : new List<Sprite> { w0, w1, w2, w3, P.quieto[d] };
+                P.talar[d] = lTalar.Count > 0 ? lTalar : (lGolpear.Count > 0 ? lGolpear : new List<Sprite> { w4, w0, w1, w2, P.quieto[d] });
+                P.arar[d] = lArar.Count > 0 ? lArar : (lGolpear.Count > 0 ? lGolpear : new List<Sprite> { w1, w2, w3, P.quieto[d] });
+                P.cosechar[d] = lCosechar.Count > 0 ? lCosechar : new List<Sprite> { w1, w2, w2, w0, P.quieto[d] };
             }
             return P;
         }
 
-        // Sprites según el personaje y la ropa que lleva en el lugar donde está.
         public JuegoPersonaje AspectoDe(Def def, Jugador j)
         {
             if (!PJS.TryGetValue(j.cuerpo ?? "", out var juego)) foreach (var v in PJS.Values) { juego = v; break; }
@@ -190,6 +253,6 @@ namespace HuertaNueva
             return aspecto != null && juego.TryGetValue(aspecto, out var p) ? p : juego["base"];
         }
 
-        public Sprite Icono(Def def, string item) => def.ITEMS.TryGetValue(item, out var it) && it.sprite != null && SPR.TryGetValue(it.sprite, out var s) ? s : blanco;
+        public Sprite Icono(Def def, string item) => def.ITEMS.TryGetValue(item ?? "", out var it) && it.sprite != null && SPR.TryGetValue(it.sprite, out var s) ? s : blanco;
     }
 }

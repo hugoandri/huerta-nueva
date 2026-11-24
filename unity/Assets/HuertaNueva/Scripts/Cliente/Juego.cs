@@ -13,7 +13,7 @@ namespace HuertaNueva
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Arrancar()
         {
-            if (FindAnyObjectByType<Juego>() == null) new GameObject("Huerta Nueva").AddComponent<Juego>();
+            if (FindAnyObjectByType<Juego>() == null) new GameObject("Mosslantern").AddComponent<Juego>();
         }
 
         Def def; Graficos G; Vista vista; Interfaz ui; AlmacenLocal almacen;
@@ -50,12 +50,13 @@ namespace HuertaNueva
             {
                 var e = almacen.Cargar();
                 if (e != null && e.BuscarJugador(perfil) != null) Empezar(e);
-                else { Empezar(NuevaPartida(PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id))); ui.Aviso("No se pudo leer la partida guardada", true); }
+                else { Empezar(NuevaPartida(PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id))); ui.Aviso("Could not read saved game", true); }
             };
-            ui.AlReiniciar = () => { almacen.Borrar(); Empezar(NuevaPartida(sesion.Yo.cuerpo)); ui.Aviso("Partida nueva"); };
+            ui.AlReiniciar = () => { almacen.Borrar(); Empezar(NuevaPartida(sesion.Yo.cuerpo)); ui.Aviso("New game started"); };
+            ui.AlSalirMenu = () => { if (jugando) sesion.Guardar(); jugando = false; ui.MostrarPortada(almacen.Existe(), almacen.Cargar()); };
             ui.AlUsar = () => { if (jugando && !ui.Abierto) UsarFrente(); };
             ui.AlComer = () => { if (jugando && !ui.Abierto) sesion.Despachar(new Accion { tipo = "comer" }); };
-            ui.MostrarPortada(almacen.Existe());
+            ui.MostrarPortada(almacen.Existe(), almacen.Cargar());
         }
 
         Estado NuevaPartida(string cuerpo) => HuertaNueva.Mundo.CrearEstado(def, (uint)Random.Range(1, int.MaxValue), perfil, cuerpo);
@@ -71,7 +72,7 @@ namespace HuertaNueva
             Conectar(new SesionLocal(e, def, perfil, almacen));
             sesion.Guardar();
             ui.OcultarPortada(); ui.Cerrar(); jugando = true;
-            ui.Aviso("Ara con la azada, siembra y riega. El puesto vende semillas.");
+            ui.Aviso("Till with the hoe, plant seeds, and water them. The stall sells seeds.");
         }
 
         void UsarFrente() { var (x, y) = Reglas.CeldaFrente(def, sesion.Yo); sesion.Despachar(new Accion { tipo = "usar", x = x, y = y }); }

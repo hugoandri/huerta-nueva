@@ -59,6 +59,10 @@ def main():
                 while os.path.exists(os.path.join(src, f'caminar_{x}_{n}.png')):
                     shutil.copy(os.path.join(src, f'caminar_{x}_{n}.png'), os.path.join(d, f'caminar_{x}_{n}.png')); n += 1
                 cuadros[x] = n
+                for pref in ('idle', 'golpear', 'talar', 'arar', 'cosechar'):
+                    k = 0
+                    while os.path.exists(os.path.join(src, f'{pref}_{x}_{k}.png')):
+                        shutil.copy(os.path.join(src, f'{pref}_{x}_{k}.png'), os.path.join(d, f'{pref}_{x}_{k}.png')); k += 1
             info['personajes'][cuerpo][aspecto] = {'pie': pie(os.path.join(src, 'south.png')), 'cuadros': cuadros}
 
     json.dump(info, open(os.path.join(DEST, 'graficos.json'), 'w'), ensure_ascii=False, indent=1)

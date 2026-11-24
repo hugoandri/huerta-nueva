@@ -1,3 +1,17 @@
 node_modules/
 .DS_Store
 .env
+
+# Unity: archivos generados por el editor y compilaciones
+unity/[Ll]ibrary/
+unity/[Tt]emp/
+unity/[Oo]bj/
+unity/[Ll]ogs/
+unity/[Uu]ser[Ss]ettings/
+unity/[Bb]uild/
+unity/[Bb]uilds/
+unity/.vs/
+unity/*.csproj
+unity/*.sln
+unity/*.slnx
+unity/*.log

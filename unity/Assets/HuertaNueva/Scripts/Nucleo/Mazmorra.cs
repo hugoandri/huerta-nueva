@@ -36,11 +36,12 @@ namespace HuertaNueva
             return null;
         }
 
-        public static Monstruo CrearMonstruo(Def def, Zona z, string id, int cx, int cy, int piso)
+        public static Monstruo CrearMonstruo(Def def, Zona z, string id, int cx, int cy, int piso, int prestigio = 0)
         {
             var m = def.MON[id];
-            double escala = 1 + (piso - 1) * 0.15;
-            float vida = (float)Math.Round(m.vida * (m.jefe ? 1 : escala), MidpointRounding.AwayFromZero);
+            double baseEsc = (z.mazmorra != null && def.MAZ.TryGetValue(z.mazmorra, out var mz) ? mz.escalaBase : 1) + prestigio * 0.25;
+            double escala = baseEsc + (piso - 1) * 0.15;
+            float vida = (float)Math.Round(m.vida * (m.jefe ? 1 + prestigio * 0.25 : escala), MidpointRounding.AwayFromZero);
             var mo = new Monstruo { uid = z.sigUid++, id = id, x = (cx + 0.5f) * def.T, y = (cy + 0.8f) * def.T, vida = vida, vidaMax = vida, cd = 1, dir = 1 };
             z.monstruos.Add(mo);
             return mo;
@@ -57,7 +58,7 @@ namespace HuertaNueva
         public static void PonerBajada(Def def, Zona z) => PonerEnSalaFinal(def, z, "escalera_bajar");
         public static void PonerSalidaFinal(Def def, Zona z) => PonerEnSalaFinal(def, z, "escalera_subir");
 
-        public static Zona GenerarPiso(Def def, string mazmorra, long semilla, int piso)
+        public static Zona GenerarPiso(Def def, string mazmorra, long semilla, int piso, int prestigio = 0)
         {
             int W = def.W, H = def.H;
             var cfg = def.MAZ[mazmorra];
@@ -107,7 +108,7 @@ namespace HuertaNueva
             z.bajada = bajada ?? new Punto(0, 0);
 
             cfg.jefes.TryGetValue(piso, out var jefe);
-            if (jefe != null) CrearMonstruo(def, z, jefe, z.salaFinal.x, z.salaFinal.y, piso);
+            if (jefe != null) CrearMonstruo(def, z, jefe, z.salaFinal.x, z.salaFinal.y, piso, prestigio);
             else if (piso < cfg.pisos) PonerBajada(def, z);
 
             Punto CeldaEnSala(Sala s, int margen = 1) => new Punto(EntreR(r, s.x + margen, s.x + s.w - 1 - margen), EntreR(r, s.y + margen, s.y + s.h - 1 - margen));
@@ -133,7 +134,7 @@ namespace HuertaNueva
             {
                 var s = otras[EntreR(r, 0, otras.Count - 1)]; var c = CeldaEnSala(s);
                 if (z.objetos.Any(o => o.x == c.x && o.y == c.y)) continue;
-                CrearMonstruo(def, z, tipos[EntreR(r, 0, tipos.Count - 1)].id, c.x, c.y, piso); n++;
+                CrearMonstruo(def, z, tipos[EntreR(r, 0, tipos.Count - 1)].id, c.x, c.y, piso, prestigio); n++;
             }
             return z;
         }
