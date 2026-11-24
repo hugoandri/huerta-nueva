@@ -90,8 +90,8 @@
     "granjera": {
       "carpeta": "assets/personaje/granjera",
       "tamano": {
-        "width": 68,
-        "height": 68
+        "width": 48,
+        "height": 48
       },
       "cuadros": {
         "south": 6,
@@ -104,8 +104,8 @@
         "minera": {
           "carpeta": "assets/personaje/granjera/ropa_minera",
           "tamano": {
-            "width": 68,
-            "height": 68
+            "width": 48,
+            "height": 48
           },
           "cuadros": {
             "south": 6,
@@ -118,8 +118,8 @@
         "aventurera": {
           "carpeta": "assets/personaje/granjera/ropa_aventurera",
           "tamano": {
-            "width": 68,
-            "height": 68
+            "width": 48,
+            "height": 48
           },
           "cuadros": {
             "south": 6,
@@ -134,8 +134,8 @@
     "granjero": {
       "carpeta": "assets/personaje/granjero",
       "tamano": {
-        "width": 68,
-        "height": 68
+        "width": 48,
+        "height": 48
       },
       "cuadros": {
         "south": 6,
@@ -148,8 +148,8 @@
         "minera": {
           "carpeta": "assets/personaje/granjero/ropa_minera",
           "tamano": {
-            "width": 68,
-            "height": 68
+            "width": 48,
+            "height": 48
           },
           "cuadros": {
             "south": 6,
@@ -162,8 +162,8 @@
         "aventurera": {
           "carpeta": "assets/personaje/granjero/ropa_aventurera",
           "tamano": {
-            "width": 68,
-            "height": 68
+            "width": 48,
+            "height": 48
           },
           "cuadros": {
             "south": 6,

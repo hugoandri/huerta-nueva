@@ -565,6 +565,20 @@ def animar_locales():
                     im_f.save(os.path.join(carpeta, f'caminar_{d}_{i}.png'))
             else:
                 walk[d] = [limpiar_bordes(Image.open(os.path.join(carpeta, f'caminar_{d}_{i}.png')).convert('RGBA')) for i in range(n)]
+                if '--alinear' in sys.argv and walk[d]:
+                    # PixelLab entrega la caminata algo más arriba que la pose quieta: se bajan todos los
+                    # cuadros lo mismo (se conserva el vaivén) para que los pies coincidan y no haya saltito.
+                    pies = sorted(f.getbbox()[3] for f in walk[d] if f.getbbox())
+                    dy = rot[d].getbbox()[3] - pies[len(pies) // 2]
+                    if dy:
+                        movidos = []
+                        for f in walk[d]:
+                            nuevo = Image.new('RGBA', f.size, (0, 0, 0, 0))
+                            nuevo.paste(f, (0, dy), f)
+                            movidos.append(nuevo)
+                        walk[d] = movidos
+                        for i, im_f in enumerate(walk[d]):
+                            im_f.save(os.path.join(carpeta, f'caminar_{d}_{i}.png'))
         for clip in ('idle', 'arar', 'talar', 'golpear', 'cosechar'):
             for f in glob.glob(os.path.join(carpeta, f'{clip}_*.png')):
                 os.remove(f)

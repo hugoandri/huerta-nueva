@@ -321,6 +321,15 @@ async function generarPersonaje(p) {
         character_id: origen, edit_description: p.edicion, state_name: p.id, no_background: true, use_color_palette_from_reference: true,
       });
       cid = datos.character_id;
+    } else if (p.referencia) {
+      // "referencia": imagen de frente aprobada (assets/referencias/<id>.png); el modelo v3 la gira
+      // a las 4 direcciones respetando el dibujo. Cuesta ~1 generación con 48×48.
+      const { datos } = await api('POST', '/create-character-v3', {
+        description: p.descripcion,
+        reference_image: { type: 'base64', base64: (await fs.readFile(path.join(RAIZ, p.referencia))).toString('base64'), format: 'png' },
+        n_directions: 4, view: p.view || 'high top-down', template_id: 'mannequin', no_background: true,
+      });
+      cid = datos.character_id;
     } else {
       // estilo.personajes: un mismo estilo chibi para todos los personajes (design/biblia-de-arte.md)
       const ep = estilo.personajes || {};

@@ -32,15 +32,16 @@
 
   "mundo": { "tile": 32, "ancho": 48, "alto": 36, "semilla": 7 },
 
-  "_personajes": "Playable characters. Each outfit is a state variant of the same character in PixelLab: same face and proportions, different outfit.",
+  "_personajes": "Playable characters. 'referencia' = approved front image (made with the slime's original pixflux settings); after generating, run herramientas/estilo_slime.py on their folders. Each outfit is a state variant of the same character in PixelLab: same face and proportions, different outfit.",
   "personajes": [
     {
       "id": "granjera",
       "nombre": "Clara",
       "titulo": "Glen Botanist & Herbalist",
       "personalidad": "Wears a glowing blue mosslantern blossom on her straw sunhat. Spirited, observant, and happiest tending morning sprouts or brewing golden preserves.",
-      "descripcion": "girl farmer, small round straw hat with a tiny blue flower, auburn braid, cream shirt, moss-green overalls, brown boots",
-      "tamano": 64,
+      "descripcion": "cute chibi farmer girl Clara with straw hat with a blue flower, auburn braid, green overalls",
+      "referencia": "assets/referencias/granjera.png",
+      "tamano": 48,
       "animacion": "walking"
     },
     {
@@ -48,8 +49,9 @@
       "nombre": "Arthur",
       "titulo": "Ridge Craftsman & Delver",
       "personalidad": "Wears Grandpa Aurelius's red neckerchief. Bold, warm-hearted, and eager to stoke the smelting furnaces at dawn and map the shifting tunnels below.",
-      "descripcion": "boy farmer, small round straw hat, messy dark brown hair, red neckerchief, cream shirt, forest-green overalls, brown boots",
-      "tamano": 64,
+      "descripcion": "cute chibi farmer boy Arthur with straw hat, messy brown hair, red neckerchief, green overalls",
+      "referencia": "assets/referencias/granjero.png",
+      "tamano": 48,
       "animacion": "walking"
     }
   ],

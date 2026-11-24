@@ -37,15 +37,21 @@ sus personajes, nombres, temas ni arte.
 
 ## Receta aprobada para personajes (2026-11-24)
 
-El dueño eligió como guía de estilo los RPG retro de 8/16 bits: cabeza enorme, **ojos de punto negros**,
-mejillas rosadas, contorno oscuro grueso y colores planos. Clara y Arthur (con sus trajes) ya están hechos así.
-Para que PixelLab lo respete no basta el texto del prompt: hace falta su ajuste de proporciones.
+**La referencia es el slime** (`assets/sprites/limo.png`): chibi, ojos grandes con brillo, mejillas rosadas,
+pocos colores vivos y contorno oscuro continuo. El dueño descartó la versión de ojos de punto y la dibujada a mano.
 
-- `contenido.json` → `estilo.personajes`: lienzo 48, `proportions` personalizadas (cabeza ×1,7, piernas ×0,55,
-  brazos ×0,6), `low top-down`, contorno negro, `low detail`, sin realce de color.
-- Si la animación de caminar de PixelLab cambia la ropa de un traje (pasó con los dos de Arthur), la caminata se
-  arma desde el propio dibujo: `python herramientas/animar-personajes.py --locales --caminar-simple=granjero/ropa_minera`.
-- Después: `python herramientas/animar-personajes.py --locales` (acciones) y `python herramientas/unity/sincronizar.py`.
+1. **Imagen de frente** con `create-image-pixflux` y los ajustes con que se hizo el slime (contorno negro,
+   `basic shading`, `medium detail`, `high top-down`, sufijo "cozy farming game pixel art, vibrant colors"),
+   48×48. Se guarda en `assets/referencias/<id>.png` y se pone como `"referencia"` del personaje.
+2. `node herramientas/generar-assets.mjs --solo=<id> --forzar`: el modelo v3 la gira a 4 direcciones (~1
+   generación), la anima caminando y crea los trajes (`ropas`) como estados del mismo personaje.
+3. `python herramientas/animar-personajes.py --locales --alinear`: baja la caminata para que los pies coincidan
+   con la pose quieta y arma idle, arar, talar, golpear y cosechar.
+4. `python herramientas/estilo_slime.py assets/personaje/<id> assets/personaje/<id>/ropa_*`: el filtro del slime
+   (24 colores, contorno oscuro continuo teñido, sin sombra pintada). Se aplica a **todo** cuadro de personaje.
+5. `python herramientas/unity/sincronizar.py`.
+
+Si la caminata de PixelLab le cambia la ropa a un traje, `--caminar-simple=<id>/ropa_<traje>` la arma desde el dibujo.
 - **Monstruos y criaturas**: en `sprites`, `"estilo": "personajes"` usa la misma receta (prefijo `prefijo_criaturas`,
   contorno negro, colores planos). Ya están así el esqueleto, el rey slime y los tres jefes; los jefes miden
   ~1,6× la jugadora. Si PixelLab pinta una sombra debajo, se quita: el juego ya dibuja la suya.
@@ -63,8 +69,7 @@ Para que PixelLab lo respete no basta el texto del prompt: hace falta su ajuste 
    - `Reglas.cs` (`Usar`, colocables): se gasta el objeto aunque `Mundo.Colocar` falle. Hoy no pasa porque
      todo lo colocable ocupa 1×1, pero romperá con edificios grandes.
    - `NuevoDia` vuelve a sembrar rocas, árboles y maleza en cualquier sitio, lo que tapa lo que el jugador limpia.
-2. **Arte de los protagonistas**: rehacer granjera y granjero en chibi (cabeza ≥ 40 % de la figura,
-   contorno marrón oscuro `#2b1d1a`) con la receta de `biblia-de-arte.md`. Es el cambio que más se nota.
+2. ~~Arte de los protagonistas~~: hecho con la receta del slime (arriba).
 3. **Primer hito jugable** (`sistemas-nucleo.md` § 5): construcción, residentes, rescate en la mazmorra,
    ventajas temporales por expedición y el material `musgo_brillante`. Necesita subir `VERSION_ESTADO`.
 4. Granja por zonas y salas con tipo en la mazmorra (`niveles.md`).

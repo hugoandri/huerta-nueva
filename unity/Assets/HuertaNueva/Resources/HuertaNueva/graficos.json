@@ -89,7 +89,7 @@
  "personajes": {
   "granjera": {
    "base": {
-    "pie": 55,
+    "pie": 44,
     "cuadros": {
      "south": 6,
      "west": 6,
@@ -98,7 +98,7 @@
     }
    },
    "minera": {
-    "pie": 56,
+    "pie": 44,
     "cuadros": {
      "south": 6,
      "west": 6,
@@ -107,7 +107,7 @@
     }
    },
    "aventurera": {
-    "pie": 55,
+    "pie": 44,
     "cuadros": {
      "south": 6,
      "west": 6,
@@ -118,7 +118,7 @@
   },
   "granjero": {
    "base": {
-    "pie": 54,
+    "pie": 46,
     "cuadros": {
      "south": 6,
      "west": 6,
@@ -127,7 +127,7 @@
     }
    },
    "minera": {
-    "pie": 54,
+    "pie": 46,
     "cuadros": {
      "south": 6,
      "west": 6,
@@ -136,7 +136,7 @@
     }
    },
    "aventurera": {
-    "pie": 54,
+    "pie": 46,
     "cuadros": {
      "south": 6,
      "west": 6,

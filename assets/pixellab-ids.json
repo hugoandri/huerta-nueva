@@ -1,14 +1,14 @@
 {
   "tileset:tierra": "f5136d80-c24f-4036-95c6-0bed68f9ba3c",
   "tileset:agua": "4cc5429c-6023-4c0a-b8ca-b29061250e1a",
-  "personaje:granjero": "514ea585-ba4e-4482-92f0-9d9704102c14",
+  "personaje:granjero": "1f1cb590-b791-476f-95fb-00dc8d316dda",
   "tileset:cueva": "6887080a-9fa4-4768-97ec-d3de8bfcf41d",
-  "ropa:granjero:minera": "c6976c66-598c-41bd-bf85-709548d41ab2",
-  "ropa:granjero:aventurera": "79a5d6c9-4dde-4f55-9675-858e77e13a52",
+  "ropa:granjero:minera": "37116ecc-84fd-4418-a687-f7d5049356e1",
+  "ropa:granjero:aventurera": "b54cdc05-e3e3-445e-a66d-d443b047ed3e",
   "tileset:cripta": "cc3617b5-55c6-4611-91a3-34abcb393be5",
-  "personaje:granjera": "c65b5476-b300-4721-a365-bcc5a9d230b2",
-  "ropa:granjera:minera": "fda0d2d1-2dd0-407a-9df5-59f18e70283c",
-  "ropa:granjera:aventurera": "fda6745c-9e44-4b5c-98d4-b8040f0b6960",
+  "personaje:granjera": "8d392d8a-adc4-45e0-9e16-cb3ce14bc618",
+  "ropa:granjera:minera": "3ebc110e-6f5c-4a11-b99a-4b9cbc81df3c",
+  "ropa:granjera:aventurera": "dc4507cd-5092-4e07-a8df-46aa389e795a",
   "tileset:camino": "7fb2e432-6bc6-4a6e-a55f-894c34dbe610",
   "tileset:acantilado": "1314efd9-7b84-4b1c-95ae-b17d1261db68",
   "personaje": {
@@ -19,10 +19,10 @@
     "granjero_ropa_minera": "f413c75a-8b53-49ba-8b4b-be65bd296bd6",
     "granjero_ropa_aventurera": "3dc79ed4-8b35-4105-bc36-88b2c0f2047b"
   },
-  "personaje:granjero:anim": "afc8795c-306e-4578-b67d-467d8280698e",
-  "personaje:granjera:anim": "0bfbf04e-f51a-426c-bca5-2568792cb542",
-  "ropa:granjera:minera:anim": "9192aa71-bd6f-46fe-8a4b-8b7403ae6029",
-  "ropa:granjera:aventurera:anim": "cb6052c1-8770-43bd-8f80-414cd40148f4",
-  "ropa:granjero:minera:anim": "ed8ab3d3-ba55-4e3b-a94d-75b616f317f0",
-  "ropa:granjero:aventurera:anim": "17c8d61f-a5f5-405a-a899-03eb736d7699"
+  "personaje:granjero:anim": "06311887-218f-4520-b183-9b1023a53dca",
+  "personaje:granjera:anim": "a2ecf9c0-b238-4a18-bc90-ea429e197f0d",
+  "ropa:granjero:minera:anim": "c588e8e7-9ae6-407d-a667-4ffd6ffe40ca",
+  "ropa:granjera:minera:anim": "b76cbaa0-15aa-4cf8-ad88-13da55c5ca50",
+  "ropa:granjero:aventurera:anim": "01cd6c94-8ac6-4b05-9de4-c791a452a3e7",
+  "ropa:granjera:aventurera:anim": "7edb8755-143c-4e9c-9493-04a6472de176"
 }
