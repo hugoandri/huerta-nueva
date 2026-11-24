@@ -175,7 +175,7 @@ Desde el día 2-3 la Mina pide energía y vida (limos y murciélagos en los piso
 
 ## Open questions
 
-- ¿El autor anónimo se llama *The Night Moth* y el boletín *The Lantern Post*, o prefieres otros nombres?
+- ~~Nombres~~ decidido (2026-11-24): el autor anónimo es **The Night Moth** y el boletín ***The Lantern Post*** *(you said: "Sí, sirven")*.
 - ¿Romance entra en el Año 1 o solo amistad?
 - ¿Cuántos vecinos en la demo: Aunt Brisa + 2, o más?
 - ¿Los Mosslings también chismean (testigos en la granja) o solo los vecinos?
