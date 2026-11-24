@@ -8,7 +8,7 @@ sus personajes, nombres, temas ni arte.
 
 | Documento | Quién | Qué decide |
 | --- | --- | --- |
-| [prd.md](prd.md) | Producto (plantillas del estudio) | Resumen de una página, qué está hecho, qué falta, hito de demo y lecciones del devlog de ISO-CORE |
+| [prd.md](prd.md) | Producto (plantillas del estudio) | Resumen de producto: qué está hecho, qué falta, ideas adoptadas de Whisper Valley (pueblo, chisme, estaciones), hito de demo y lecciones del devlog de ISO-CORE |
 | [vision.md](vision.md) | Dirección creativa | Pilares, tono, bucle principal, qué se corta |
 | [sistemas-nucleo.md](sistemas-nucleo.md) | Diseño de juego | Construcción, residentes, recursos, expediciones, primer hito jugable |
 | [biblia-de-arte.md](biblia-de-arte.md) | Dirección de arte | Auditoría del arte actual, estilo, paletas, tamaños, recetas de PixelLab |

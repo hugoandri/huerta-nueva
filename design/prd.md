@@ -1,67 +1,69 @@
 # Game Brief (PRD): Mosslantern
 
 > Documento de producto armado con las plantillas de Claude-Code-Game-Studios (`game-brief` + `milestone-definition`).
-> Junta lo que ya existe en el repo, las decisiones del dueño (`design/README.md`) y las lecciones del devlog
-> *"I Spent 2 Years Developing My Indie Game – Was It Worth It?"* (JohnBrx, ISO-CORE).
-> Los encabezados quedan en inglés como pide la plantilla. Marcas: *(guessed)* = lo propuso el equipo;
-> *(inferred (strong))* = sale del código o de otro documento; sin marca = lo dijo el dueño.
-> Fecha: 2026-11-24 · Rama: `mosslantern-unity` · Detalle de cada sistema: `vision.md`, `sistemas-nucleo.md`,
-> `niveles.md`, `biblia-de-arte.md`.
+> Junta lo que ya existe en el repo, las decisiones del dueño (`design/README.md`), ideas adoptadas del GDD
+> **Whisper Valley** (@Carlos, 2026-11-21) y las lecciones del devlog de ISO-CORE (JohnBrx).
+> Los encabezados quedan en inglés como pide la plantilla. Marcas: *(guessed)* = propuesta del equipo;
+> *(inferred (strong))* = sale del código o de otro documento; *(from Whisper Valley)* = idea adoptada de ese GDD;
+> sin marca = lo dijo el dueño.
+> Fecha: 2026-11-24 · Rama: `mosslantern-unity` · Detalle: `vision.md`, `sistemas-nucleo.md`, `niveles.md`, `biblia-de-arte.md`.
 
 ## In your words
 
 - "un juego tipo Cult of the Lamb junto con Stardew Valley en construcción, dungeons, y que los monitos, sprites y ambiente sea igual de amigable y agradable a la vista"
-- "todos los personajes deben seguir un mismo arte. no pueden haber artes más lindos y simpáticos y otros más realistas… ahí el arte del slime es el que predomina"
+- "todos los personajes deben seguir un mismo arte… ahí el arte del slime es el que predomina"
 - Primera versión: "Un jugador". Idioma: "debe ser todo en inglés".
-- Sobre los protagonistas: "si lo dejas con el arte del slime" → aprobado tras el filtro: "Sí, calzan". Tras probar el .exe: "Se ve bien".
+- Protagonistas: "si lo dejas con el arte del slime" → "Sí, calzan". Tras probar el .exe: "Se ve bien".
+- Sobre el GDD de Whisper Valley: "debe tener sentido con esto" → elegiste **mezclar ideas**.
 
-**Pitch:** Heredas la granja del abuelo en Mosslantern Glen: cultivas de día, bajas a mazmorras cambiantes a rescatar Mosslings y, con ellos, conviertes la granja en una aldea que se ilumina.
+**Pitch:** Heredas la granja del abuelo en Mosslantern Glen, un pueblo pequeño donde todos se enteran de todo: cultivas de día, bajas a mazmorras a rescatar Mosslings y, cada noche, el boletín anónimo del pueblo cuenta lo que hiciste.
 
-**Genre:** granja cozy + construcción de aldea + mazmorras cortas tipo roguelite.
+**Genre:** granja cozy + vida de pueblo con relaciones y chisme + construcción de aldea + mazmorras cortas tipo roguelite.
 
-**Controls:** WASD/flechas caminar · Espacio/J/Enter/clic usar · 1-0, -, =, Q/E o rueda para la barra · I/Tab mochila · C crafteo · F comer. *(inferred (strong): README y LEEME.txt del build)*
+**Controls:** WASD/flechas caminar · Espacio/J/Enter/clic usar · 1-0, -, =, Q/E o rueda para la barra · I/Tab mochila · C crafteo · F comer. *(inferred (strong))*
 
-**Question:** ¿Rescatar un Mossling en la mazmorra y verlo trabajar en la granja al día siguiente hace que quieras volver a bajar? *(guessed)*
+**Question:** ¿Rescatar un Mossling, verlo trabajar en la granja y leer a la mañana siguiente qué dice el pueblo de ti hace que quieras jugar otro día? *(guessed)*
 
-**Hooks:** los Mosslings rescatados que viven y trabajan en tu granja; la aldea que se ve crecer e iluminarse en el mapa. *(guessed, de `vision.md`)*
+**Hooks:** los Mosslings que viven y trabajan en tu granja; *The Lantern Post*, el boletín nocturno de un autor anónimo que convierte tus actos (en la granja, en el pueblo y en la mazmorra) en chisme. *(guessed; el boletín, from Whisper Valley)*
 
-**Intent:** soft or no failure — "fallar es una siesta", sin multa de dinero al caer *(you said: confías en `sistemas-nucleo.md`)* · payoff builds — la aldea crece con cada expedición *(from Cult of the Lamb)*.
+**Intent:** soft or no failure — caer en la mazmorra o un mal rumor nunca te quitan lo construido · payoff builds — la aldea y tu reputación crecen día a día.
 
 ## Look and references
 
-- Look: pixel art top-down con el **estilo del slime** (`assets/sprites/limo.png`) para todo personaje y criatura: chibi, ojos grandes con brillo, mejillas rosadas, pocos colores vivos, contorno oscuro continuo. Entorno cálido: césped con tréboles, árbol de copa redonda, cueva de piedra cálida, cripta lila con vacío estrellado. Firma: farolillos azules de musgo.
-- References: Stardew Valley (la vida de granja y el día a día), Cult of the Lamb (la base que crece alimentada por expediciones), ISO-CORE (alcance pequeño, peligro ligero, recetas que piden drops de monstruos). Solo de género y sensación: nada copiado.
-- View: 2D · Camera: top-down siguiendo al jugador, tiles de 32 px.
+- Look: pixel art top-down con el **estilo del slime** (`assets/sprites/limo.png`) para todo personaje y criatura: chibi, ojos grandes con brillo, mejillas rosadas, pocos colores vivos, contorno oscuro continuo. Entorno cálido (césped con tréboles, árbol redondo, cueva cálida, cripta lila). Firma: farolillos azules de musgo. El boletín se ve como una hoja de papel pixelada clavada en el tablón del pueblo, con un sello azul de farol. *(sello y hoja: from Whisper Valley, adaptado)*
+- References: Stardew Valley (granja y pueblo), Cult of the Lamb (la base que crece con expediciones), Whisper Valley (chisme con testigos, columna nocturna, estaciones con festival, corazones de amistad), ISO-CORE (alcance pequeño, peligro ligero). Solo de género y sensación.
+- View: 2D · Camera: top-down siguiendo al jugador, tiles de 32 px. *(Whisper Valley usa isométrico 2:1; aquí se mantiene top-down porque el juego, el arte y el código ya lo son.)*
 
 ## First minute
 
-Despiertas frente a la casa del abuelo con azada, regadera y semillas de rábano. Aunt Brisa saluda desde su puesto. Aras tres casillas, siembras, riegas en el estanque y ves el primer brote; al lado del acantilado un farol azul apagado parpadea en la boca de la cueva: el gancho (algo te espera abajo) aparece antes de terminar el primer día. *(guessed)*
+Despiertas frente a la casa del abuelo con azada, regadera y semillas. Aras, siembras y riegas tu primer surco. En el tablón junto al puesto de Aunt Brisa hay una hoja nueva: *"Hay luz otra vez en la granja de Aurelius… Quien la ocupa no sabe ni dónde va la regadera."* Firmado: **The Night Moth**. A lo lejos, en la boca de la cueva, un farol azul apagado parpadea. *(guessed; la primera columna, from Whisper Valley)*
 
 ## Challenge
 
-Desde el día 2-3 la Mina pide energía y vida: limos y murciélagos en los pisos 1-4, el Rey Slime en el 5. Caer te devuelve a la granja con media vida y sin multa; los **Destellos** de esa expedición se pierden. Más adelante la Cripta (se abre al llegar al piso 5 de la Mina) sube la escala de los monstruos ×1,6. *(inferred (strong): `contenido.json`, `sistemas-nucleo.md`)*
+Desde el día 2-3 la Mina pide energía y vida (limos y murciélagos en los pisos 1-4, el Rey Slime en el 5). Caer te devuelve a casa con media vida y sin multa; se pierden los Destellos de esa expedición… y esa noche The Night Moth lo publica. En el pueblo el reto es social: lo que haces tiene testigos, y un rumor puede bajar corazones si no lo atiendes. *(guessed; testigos, from Whisper Valley)*
 
 ## Core loop
 
-- Día en la granja: cultivar, procesar (horno, tarro), vender → dinero y comida.
-- Expedición: bajar 3-5 pisos, minar, pelear, rescatar Mosslings y juntar `musgo_brillante` → materiales y residentes.
-- Aldea: construir casas y talleres, alimentar a los Mosslings → producen materiales y ventajas para la próxima expedición.
-- Cada bucle alimenta a los otros dos; se repite con un día nuevo. *(inferred (strong): `sistemas-nucleo.md` §1)*
+- **Mañana:** leer *The Lantern Post* en el tablón (1-3 rumores) → marca la agenda del día. *(from Whisper Valley)*
+- **Día:** granja (cultivar, procesar, vender) y pueblo (hablar, regalar, encargos) → dinero, comida y corazones. Las acciones sociales no gastan energía. *(from Whisper Valley)*
+- **Expedición (opcional cada día):** minar, pelear, rescatar Mosslings y juntar `musgo_brillante` → materiales y residentes.
+- **Noche:** construir y alimentar a los Mosslings; dormir → el juego procesa lo que pasó y The Night Moth escribe.
 
 ## Goal & fail state
 
-- Meta: tener los 6 Mosslings de la primera tanda viviendo en la aldea y la Torre de Faroles encendida; una sesión se siente completa al terminar un día con algo nuevo construido o rescatado. *(guessed)*
-- Fallo: desmayarse a las 2:00 o caer en la mazmorra → vuelves a casa; se pierden los Destellos, nunca residentes ni edificios.
+- Meta del Año 1: alojar 6 Mosslings, encender la Torre de Faroles y llegar a 6 corazones con 3 vecinos. Una sesión se siente completa al terminar un día con algo construido, rescatado o un corazón ganado. *(guessed)*
+- Fallo: desmayarse a las 2:00 o caer en la mazmorra → vuelves a casa sin perder residentes ni edificios; un rumor ignorado se apaga en 3 días. *(guessed; los 3 días, from Whisper Valley)*
 
 ## Features
 
 - [x] Granja: arar, regar, 3 cultivos, lluvia, cuervos y espantapájaros
 - [x] Crafteo (16 recetas), horno, tarro, tienda de Aunt Brisa, caja de envíos
-- [x] 2 mazmorras de 10 pisos con jefes en 5 y 10, puntos de control, rangos y botín por jugador
-- [x] Guardado con respaldos (no pierde la partida) y arte unificado en el estilo del slime
-- [ ] Construcción en la granja (`construir`, `mejorar`, `mover`) con los primeros edificios
+- [x] 2 mazmorras de 10 pisos con jefes en 5 y 10, puntos de control y rangos
+- [x] Guardado con respaldos y arte unificado en el estilo del slime
 - [ ] Mosslings: rescate en la mazmorra, hogar, comida y un trabajo cada uno
-- [ ] Destellos: elegir 1 de 3 ventajas temporales por expedición
+- [ ] Construcción mínima en la granja (`construir`, `mover`)
+- [ ] Vecinos con corazones de amistad, regalos y un hito a los 2/4/6 corazones
+- [ ] *The Lantern Post*: rumores con testigos y una columna nocturna hecha con plantillas
 
 ## Your systems
 
@@ -69,85 +71,111 @@ Desde el día 2-3 la Mina pide energía y vida: limos y murciélagos en los piso
 - crafteo, horno y tarro · in the slice
 - tienda y caja de envíos · in the slice
 - mazmorras con jefes · in the slice
-- construcción de aldea · thin stand-in *(guessed: gestión ligera primero)*
 - residentes Mosslings · thin stand-in *(guessed)*
-- Destellos · thin stand-in *(guessed)*
-- granja por zonas con expansiones · later *(guessed)*
-- salas con tipo en la mazmorra (fogata, rescate, santuario) · later *(guessed)*
+- construcción de aldea · thin stand-in *(guessed: gestión ligera)*
+- vecinos y corazones de amistad · thin stand-in *(from Whisper Valley)*
+- chisme con testigos y columna nocturna · thin stand-in *(from Whisper Valley)*
+- reputación en dos ejes · later *(from Whisper Valley)*
+- estaciones de 14 días con festival · later *(from Whisper Valley)*
+- misiones (historia, encargos del tablón, arcos de vecino) · later *(from Whisper Valley)*
+- Destellos en la expedición · later *(guessed)*
 - historia del abuelo y diario · in the slice *(inferred (strong))*
 
 ## Keep
 
 - El arte del slime en todos los personajes y monstruos *(you said)*.
-- Clara y Arthur como quedaron: referencias en `assets/referencias/`, filtro `herramientas/estilo_slime.py` *(you said: "Sí, calzan")*.
-- El juego tal como se ve en el build del 24-11 *(you said: "Se ve bien")*.
+- Clara y Arthur como quedaron (`assets/referencias/`, `herramientas/estilo_slime.py`) *(you said)*.
+- El juego tal como se ve en el build del 24-11 *(you said)*.
 
 ## Avoid
 
 - Mezclar personajes realistas con tiernos *(you said)*.
-- Los protagonistas de ojos de punto y proporciones forzadas de PixelLab ("no está bien hecho") y los dibujados a mano de 16×24 ("feo") *(you said)*.
-- Copiar personajes, nombres, temas de secta o arte de Cult of the Lamb o Stardew Valley.
-- Castigos duros: los residentes nunca mueren ni se van.
+- Los protagonistas de ojos de punto de PixelLab y los dibujados a mano de 16×24 *(you said)*.
+- Copiar personajes, nombres o arte de Cult of the Lamb, Stardew Valley o Whisper Valley: las ideas se adaptan con nombres propios de Mosslantern.
+- Chisme cruel: los rumores hablan de **acciones y decisiones**, nunca de cuerpo, salud, discapacidad, orientación o identidad; picante y teatral, no bullying *(from Whisper Valley, regla de tono)*.
+- Castigos duros: los Mosslings nunca mueren ni se van; un rumor nunca te quita lo construido.
 - Textos del juego en otro idioma que no sea inglés *(you said)*.
 
 ## Out of scope
 
-- Cooperativo (el núcleo ya lo permite; queda para después) *(you said: un jugador)*.
-- Constructor de aldea completo (rutas, logística, edificios libres): primero gestión ligera.
-- Mazmorras nuevas, biomas nuevos o un mapa abierto: primero que funcione el bucle de la comunidad.
-- Versión móvil y localización a otros idiomas.
-- Rehacer la casa, el puesto y los objetos de la granja (ya funcionan).
+- Lo que Whisper Valley tiene y Mosslantern **no** adopta: iPhone y diseño vertical, isométrico 2:1, Godot, free-to-play con pase diario y Pétalos, backend en la nube e IA que escribe la columna, protagonista única personalizable, moda como sistema de juego y red social in-game. *(decidido al mezclar: chocan con PC/Unity, un jugador y Clara/Arthur)*
+- Romance y boda: después de que la amistad funcione *(guessed)*.
+- Cooperativo *(you said: un jugador)*.
+- Constructor de aldea completo, mazmorras o biomas nuevos, mapa abierto.
+- Rehacer la casa, el puesto y los objetos de la granja.
 
 ## Build order
 
-1. **Primer Mossling (la prueba del gancho):** un farol apagado en el piso 3 de la Mina; al encenderlo con una antorcha el Mossling vuelve contigo, vive en una Moss Hut y riega 12 casillas cada mañana. Se gana al verlo trabajar; se pierde si caes antes de salir (lo vuelves a buscar).
-2. Construcción mínima: Lantern Hearth, Moss Hut, Shared Table y Woodshed con `construir`/`mover`.
-3. Comida y felicidad: el Mossling come del Shared Table; si no come, duerme la siesta y no trabaja.
-4. Destellos: 1 de 3 al bajar y al vencer al jefe del piso 5.
+1. **Primer Mossling (la prueba del gancho):** un farol apagado en el piso 3 de la Mina; al encenderlo con una antorcha el Mossling vuelve contigo, vive en una Moss Hut y riega 12 casillas cada mañana.
+2. **Construcción mínima:** Lantern Hearth, Moss Hut, Shared Table y Woodshed con `construir`/`mover`.
+3. **Vecinos:** Aunt Brisa y 2 vecinos nuevos con corazones de amistad (0-10), gustos de regalo y un evento a los 2, 4 y 6 corazones.
+4. **The Lantern Post:** testigos por lugar y hora, rumores con etiqueta, verdad y jugosidad, y una columna de 1-3 rumores cada mañana hecha con plantillas. Respuestas: ignorar o desmentir.
 5. Pulido para la demo: ajustes de comodidad, textos en inglés revisados, tutorial del primer día.
 
 ---
-**Kill condition:** si después de dos rondas de ajuste, rescatar y alojar al primer Mossling no da ganas de bajar otra vez, se replantea la comunidad antes de construir más edificios. *(guessed)*
+**Kill condition:** si después de dos rondas de ajuste, rescatar al primer Mossling no da ganas de bajar otra vez, o leer la columna por la mañana no cambia lo que el jugador decide hacer ese día, se replantea ese sistema antes de sumar contenido. *(guessed)*
 
-**Who it's for / what they feel:** jugadores de granjas cozy que quieren un poco de aventura sin estrés; se sienten cuidadores de una aldea que crece gracias a ellos. *(guessed)*
+**Who it's for / what they feel:** jugadores de granjas cozy que disfrutan las relaciones y un poco de aventura sin estrés; se sienten la persona nueva de la que todos hablan y que decide qué cuenta el pueblo de ella. *(guessed; la fantasía, from Whisper Valley)*
 
-**Games you love / don't:** Stardew Valley (la granja), Cult of the Lamb (la base que crece) *(you said)*; EarthBound como guía de proporciones, que al final se descartó para los protagonistas *(you said)*.
+**Games you love / don't:** Stardew Valley (la granja), Cult of the Lamb (la base que crece) *(you said)*; Whisper Valley como fuente de ideas de pueblo y chisme *(you said: mezclar ideas)*.
 
 ---
 
-## Lecciones del video aplicadas a Mosslantern
+## Qué se adopta de Whisper Valley y cómo encaja
+
+| Idea de Whisper Valley | Versión Mosslantern | Encaje con lo que ya existe |
+| --- | --- | --- |
+| Lady Lavanda y El Susurro (columna anónima nocturna) | **The Night Moth** escribe ***The Lantern Post***, una hoja clavada en el tablón del pueblo cada mañana. | La ventana de "resumen" de `NuevoDia` ya junta ventas y notas del día: la columna sale de ahí. |
+| El misterio de quién escribe, que nunca se resuelve | The Night Moth ya escribía cuando vivía el abuelo Aurelius; las notas del abuelo dan pistas que nunca confirman a nadie. | Engancha con `historia.cartas` (las notas del abuelo) y los `murmullos` nocturnos. |
+| Rumores con testigos, etiqueta, verdad, jugosidad y alcance | Igual, con testigos por lugar y hora (granja, puesto, pueblo, boca de la cueva). La mazmorra también genera rumores: vencer a un jefe, caer, rescatar un Mossling. | Las reglas viven en el núcleo (`Reglas.Aplicar` devuelve eventos); se pueden probar sin Unity como el resto del núcleo. |
+| Respuestas: desmentir, abrazar, ignorar, contraatacar, pedir defensa | Demo: ignorar y desmentir. Después: abrazar y pedir defensa a un amigo con 6+ corazones. Contraatacar queda fuera (choca con el tono amable). | — |
+| Reputación en dos ejes (Encanto / Integridad) | Dos ejes con nombres propios, por ejemplo *Glow* (fama) y *Heart* (confianza). | Se guarda en `Estado` junto a `hitos`. |
+| Corazones de amistad y romance, hitos a 2/4/6/8/10 | Amistad primero; romance más adelante. | Los regalos usan los productos que ya existen: conservas, lingotes, gemas. |
+| Las acciones sociales no gastan energía | Igual: hablar y regalar no gastan energía. | Respeta el sistema de energía actual. |
+| Estaciones de 14 días con festival y "drama de temporada" | Más adelante: 4 estaciones de 14 días; el primer festival sería la **Noche de Faroles**, cuando los Mosslings rescatados iluminan el pueblo. | Hoy el día ya cuenta días y lluvia (`Tiempo`). |
+| Tipos de misión (historia, arco de personaje, encargo, chisme, proyecto, festival) | Encargos en el tablón del pueblo y arcos de vecino primero. | Las recompensas usan los items actuales. |
+| Regla de tono del chisme | Adoptada tal cual (ver Avoid). | — |
+
+## Lecciones del devlog de ISO-CORE
 
 | Lo que cuenta el devlog | Cómo lo aplicamos |
 | --- | --- |
-| Abandonó muchos proyectos; esta vez mantuvo el alcance pequeño y realista. | Out of scope explícito, un solo hito a la vez y una *kill condition*. La demo es "Primer Mossling", no el juego entero. |
-| Eligió el estilo de arte según lo que sabía hacer (pixel art isométrico en vez de 3D). | La receta que funciona ya está escrita: referencia pixflux → personaje v3 → `igualar_escala.py` → `estilo_slime.py`. Todo personaje nuevo sale por ahí, sin experimentos caros. |
-| Los controles WASD no se sentían naturales en isométrico; usó clic para moverse con A\*. | Nuestra vista es top-down y WASD funciona. Los Mosslings sí necesitarán caminar solos: A\* sobre la rejilla de ocupación que ya existe (`Mundo.Ocupacion`). |
-| Un mapa de celdas ocupadas, invisible, para el pathfinding. | Ya existe (`g.ocupa`); se reutiliza para residentes y construcción. |
-| El mundo en islas que se desbloquean no resultó divertido; probó un mes y pivotó a mundo abierto. | La granja por zonas con expansiones (`niveles.md`) es parecida a sus islas: se deja en *later* y se prueba barata antes de invertir. Si no divierte, se cambia rápido. |
-| Los chunks prehechos hacían el mundo repetitivo; regeneró cada aspecto por separado y añadió biomas. | Las mazmorras ganan tipos de sala (fogata, rescate, santuario) y la regeneración nocturna de la granja se limita al "monte" para que lo limpiado se quede limpio. |
-| Peligro ligero, pocos monstruos, y algunas recetas piden drops para que no se puedan evitar siempre. | Ya pasa: `baba`, `ala` y `hueso` aparecen en recetas. Se mantiene en los edificios nuevos (Expedition Board, Moss Bath). |
-| La rejilla y la sacudida de cámara molestaban; las hizo ajustables. | Añadir un menú de opciones: sacudida de cámara, mostrar cuadrícula, volumen, tamaño de texto. |
-| Cambió el menú de construcción por el inventario, que maneja construcción e items. | Al diseñar `construir`, evaluar hacerlo desde el panel de crafteo/inventario en vez de un menú aparte. |
-| Los devlogs y los comentarios le dieron motivación y feedback; le pidieron página de Steam pronto para wishlists; playtesters por Patreon. | Ya hay una build de prueba (`v0.1-prueba`). Siguiente: probadores con la build de cada hito y, cuando la demo esté lista, página de Steam para wishlists. |
-| Meta cercana: demo en Steam. | Hito "Primer Mossling" (abajo) como demo. |
+| Abandonó muchos proyectos; esta vez mantuvo el alcance pequeño y realista. | Out of scope explícito, un hito a la vez y una *kill condition*. Con las ideas de Whisper Valley el riesgo de alcance crece: solo entra lo del Build order. |
+| Eligió el arte según lo que sabía hacer. | La receta del slime ya está escrita y se usa para todo personaje y vecino nuevo. |
+| Clic para moverse con A\* porque WASD no encajaba en isométrico. | Top-down con WASD funciona; los Mosslings y vecinos que caminan solos usan A\* sobre la rejilla de ocupación que ya existe (`Mundo.Ocupacion`). |
+| Las islas desbloqueables no fueron divertidas; pivotó tras un mes. | La granja por zonas queda en *later* y se prueba barata antes de invertir. |
+| El mundo hecho de piezas repetidas se volvía monótono. | Tipos de sala en la mazmorra y regeneración nocturna solo en el "monte". |
+| Peligro ligero y drops de monstruos necesarios en recetas. | Ya pasa con `baba`, `ala` y `hueso`; los regalos favoritos de algunos vecinos también pueden pedirlos. |
+| Rejilla y sacudida de cámara ajustables. | Menú de opciones: sacudida, cuadrícula, volumen, tamaño de texto. |
+| Construir desde el inventario en vez de un menú aparte. | `construir` desde el panel de crafteo/inventario. |
+| Devlogs, comentarios, página de Steam temprano y probadores. | Build de prueba ya publicada (`v0.1-prueba`); probadores en cada hito y página de Steam con la demo. |
 
 ## Milestone: Demo "Primer Mossling"
 
-**Goal:** que un jugador nuevo juegue 30-45 minutos, rescate al primer Mossling, le construya casa y lo vea trabajar.
+**Goal:** que un jugador nuevo juegue 30-45 minutos, rescate al primer Mossling, le construya casa, haga un amigo en el pueblo y lea al menos dos columnas que hablen de lo que hizo.
 
 **Success criteria**
 - 3 de 5 probadores dicen que querían volver a bajar después de alojar al Mossling.
-- Ningún probador pierde la partida ni se queda atascado (guardado con respaldos ya hecho).
-- Todos los personajes y criaturas pasan la lista de `biblia-de-arte.md` §7 con el estilo del slime.
+- 3 de 5 probadores cambiaron lo que hacían en un día por algo que leyeron en *The Lantern Post*.
+- Ningún probador pierde la partida ni se queda atascado.
+- Todos los personajes, vecinos y criaturas pasan `biblia-de-arte.md` §7 con el estilo del slime.
 
 **Must ship:** pasos 1-3 del Build order, textos en inglés, build de Windows.
-**Should ship:** Destellos (paso 4), menú de opciones.
-**Stretch:** segundo Mossling con otro trabajo (Woodshed), tipo de sala "rescate".
+**Should ship:** paso 4 (*The Lantern Post* con ignorar/desmentir), menú de opciones.
+**Stretch:** segundo Mossling con otro trabajo, primer encargo del tablón.
 
-**Quality gates:** `npm test` (núcleo C#) en verde con pruebas nuevas para `construir` y residentes; `VERSION_ESTADO` subido con migración probada; build abre sin excepciones; prueba manual de un día completo.
+**Quality gates:** `npm test` (núcleo C#) en verde con pruebas nuevas para `construir`, residentes, corazones y rumores; `VERSION_ESTADO` subido con migración probada; el build abre sin excepciones; prueba manual de tres días completos.
 
 **Risks**
-- Subir `VERSION_ESTADO` puede invalidar guardados: el respaldo automático lo cubre, pero hay que probarlo.
-- Los Mosslings necesitan arte con la receta del slime (cuesta generaciones de PixelLab; ~930 disponibles).
-- El arte de PixelLab puede variar entre generaciones: mostrar una prueba barata antes de generar en serie.
-- Alcance: la comunidad completa (11 edificios) es tentadora; solo entran los 4 del Build order.
+- **Alcance:** las ideas de Whisper Valley duplican el tamaño del juego. Solo entran las del Build order; el resto queda en *later*.
+- **Nombres:** Whisper Valley tiene un personaje llamado *Don Aurelio*, y el abuelo de Mosslantern se llama *Aurelius*. Si los dos proyectos conviven, conviene que no se confundan.
+- **Escritura:** la columna necesita muchas plantillas de texto en inglés con buen tono; es trabajo de escritura, no de código.
+- **Guardado:** `VERSION_ESTADO` sube y el respaldo automático lo cubre, pero hay que probar la migración.
+- **Arte:** cada vecino nuevo cuesta generaciones de PixelLab (~930 disponibles); prueba barata antes de generar en serie.
+
+## Open questions
+
+- ¿El autor anónimo se llama *The Night Moth* y el boletín *The Lantern Post*, o prefieres otros nombres?
+- ¿Romance entra en el Año 1 o solo amistad?
+- ¿Cuántos vecinos en la demo: Aunt Brisa + 2, o más?
+- ¿Los Mosslings también chismean (testigos en la granja) o solo los vecinos?
