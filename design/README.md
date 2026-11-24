@@ -46,6 +46,10 @@ Para que PixelLab lo respete no basta el texto del prompt: hace falta su ajuste 
 - Si la animación de caminar de PixelLab cambia la ropa de un traje (pasó con los dos de Arthur), la caminata se
   arma desde el propio dibujo: `python herramientas/animar-personajes.py --locales --caminar-simple=granjero/ropa_minera`.
 - Después: `python herramientas/animar-personajes.py --locales` (acciones) y `python herramientas/unity/sincronizar.py`.
+- **Monstruos y criaturas**: en `sprites`, `"estilo": "personajes"` usa la misma receta (prefijo `prefijo_criaturas`,
+  contorno negro, colores planos). Ya están así el esqueleto, el rey slime y los tres jefes; los jefes miden
+  ~1,6× la jugadora. Si PixelLab pinta una sombra debajo, se quita: el juego ya dibuja la suya.
+- `sincronizar.py` borra y recrea los `.meta`: tras ejecutarlo, recupera con git los de gráficos que no cambiaron.
 
 ## Orden de trabajo recomendado
 

@@ -147,6 +147,21 @@ const guardarEstado = () => fs.writeFile(RUTA_ESTADO, JSON.stringify(estado, nul
 // ---------- sprites (objetos, cultivos, íconos): create-image-pixflux, síncrono ----------
 async function generarSprite(id, s) {
   const destino = dir(`sprites/${id}.png`);
+  // "estilo": "personajes" → monstruos y criaturas con la misma receta chibi que los personajes
+  if (s.estilo === 'personajes' && estilo.personajes) {
+    const ep = estilo.personajes;
+    s = { view: ep.view, outline: ep.outline, shading: ep.shading, detail: ep.detail, ...s,
+      descripcion: [ep.prefijo_criaturas || '', s.descripcion].join(' ').trim() };
+    const { datos } = await api('POST', '/create-image-pixflux', {
+      description: `${s.descripcion}, ${ep.sufijo || estilo.sufijo}`,
+      image_size: { width: s.ancho, height: s.alto },
+      no_background: true, outline: s.outline, shading: s.shading, detail: s.detail, view: s.view, direction: 'south',
+      ...(s.semilla != null ? { seed: s.semilla } : {}),
+    });
+    await guardarBase64(datos.image.base64, destino);
+    if (s.recortar) await fs.writeFile(destino, recortar(await fs.readFile(destino)));
+    return datos.usage;
+  }
   // "modelo": "pixen" → modelo Pixen: mejor para construcciones de frente, con volumen y mirando hacia abajo.
   const { datos } = s.modelo === 'pixen' ? await api('POST', '/create-image-pixen', {
     description: `${s.descripcion}, ${estilo.sufijo}`,
