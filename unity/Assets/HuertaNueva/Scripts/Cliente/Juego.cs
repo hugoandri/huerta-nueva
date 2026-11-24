@@ -29,7 +29,7 @@ namespace HuertaNueva
             perfil = Perfil.Id();
             string cuerpo = PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id);
             if (!def.personajes.Exists(p => p.id == cuerpo)) cuerpo = def.personajes[0].id;
-            almacen = new AlmacenLocal();
+            almacen = new AlmacenLocal(def);
 
             if (FindAnyObjectByType<EventSystem>() == null)
             {
@@ -45,12 +45,21 @@ namespace HuertaNueva
             // granja de fondo detrás de la portada (no se guarda)
             Conectar(new SesionLocal(HuertaNueva.Mundo.CrearEstado(def, (uint)def.semillaMundo, perfil, cuerpo), def, perfil, null));
             ui = new Interfaz(def, G, () => sesion, vista, cuerpo);
-            ui.AlNueva = c => { Empezar(NuevaPartida(c)); };
+            // Una partida nueva se guarda encima del archivo: antes se copia el guardado que hubiera.
+            ui.AlNueva = c => { bool respaldo = almacen.Respaldar() != null; Empezar(NuevaPartida(c)); if (respaldo) ui.Aviso("Your previous save was backed up"); };
             ui.AlContinuar = () =>
             {
                 var e = almacen.Cargar();
-                if (e != null && e.BuscarJugador(perfil) != null) Empezar(e);
-                else { Empezar(NuevaPartida(PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id))); ui.Aviso("Could not read saved game", true); }
+                if (e != null && e.BuscarJugador(perfil) == null)
+                {
+                    // Partida local de otro id (p. ej. se borraron los PlayerPrefs): se sigue jugando con ese jugador.
+                    perfil = e.jugadores[0].id;
+                    Perfil.Fijar(perfil);
+                }
+                if (e != null) { Empezar(e); return; }
+                almacen.Respaldar();
+                Empezar(NuevaPartida(PlayerPrefs.GetString("huerta-nueva-cuerpo", def.personajes[0].id)));
+                ui.Aviso("Could not read saved game. A backup copy was kept.", true);
             };
             ui.AlReiniciar = () => { almacen.Borrar(); Empezar(NuevaPartida(sesion.Yo.cuerpo)); ui.Aviso("New game started"); };
             ui.AlSalirMenu = () => { if (jugando) sesion.Guardar(); jugando = false; ui.MostrarPortada(almacen.Existe(), almacen.Cargar()); };

@@ -103,7 +103,21 @@ public static class NucleoPruebas
                     Exigir(Foto(a["ana"]) == Foto(b["ana"]) && Foto(a["luis"]) == Foto(b["luis"]), "Botín propio reproducible");
                 }
             });
-            Console.WriteLine("7 pruebas C# correctas.");
+            Prueba("guardado con contenido que ya no existe", () =>
+            {
+                var e = Nuevo(); var j = e.BuscarJugador("yo");
+                j.inv[5] = new Slot("item_borrado", 3);
+                e.granja.objetos.Add(new ObjMundo { uid = 9999, id = "objeto_borrado", x = 3, y = 12, datos = new ObjDatos() });
+                e.granja.cultivos.Add(new Cultivo { i = Mundo.Idx(def, 4, 12), id = "cultivo_borrado", dias = 0 });
+                e.mazmorra.enCurso = true; e.mazmorra.actual = "mazmorra_borrada"; e.mazmorra.nivel = new Zona();
+                e.Normalizar(def);
+                Exigir(j.inv[5] == null, "Quita items desconocidos del inventario");
+                Exigir(e.granja.objetos.All(o => def.OBJ.ContainsKey(o.id)), "Quita objetos desconocidos");
+                Exigir(e.granja.cultivos.All(c => def.CULT.ContainsKey(c.id)), "Quita cultivos desconocidos");
+                Exigir(!e.mazmorra.enCurso && e.mazmorra.nivel == null, "Cierra una expedición a una mazmorra que ya no existe");
+                Reglas.Aplicar(e, def, new Accion { tipo = "tiempo", dt = 0.05f });
+            });
+            Console.WriteLine("8 pruebas C# correctas.");
             return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }
