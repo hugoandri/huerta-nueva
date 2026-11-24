@@ -112,6 +112,21 @@ Desde el día 2-3 la Mina pide energía y vida (limos y murciélagos en los piso
 4. **The Lantern Post:** testigos por lugar y hora, rumores con etiqueta, verdad y jugosidad, y una columna de 1-3 rumores cada mañana hecha con plantillas. Respuestas: ignorar o desmentir.
 5. Pulido para la demo: ajustes de comodidad, textos en inglés revisados, tutorial del primer día.
 
+## Versions
+
+Cada versión es una build de Windows jugable que se publica como release en GitHub para probadores. Una versión no
+empieza hasta que la anterior cumple su criterio. *(guessed, salvo v0.1)*
+
+| Versión | Nombre | Qué trae | Criterio para darla por cerrada |
+| --- | --- | --- | --- |
+| **v0.1** ✅ | Base jugable | Granja, crafteo, tienda, caja de envíos, 2 mazmorras con jefes, guardado con respaldos, arte unificado en el estilo del slime, árbol y suelos nuevos. Publicada como `v0.1-prueba` (2026-11-24). | Hecha: "Se ve bien" tras probar el .exe. |
+| **v0.2** | Primer Mossling | Build order 1-2: farol apagado en el piso 3 de la Mina, rescate del primer Mossling, Moss Hut, riego automático cada mañana; `construir`/`mover` con Lantern Hearth, Moss Hut, Shared Table y Woodshed; el Mossling come y, si no, duerme la siesta. Sube `VERSION_ESTADO`. | 3 de 5 probadores quieren volver a bajar tras alojarlo. Pruebas del núcleo para `construir` y residentes. |
+| **v0.3** | Vecinos y chisme (**Demo**) | Build order 3-5: Aunt Brisa + 2 vecinos con corazones de amistad, regalos y eventos a 2/4/6; *The Lantern Post* con testigos, plantillas y respuestas ignorar/desmentir; menú de opciones; tutorial del primer día; textos en inglés revisados. | Milestone de abajo: 3 de 5 probadores cambian su día por lo que leen; nadie se atasca. |
+| **v0.4** | Primavera | Estaciones de 14 días (la primera completa), festival **Noche de Faroles**, encargos del tablón, Destellos en la expedición, 3 Mosslings con trabajos distintos, granja por zonas (prueba barata). Página de Steam con la demo. | La primavera se juega de principio a fin sin huecos; wishlists en marcha. |
+| **v0.5** | Año 1 (beta) | Las 4 estaciones y sus festivales, 6 Mosslings y la Torre de Faroles, reputación en dos ejes (*Glow* / *Heart*), arcos de vecino hasta 10 corazones, salas con tipo en la mazmorra, pistas de The Night Moth en las notas del abuelo. Decidir si entra romance. | Un Año 1 completo jugable; playtests con el público objetivo. |
+| **v1.0** | Lanzamiento en PC | Año 1 completo y pulido, logros, balance final, rendimiento y accesibilidad revisados. | Lista de lanzamiento del estudio (`/launch-checklist`). |
+| después | — | Romance (si no entró en v0.5), cooperativo, mazmorras y biomas nuevos, Año 2 con pistas y sospechosos nuevos (sin revelar nunca a The Night Moth). | — |
+
 ---
 **Kill condition:** si después de dos rondas de ajuste, rescatar al primer Mossling no da ganas de bajar otra vez, o leer la columna por la mañana no cambia lo que el jugador decide hacer ese día, se replantea ese sistema antes de sumar contenido. *(guessed)*
 
@@ -150,7 +165,7 @@ Desde el día 2-3 la Mina pide energía y vida (limos y murciélagos en los piso
 | Construir desde el inventario en vez de un menú aparte. | `construir` desde el panel de crafteo/inventario. |
 | Devlogs, comentarios, página de Steam temprano y probadores. | Build de prueba ya publicada (`v0.1-prueba`); probadores en cada hito y página de Steam con la demo. |
 
-## Milestone: Demo "Primer Mossling"
+## Milestone: v0.3 Demo (v0.2 "Primer Mossling" + v0.3 "Vecinos y chisme")
 
 **Goal:** que un jugador nuevo juegue 30-45 minutos, rescate al primer Mossling, le construya casa, haga un amigo en el pueblo y lea al menos dos columnas que hablen de lo que hizo.
 
